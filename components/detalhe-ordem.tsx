@@ -16,10 +16,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { ArrowLeft, Edit, Trash2, Plus, Clock, CheckCircle } from "lucide-react"
+import { ArrowLeft, Edit, Trash2, Plus, Clock, CheckCircle, PlayCircle } from "lucide-react"
+import Link from "next/link"
 import type { Tarefa } from "@/lib/tipos"
 import { tenicosMock, clientesMock } from "@/lib/dados-mockados"
-import { getOrdemServicoById, updateOrdemServicoStatus } from "@/lib/api/ordem_servicos"
+import { getOrdemServicoById, updateOrdemServicoStatus, updateLaudoEquipamento, updateHorarioAtendimento } from "@/lib/api/ordem_servicos"
+import { getHistoricoLaudosEquipamento, type Laudo } from "@/lib/api/equipamentos"
 
 // Opções de status disponíveis
 const statusOptions = [
@@ -80,6 +82,15 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   const [novaDescricao, setNovaDescricao] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [roleUsuario, setRoleUsuario] = useState<string>("SECRETARIA")
+  const [acaoLoading, setAcaoLoading] = useState(false)
+  const [modalLaudoAberta, setModalLaudoAberta] = useState(false)
+  const [equipamentoSelecionado, setEquipamentoSelecionado] = useState<any>(null)
+  const [textoLaudo, setTextoLaudo] = useState("")
+  const [laudoSaving, setLaudoSaving] = useState(false)
+  const [modalHistoricoAberta, setModalHistoricoAberta] = useState(false)
+  const [laudosHistorico, setLaudosHistorico] = useState<Laudo[]>([])
+  const [historicoLoading, setHistoricoLoading] = useState(false)
 
   useEffect(() => {
     async function fetchOrdem() {
@@ -96,7 +107,72 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
       }
     }
     fetchOrdem()
+    if (typeof window !== "undefined") {
+      const roleSalva = localStorage.getItem("role")
+      if (roleSalva === "1") setRoleUsuario("TECNICO")
+      else if (roleSalva === "0") setRoleUsuario("SECRETARIA")
+      else if (roleSalva) setRoleUsuario(roleSalva)
+    }
   }, [ordemId])
+
+  const atualizarStatus = async (novoStatusId: number) => {
+    setAcaoLoading(true)
+    await updateOrdemServicoStatus(ordem.id, novoStatusId)
+    const data = await getOrdemServicoById(ordemId)
+    setOrdem(data)
+    setTarefas(data.tarefas || [])
+    setAcaoLoading(false)
+  }
+
+  const abrirModalLaudo = (equip: any) => {
+    setEquipamentoSelecionado(equip)
+    setTextoLaudo("")
+    setModalLaudoAberta(true)
+  }
+
+  const salvarLaudo = async () => {
+    if (!equipamentoSelecionado || !textoLaudo.trim()) return
+    setLaudoSaving(true)
+    await updateLaudoEquipamento(ordem.id, equipamentoSelecionado.id, textoLaudo.trim())
+    const data = await getOrdemServicoById(ordemId)
+    setOrdem(data)
+    setTarefas(data.tarefas || [])
+    setLaudoSaving(false)
+    setModalLaudoAberta(false)
+  }
+
+  const abrirModalHistorico = async (equip: any) => {
+    setEquipamentoSelecionado(equip)
+    setHistoricoLoading(true)
+    try {
+      const laudos = await getHistoricoLaudosEquipamento(equip.id)
+      setLaudosHistorico(laudos)
+    } catch (err) {
+      console.error("Erro ao carregar histórico:", err)
+      setLaudosHistorico([])
+    } finally {
+      setHistoricoLoading(false)
+      setModalHistoricoAberta(true)
+    }
+  }
+
+  const iniciarAtendimento = async () => {
+    setAcaoLoading(true)
+    const agora = new Date().toISOString()
+    await updateHorarioAtendimento(ordem.id, agora, "")
+    await atualizarStatus(2) // Status 6: Em Andamento
+    setAcaoLoading(false)
+  }
+
+  const finalizarAtendimento = async () => {
+    setAcaoLoading(true)
+    const agora = new Date().toISOString()
+    // Usar data_inicio_atendimento existente ou pegar da ordem
+    const dataInicio = ordem.data_inicio_atendimento || new Date().toISOString()
+    await updateHorarioAtendimento(ordem.id, dataInicio, agora)
+    await atualizarStatus(3) // Status 3: Concluído
+    setAcaoLoading(false)
+  }
 
   const tecnico = ordem ? tenicosMock.find((t) => t.id === ordem.tecnicoId) : null
   const taxaProgress = tarefas.length > 0 ? (tarefas.filter((t) => t.status === "concluida").length / tarefas.length) * 100 : 0
@@ -161,6 +237,46 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
         <div className="flex-1">
           <h1 className="text-3xl font-bold">OS Número: {ordem.id}</h1>
         </div>
+        {roleUsuario === "TECNICO" && (
+          <div className="flex flex-wrap gap-3 items-center">
+            {ordem.status_id === 3 ? (
+              <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
+                <CheckCircle className="h-5 w-5" />
+                <span className="font-medium">Atendimento Concluído</span>
+              </div>
+            ) : (
+              <>
+                {ordem.status_id !== 2 && ordem.status_id !== 6 && (
+                  <Button
+                    onClick={iniciarAtendimento}
+                    disabled={acaoLoading}
+                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <PlayCircle className="h-4 w-4" />
+                    Iniciar Atendimento
+                  </Button>
+                )}
+                {(ordem.status_id === 2 || ordem.status_id === 6) && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+                    <Clock className="h-5 w-5" />
+                    <span className="font-medium">Atendimento Iniciado</span>
+                  </div>
+                )}
+                {ordem.status_id !== 3 && (
+                  <Button
+                    variant="outline"
+                    onClick={finalizarAtendimento}
+                    disabled={acaoLoading}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Finalizar Atendimento
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Grid principal */}
@@ -180,11 +296,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     <StatusSelect
                       ordemId={ordem.id}
                       statusAtual={ordem.status_id}
-                      onStatusChange={async (novoStatusId: number) => {
-                        await updateOrdemServicoStatus(ordem.id, novoStatusId)
-                        const data = await getOrdemServicoById(ordemId)
-                        setOrdem(data)
-                      }}
+                      onStatusChange={atualizarStatus}
                     />
                   </div>
                 </div>
@@ -281,8 +393,30 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                 <ul className="space-y-2">
                   {ordem.equipamentos.map((equip: any) => (
                     <li key={equip.id} className="border-b pb-2 last:border-b-0 last:pb-0">
-                      <div className="font-medium">{equip.marca} ({equip.btus} BTUs)</div>
-                      <div className="text-sm text-muted-foreground">Local: {equip.local_instalacao}</div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                          <div className="font-medium">{equip.marca} ({equip.btus} BTUs)</div>
+                          <div className="text-sm text-muted-foreground">Local: {equip.local_instalacao}</div>
+                          <div className="mt-2">
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="px-0"
+                              onClick={() => abrirModalHistorico(equip)}
+                            >
+                              Histórico do equipamento
+                            </Button>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="whitespace-nowrap"
+                          onClick={() => abrirModalLaudo(equip)}
+                        >
+                          Laudo Técnico
+                        </Button>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -377,6 +511,114 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
           </Card>
         </div>
       </div>
+
+      {/* Modal de laudo técnico */}
+      <AlertDialog open={modalLaudoAberta} onOpenChange={setModalLaudoAberta}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Laudo técnico</AlertDialogTitle>
+          <AlertDialogDescription>
+            {equipamentoSelecionado ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{equipamentoSelecionado.marca} ({equipamentoSelecionado.btus} BTUs)</p>
+                <p className="text-sm text-muted-foreground">Local: {equipamentoSelecionado.local_instalacao}</p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Selecione um equipamento.</p>
+            )}
+          </AlertDialogDescription>
+          <div className="mt-4 space-y-2">
+            <label className="text-sm text-muted-foreground" htmlFor="laudo-textarea">
+              Descreva o laudo técnico
+            </label>
+            <textarea
+              id="laudo-textarea"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              rows={5}
+              value={textoLaudo}
+              onChange={(e) => setTextoLaudo(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={salvarLaudo}
+              disabled={!equipamentoSelecionado || !textoLaudo.trim() || laudoSaving}
+            >
+              {laudoSaving ? "Salvando..." : "Salvar laudo"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de histórico de laudos */}
+      <AlertDialog open={modalHistoricoAberta} onOpenChange={setModalHistoricoAberta}>
+        <AlertDialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <AlertDialogTitle>Histórico de laudos</AlertDialogTitle>
+          <AlertDialogDescription>
+            {equipamentoSelecionado && (
+              <p className="text-sm font-medium mb-4">
+                {equipamentoSelecionado.marca} ({equipamentoSelecionado.btus} BTUs) - {equipamentoSelecionado.local_instalacao}
+              </p>
+            )}
+          </AlertDialogDescription>
+
+          {historicoLoading ? (
+            <div className="flex justify-center py-8">
+              <p className="text-sm text-muted-foreground">Carregando histórico...</p>
+            </div>
+          ) : laudosHistorico.length > 0 ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 px-3">Data</th>
+                    <th className="text-left py-2 px-3">Laudo</th>
+                    <th className="text-left py-2 px-3">OS</th>
+                    <th className="text-left py-2 px-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {laudosHistorico.map((laudo) => (
+                    <tr key={laudo.id} className="border-b hover:bg-muted/50">
+                      <td className="py-2 px-3 text-xs">
+                        {new Date(laudo.created_at).toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                      <td className="py-2 px-3">
+                        <p className="text-xs line-clamp-2">{laudo.laudo}</p>
+                      </td>
+                      <td className="py-2 px-3">
+                        <div className="text-xs">
+                          <p className="font-medium">{laudo.ordem_servico.numero_ordem}</p>
+                          <p className="text-muted-foreground">{laudo.ordem_servico.descricao}</p>
+                        </div>
+                      </td>
+                      <td className="py-2 px-3">
+                        <Badge variant="outline" className="text-xs">
+                          {laudo.ordem_servico.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex justify-center py-8">
+              <p className="text-sm text-muted-foreground">Nenhum laudo registrado para este equipamento.</p>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 mt-4">
+            <AlertDialogCancel>Fechar</AlertDialogCancel>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
