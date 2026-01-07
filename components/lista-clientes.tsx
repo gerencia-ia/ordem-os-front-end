@@ -56,6 +56,8 @@ export default function ListaClientes() {
   const [editEnderecos, setEditEnderecos] = useState<
     Array<{ id?: number; rua: string; numero: string; bairro: string; complemento?: string; cidade: string }>
   >([])
+  const [editEquipOpen, setEditEquipOpen] = useState(false)
+  const [editEquipamentos, setEditEquipamentos] = useState<any[]>([])
 
   const addEditTelefone = () => setEditTelefones((arr) => [...arr, { numero: "" }])
   const removeEditTelefone = (idx: number) =>
@@ -338,6 +340,8 @@ export default function ListaClientes() {
             setClienteSelecionado(null)
             setEditTelefones([])
             setEditEnderecos([])
+            setEditEquipamentos([])
+            setEditEquipOpen(false)
           }
         }}>
           <DialogContent className="sm:max-w-md">
@@ -345,6 +349,30 @@ export default function ListaClientes() {
               <DialogTitle>Editar Cliente</DialogTitle>
               <DialogDescription>Atualize os dados do cliente</DialogDescription>
             </DialogHeader>
+            <div className="flex justify-end mb-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setEditEquipOpen(true)}>
+                <PlusCircle className="h-4 w-4 mr-1" /> Cadastrar Equipamento
+              </Button>
+            </div>
+            {/* Modal de cadastro de equipamento (edição) */}
+            <CadastrarEquipamento
+              open={editEquipOpen}
+              setOpen={setEditEquipOpen}
+              onSalvarEquipamento={(equip) => setEditEquipamentos((prev) => [...prev, equip])}
+            />
+            {/* Lista de equipamentos adicionados nesta edição */}
+            {editEquipamentos.length > 0 && (
+              <div className="mb-4">
+                <div className="font-medium mb-1">Equipamentos adicionados:</div>
+                <ul className="list-disc pl-5">
+                  {editEquipamentos.map((eq, i) => (
+                    <li key={i} className="text-sm">
+                      {eq.marca} - {eq.btus} BTUs - {eq.local_instalacao} {eq.observacao && `- ${eq.observacao}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="space-y-4">
               <Input
                 placeholder="Nome do cliente"
@@ -479,12 +507,14 @@ export default function ListaClientes() {
                       email: editForm.email.trim() ? editForm.email.trim() : null,
                       telefones_attributes: telsAttributes,
                       enderecos_attributes: endsAttributes,
+                      equipamentos_attributes: editEquipamentos,
                     }
 
                     const atualizado = await updateCliente(String(clienteSelecionado.id), payload)
                     setClientes((lista) => lista.map((c) => (c.id === atualizado.id ? { ...c, ...atualizado } : c)))
                     setEditOpen(false)
                     setClienteSelecionado(null)
+                    setEditEquipamentos([])
                   } catch (e) {
                     console.error(e)
                     setError("Erro ao atualizar cliente")

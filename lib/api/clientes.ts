@@ -27,6 +27,14 @@ export type AtualizarClientePayload = {
     cidade?: string
     _destroy?: boolean
   }>
+  equipamentos_attributes?: Array<{
+    id?: number
+    marca?: string
+    btus?: string
+    local_instalacao?: string
+    observacao?: string
+    _destroy?: boolean
+  }>
 }
 
 export async function getClientes(): Promise<Cliente[]> {

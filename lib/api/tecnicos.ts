@@ -3,6 +3,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from "./api"
 
 export type NovoTecnicoPayload = {
   nome: string
+  cpf: string
   telefone: string
   especialidades: string[]
 }
