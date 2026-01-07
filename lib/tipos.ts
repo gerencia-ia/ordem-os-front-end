@@ -87,6 +87,7 @@ export interface OrdemServico {
   cliente_nome: string
   prioridade_descricao: string
   status_descricao: string
+  tecnico_responsavel?: {}
 }
 
 export interface Dashboard {
