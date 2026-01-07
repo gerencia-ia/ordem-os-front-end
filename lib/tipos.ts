@@ -27,6 +27,7 @@ export type Endereco = {
 export interface Cliente {
   id: number
   nome: string
+  cpf?: string
   email?: string | null
   dataRegistro: string
   telefones: Telefone[]
@@ -37,6 +38,7 @@ export interface Tecnico {
   id: string
   nome: string
   email: string
+  cpf: string
   telefone: string
   especialidades: string[]
   statusDisponibilidade: "disponivel" | "ocupado" | "ausente"
@@ -85,6 +87,7 @@ export interface OrdemServico {
   cliente_nome: string
   prioridade_descricao: string
   status_descricao: string
+  tecnico_responsavel?: {}
 }
 
 export interface Dashboard {

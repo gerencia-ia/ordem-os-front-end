@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { getTecnicos, createTecnico } from "@/lib/api/tecnicos"
+import { getTecnicos, createTecnico, updateTecnico } from "@/lib/api/tecnicos"
 import { Plus, Phone, Edit, Trash2 } from "lucide-react"
 import type { Tecnico } from "@/lib/tipos"
 
@@ -26,8 +26,21 @@ export default function ListaTecnicos() {
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  // edição de técnico
+  const [editOpen, setEditOpen] = useState(false)
+  const [editSaving, setEditSaving] = useState(false)
+  const [tecnicoSelecionado, setTecnicoSelecionado] = useState<Tecnico | null>(null)
+  const [editTecnico, setEditTecnico] = useState({
+    nome: "",
+    cpf: "",
+    telefone: "",
+    especialidades: [] as string[],
+    especialidadeInput: "",
+  })
+
   const [novoTecnico, setNovoTecnico] = useState({
     nome: "",
+    cpf: "",
     telefone: "",
     especialidades: [] as string[],
     especialidadeInput: "",
@@ -69,6 +82,7 @@ export default function ListaTecnicos() {
   const resetNovoTecnico = () =>
     setNovoTecnico({
       nome: "",
+      cpf: "",
       telefone: "",
       especialidades: [],
       especialidadeInput: "",
@@ -79,6 +93,7 @@ export default function ListaTecnicos() {
       setSaving(true)
       const criado = await createTecnico({
         nome: novoTecnico.nome.trim(),
+        cpf: novoTecnico.cpf.trim(),
         telefone: novoTecnico.telefone.trim(),
         especialidades: novoTecnico.especialidades,
       })
@@ -99,6 +114,7 @@ export default function ListaTecnicos() {
   const tecnicosFiltrados = tecnicos.filter(
     (t) =>
       t.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      t.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
       t.telefone.toLowerCase().includes(busca.toLowerCase()),
   )
 
@@ -126,6 +142,11 @@ export default function ListaTecnicos() {
                 placeholder="Nome completo"
                 value={novoTecnico.nome}
                 onChange={(e) => setNovoTecnico((s) => ({ ...s, nome: e.target.value }))}
+              />
+              <Input
+                placeholder="CPF (apenas números)"
+                value={novoTecnico.cpf}
+                onChange={(e) => setNovoTecnico((s) => ({ ...s, cpf: e.target.value }))}
               />
               <Input
                 placeholder="Telefone"
@@ -158,7 +179,7 @@ export default function ListaTecnicos() {
               <Button
                 className="w-full"
                 onClick={handleAddTecnico}
-                disabled={saving || !novoTecnico.nome.trim() || !novoTecnico.telefone.trim()}
+                disabled={saving || !novoTecnico.nome.trim() || !novoTecnico.cpf.trim() || !novoTecnico.telefone.trim()}
               >
                 {saving ? "Salvando..." : "Adicionar"}
               </Button>
@@ -172,7 +193,7 @@ export default function ListaTecnicos() {
           <CardTitle>Filtrar</CardTitle>
         </CardHeader>
         <CardContent>
-          <Input placeholder="Buscar por nome ou email..." value={busca} onChange={(e) => setBusca(e.target.value)} />
+          <Input placeholder="Buscar por nome, CPF ou telefone..." value={busca} onChange={(e) => setBusca(e.target.value)} />
         </CardContent>
       </Card>
 
@@ -186,6 +207,7 @@ export default function ListaTecnicos() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
+                  <TableHead>CPF</TableHead>
                   <TableHead>Telefone</TableHead>
                   <TableHead>Especialidades</TableHead>
                   <TableHead>Ações</TableHead>
@@ -195,6 +217,7 @@ export default function ListaTecnicos() {
                 {tecnicosFiltrados.map((tecnico) => (
                   <TableRow key={tecnico.id}>
                     <TableCell className="font-medium">{tecnico.nome}</TableCell>
+                    <TableCell>{tecnico.cpf || "-"}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
@@ -212,7 +235,21 @@ export default function ListaTecnicos() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setTecnicoSelecionado(tecnico)
+                            setEditTecnico({
+                              nome: tecnico.nome || "",
+                              cpf: tecnico.cpf || "",
+                              telefone: tecnico.telefone || "",
+                              especialidades: [...(tecnico.especialidades || [])],
+                              especialidadeInput: "",
+                            })
+                            setEditOpen(true)
+                          }}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -227,6 +264,122 @@ export default function ListaTecnicos() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog de edição de técnico */}
+      <Dialog
+        open={editOpen}
+        onOpenChange={(o) => {
+          setEditOpen(o)
+          if (!o) {
+            setTecnicoSelecionado(null)
+            setEditTecnico({ nome: "", cpf: "", telefone: "", especialidades: [], especialidadeInput: "" })
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Técnico</DialogTitle>
+            <DialogDescription>Atualize os dados do técnico selecionado</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Nome completo"
+              value={editTecnico.nome}
+              onChange={(e) => setEditTecnico((s) => ({ ...s, nome: e.target.value }))}
+            />
+            <Input
+              placeholder="CPF (apenas números)"
+              value={editTecnico.cpf}
+              onChange={(e) => setEditTecnico((s) => ({ ...s, cpf: e.target.value }))}
+            />
+            <Input
+              placeholder="Telefone"
+              value={editTecnico.telefone}
+              onChange={(e) => setEditTecnico((s) => ({ ...s, telefone: e.target.value }))}
+            />
+
+            <div className="space-y-2">
+              <span className="font-medium">Especialidades</span>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Ex: manutenção"
+                  value={editTecnico.especialidadeInput}
+                  onChange={(e) => setEditTecnico((s) => ({ ...s, especialidadeInput: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && editTecnico.especialidadeInput.trim()) {
+                      setEditTecnico((s) => ({
+                        ...s,
+                        especialidades: [...s.especialidades, s.especialidadeInput.trim()],
+                        especialidadeInput: "",
+                      }))
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() =>
+                    editTecnico.especialidadeInput.trim() &&
+                    setEditTecnico((s) => ({
+                      ...s,
+                      especialidades: [...s.especialidades, s.especialidadeInput.trim()],
+                      especialidadeInput: "",
+                    }))
+                  }
+                >
+                  Adicionar
+                </Button>
+              </div>
+              <div className="flex gap-1 flex-wrap">
+                {editTecnico.especialidades.map((esp, idx) => (
+                  <Badge
+                    key={`${esp}-${idx}`}
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setEditTecnico((s) => ({
+                        ...s,
+                        especialidades: s.especialidades.filter((_, i) => i !== idx),
+                      }))
+                    }
+                  >
+                    {esp} ×
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <Button
+              className="w-full"
+              onClick={async () => {
+                if (!tecnicoSelecionado) return
+                try {
+                  setEditSaving(true)
+                  const atualizado = await updateTecnico(String(tecnicoSelecionado.id), {
+                    nome: editTecnico.nome.trim(),
+                    cpf: editTecnico.cpf.trim(),
+                    telefone: editTecnico.telefone.trim(),
+                    especialidades: editTecnico.especialidades,
+                  })
+                  setTecnicos((lista) => lista.map((t) => (t.id === atualizado.id ? { ...t, ...atualizado } : t)))
+                  setEditOpen(false)
+                  setTecnicoSelecionado(null)
+                } catch (e) {
+                  console.error(e)
+                  setError("Erro ao atualizar técnico")
+                } finally {
+                  setEditSaving(false)
+                }
+              }}
+              disabled={
+                editSaving || !editTecnico.nome.trim() || !editTecnico.cpf.trim() || !editTecnico.telefone.trim()
+              }
+            >
+              {editSaving ? "Salvando..." : "Salvar alterações"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

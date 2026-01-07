@@ -1,14 +1,11 @@
 import type { Status } from "@/lib/tipos"
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
+import { apiGet } from "./api"
 
 export type StatusPayload = {
   nome: string
 }
 
 export async function getStatus(): Promise<Status[]> {
-  const response = await fetch(`${API_BASE_URL}/status`, { cache: "no-store" })
-  if (!response.ok) throw new Error("Erro ao buscar status")
-  return response.json()
+  return apiGet<Status[]>("/status", { cache: "no-store" })
 }
 

@@ -1,45 +1,94 @@
+import { OrdemServico } from "@/lib/tipos"
+import { apiDelete, apiGet, apiPatch, apiPost } from "./api"
+
 // Buscar detalhes de uma ordem de serviço por ID
 export async function getOrdemServicoById(id: number | string) {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
-  const response = await fetch(`${API_BASE_URL}/ordem_servicos/${id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-  if (!response.ok) {
-    throw new Error("Erro ao buscar detalhes da ordem de serviço")
-  }
-  console.log("Response ordem_servicos/:id =", response)
-  return response.json()
+  return apiGet<OrdemServico>(`/ordem_servicos/${id}`)
 }
+
 // Buscar todas as ordens de serviço
 export async function getOrdensServico(): Promise<OrdemServico[]> {
-  const response = await fetch(`${API_BASE_URL}/ordem_servicos`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-  if (!response.ok) {
-    throw new Error("Erro ao buscar ordens de serviço")
-  }
-  return response.json()
+  return apiGet<OrdemServico[]>("/ordem_servicos")
 }
-import { OrdemServico } from "@/lib/tipos"
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
 export async function createOrdemServico(ordem: any): Promise<OrdemServico> {
-  const response = await fetch(`${API_BASE_URL}/ordem_servicos`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  return apiPost<OrdemServico>("/ordem_servicos", ordem)
+}
+
+// Atualizar o status de uma ordem de serviço
+export async function updateOrdemServicoStatus(id: number | string, status_id: number) {
+  return apiPatch<OrdemServico>(`/ordem_servicos/${id}/update_status`, { status_id })
+}
+
+// Atualizar laudo de um equipamento vinculado à OS
+export async function updateLaudoEquipamento(
+  ordemId: number | string,
+  equipamentoId: number | string,
+  laudo: string,
+) {
+  return apiPatch<OrdemServico>(
+    `/ordem_servicos/${ordemId}/equipamentos/${equipamentoId}/laudo`,
+    { laudo },
+  )
+}
+
+// Atualizar horários de atendimento da OS
+export async function updateHorarioAtendimento(
+  ordemId: number | string,
+  dataInicioAtendimento: string,
+  dataFimAtendimento: string,
+) {
+  return apiPatch<OrdemServico>(`/ordem_servicos/${ordemId}`, {
+    ordem_servico: {
+      data_inicio_atendimento: dataInicioAtendimento,
+      data_fim_atendimento: dataFimAtendimento,
     },
-    body: JSON.stringify(ordem),
   })
-  if (!response.ok) {
-    throw new Error("Erro ao criar ordem de serviço")
-  }
-  return response.json()
+}
+
+// Adicionar serviço à ordem (quantidade opcional)
+export async function addServicoOrdem(
+  ordemId: number | string,
+  servicoId: number | string,
+  quantidade?: number,
+) {
+  const payload: Record<string, number | string> = { servico_id: servicoId }
+  if (quantidade !== undefined) payload.quantidade = quantidade
+  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/servicos`, payload)
+}
+
+// Remover serviço da ordem
+export async function removeServicoOrdem(ordemId: number | string, servicoId: number | string) {
+  return apiDelete<void>(`/ordem_servicos/${ordemId}/servicos/${servicoId}`)
+}
+
+// Adicionar/atribuir técnico à ordem
+export async function addTecnicoOrdem(ordemId: number | string, tecnicoId: number | string) {
+  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/tecnicos`, {
+    tecnico_id: tecnicoId,
+  })
+}
+
+// Remover técnico específico da ordem
+export async function removeTecnicoOrdem(ordemId: number | string, tecnicoId: number | string) {
+  return apiDelete<void>(`/ordem_servicos/${ordemId}/tecnicos/${tecnicoId}`)
+}
+
+// Definir técnico responsável da ordem
+export async function updateTecnicoResponsavel(ordemId: number | string, tecnicoId: number | string) {
+  return apiPatch<OrdemServico>(`/ordem_servicos/${ordemId}`, {
+    ordem_servico: {
+      tecnico_id: tecnicoId,
+    },
+  })
+}
+
+// Remover técnico responsável da ordem
+export async function removeTecnicoResponsavel(ordemId: number | string) {
+  return apiPatch<OrdemServico>(`/ordem_servicos/${ordemId}`, {
+    ordem_servico: {
+      tecnico_id: null,
+    },
+  })
 }
 
