@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ArrowLeft, Edit, Trash2, Plus, Clock, CheckCircle, PlayCircle } from "lucide-react"
 import Link from "next/link"
-import type { Servico, Tarefa } from "@/lib/tipos"
+import type { Servico, Tecnico, Tarefa } from "@/lib/tipos"
 import { tenicosMock, clientesMock } from "@/lib/dados-mockados"
 import {
   getOrdemServicoById,
@@ -27,9 +27,12 @@ import {
   updateHorarioAtendimento,
   addServicoOrdem,
   removeServicoOrdem,
+  addTecnicoOrdem,
+  removeTecnicoOrdem,
 } from "@/lib/api/ordem_servicos"
 import { getHistoricoLaudosEquipamento, type Laudo } from "@/lib/api/equipamentos"
 import { getServicos } from "@/lib/api/servicos"
+import { getTecnicos } from "@/lib/api/tecnicos"
 
 // Opções de status disponíveis
 const statusOptions = [
@@ -106,6 +109,11 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   const [remocaoLoadingId, setRemocaoLoadingId] = useState<number | string | null>(null)
   const [servicosDisponiveis, setServicosDisponiveis] = useState<Servico[]>([])
   const [servicosLoading, setServicosLoading] = useState(false)
+  const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState<Tecnico[]>([])
+  const [tecnicoLoading, setTecnicoLoading] = useState(false)
+  const [tecnicoSaving, setTecnicoSaving] = useState(false)
+  const [modalTecnicoAberta, setModalTecnicoAberta] = useState(false)
+  const [tecnicoIdInput, setTecnicoIdInput] = useState("")
 
   useEffect(() => {
     async function fetchOrdem() {
@@ -211,6 +219,47 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     setModalServicoAberta(true)
   }
 
+  const carregarTecnicos = async () => {
+    setTecnicoLoading(true)
+    try {
+      const lista = await getTecnicos()
+      setTecnicosDisponiveis(lista)
+    } catch (err) {
+      console.error("Erro ao carregar técnicos:", err)
+      setTecnicosDisponiveis([])
+    } finally {
+      setTecnicoLoading(false)
+    }
+  }
+
+  const abrirModalTecnico = () => {
+    setTecnicoIdInput("")
+    if (tecnicosDisponiveis.length === 0) {
+      void carregarTecnicos()
+    }
+    setModalTecnicoAberta(true)
+  }
+
+  const salvarTecnico = async () => {
+    if (!tecnicoIdInput.trim()) return
+    setTecnicoSaving(true)
+    await addTecnicoOrdem(ordem.id, tecnicoIdInput.trim())
+    const data = await getOrdemServicoById(ordemId)
+    setOrdem(data)
+    setTarefas(data.tarefas || [])
+    setTecnicoSaving(false)
+    setModalTecnicoAberta(false)
+  }
+
+  const removerTecnico = async () => {
+    setTecnicoSaving(true)
+    await removeTecnicoOrdem(ordem.id, ordem.tecnico_responsavel?.id)
+    const data = await getOrdemServicoById(ordemId)
+    setOrdem(data)
+    setTarefas(data.tarefas || [])
+    setTecnicoSaving(false)
+  }
+
   const salvarServico = async () => {
     if (!servicoIdInput.trim()) return
     setServicoSaving(true)
@@ -230,6 +279,21 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     setOrdem(data)
     setTarefas(data.tarefas || [])
     setRemocaoLoadingId(null)
+  }
+
+  const contatarCliente = () => {
+    const numeroOriginal: string | undefined = ordem.cliente?.telefones.find(() => true)?.numero
+    if (!numeroOriginal) return
+    const digits = String(numeroOriginal).replace(/\D/g, "")
+    if (!digits) return
+    let phone = digits
+    if (!phone.startsWith("55")) {
+      if (phone.length <= 11) {
+        phone = "55" + phone
+      }
+    }
+    const url = `https://wa.me/${phone}`
+    window.open(url, "_blank")
   }
 
   const tecnico = ordem ? tenicosMock.find((t) => t.id === ordem.tecnicoId) : null
@@ -537,7 +601,13 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                 </p>
 
               </div>
-              <Button className="w-full mt-4">Contatar Cliente</Button>
+              <Button
+                className="w-full mt-4"
+                onClick={contatarCliente}
+                disabled={!ordem.cliente?.telefones.find(() => true)?.numero}
+              >
+                Contatar Cliente
+              </Button>
             </CardContent>
           </Card>
 
@@ -557,9 +627,28 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     <p className="text-sm text-muted-foreground">Telefone</p>
                     <p className="font-medium">{ordem.tecnico_responsavel.telefone}</p>
                   </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={abrirModalTecnico} disabled={tecnicoSaving}>
+                      Alterar técnico
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={removerTecnico}
+                      disabled={tecnicoSaving}
+                    >
+                      Remover
+                    </Button>
+                  </div>
                 </>
               ) : (
-                <p className="text-sm text-muted-foreground">Nenhum técnico atribuído</p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Nenhum técnico atribuído</p>
+                  <Button size="sm" onClick={abrirModalTecnico} disabled={tecnicoSaving}>
+                    Atribuir técnico
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -681,6 +770,42 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               disabled={!servicoIdInput.trim() || servicoSaving || servicosLoading || servicosDisponiveis.length === 0}
             >
               {servicoSaving ? "Adicionando..." : "Adicionar"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de técnico responsável */}
+      <AlertDialog open={modalTecnicoAberta} onOpenChange={setModalTecnicoAberta}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Selecionar técnico</AlertDialogTitle>
+          <div className="mt-4 space-y-3">
+            {tecnicoLoading ? (
+              <p className="text-sm text-muted-foreground">Carregando técnicos...</p>
+            ) : tecnicosDisponiveis.length > 0 ? (
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                value={tecnicoIdInput}
+                onChange={(e) => setTecnicoIdInput(e.target.value)}
+              >
+                <option value="">Selecione um técnico</option>
+                {tecnicosDisponiveis.map((tecnico) => (
+                  <option key={tecnico.id} value={String(tecnico.id)}>
+                    {tecnico.nome} - {tecnico.telefone}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nenhum técnico disponível.</p>
+            )}
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <AlertDialogCancel disabled={tecnicoSaving}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={salvarTecnico}
+              disabled={!tecnicoIdInput.trim() || tecnicoSaving || tecnicoLoading || tecnicosDisponiveis.length === 0}
+            >
+              {tecnicoSaving ? "Salvando..." : "Salvar"}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>

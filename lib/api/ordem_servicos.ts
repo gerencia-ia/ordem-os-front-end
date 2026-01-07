@@ -62,3 +62,33 @@ export async function removeServicoOrdem(ordemId: number | string, servicoId: nu
   return apiDelete<void>(`/ordem_servicos/${ordemId}/servicos/${servicoId}`)
 }
 
+// Adicionar/atribuir técnico à ordem
+export async function addTecnicoOrdem(ordemId: number | string, tecnicoId: number | string) {
+  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/tecnicos`, {
+    tecnico_id: tecnicoId,
+  })
+}
+
+// Remover técnico específico da ordem
+export async function removeTecnicoOrdem(ordemId: number | string, tecnicoId: number | string) {
+  return apiDelete<void>(`/ordem_servicos/${ordemId}/tecnicos/${tecnicoId}`)
+}
+
+// Definir técnico responsável da ordem
+export async function updateTecnicoResponsavel(ordemId: number | string, tecnicoId: number | string) {
+  return apiPatch<OrdemServico>(`/ordem_servicos/${ordemId}`, {
+    ordem_servico: {
+      tecnico_id: tecnicoId,
+    },
+  })
+}
+
+// Remover técnico responsável da ordem
+export async function removeTecnicoResponsavel(ordemId: number | string) {
+  return apiPatch<OrdemServico>(`/ordem_servicos/${ordemId}`, {
+    ordem_servico: {
+      tecnico_id: null,
+    },
+  })
+}
+
