@@ -6,6 +6,27 @@ export type NovoClientePayload = {
   email?: string | null
   telefones_attributes: { numero: string }[]
   enderecos_attributes: { rua: string; numero: string; bairro: string; complemento?: string; cidade: string }[]
+  equipamentos_attributes?: Array<{
+    marca?: string
+    btus?: string
+    local_instalacao?: string
+    observacao?: string
+  }>
+}
+
+export type AtualizarClientePayload = {
+  nome?: string
+  email?: string | null
+  telefones_attributes?: Array<{ id?: number; numero?: string; _destroy?: boolean }>
+  enderecos_attributes?: Array<{
+    id?: number
+    rua?: string
+    numero?: string
+    bairro?: string
+    complemento?: string
+    cidade?: string
+    _destroy?: boolean
+  }>
 }
 
 export async function getClientes(): Promise<Cliente[]> {
@@ -20,7 +41,7 @@ export async function createCliente(data: NovoClientePayload): Promise<Cliente> 
   return apiPost<Cliente>("/clientes", data)
 }
 
-export async function updateCliente(id: string, data: Partial<Cliente>): Promise<Cliente> {
+export async function updateCliente(id: string, data: AtualizarClientePayload): Promise<Cliente> {
   return apiPut<Cliente>(`/clientes/${id}`, data)
 }
 
