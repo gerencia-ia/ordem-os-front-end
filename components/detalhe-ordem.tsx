@@ -18,10 +18,18 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ArrowLeft, Edit, Trash2, Plus, Clock, CheckCircle, PlayCircle } from "lucide-react"
 import Link from "next/link"
-import type { Tarefa } from "@/lib/tipos"
+import type { Servico, Tarefa } from "@/lib/tipos"
 import { tenicosMock, clientesMock } from "@/lib/dados-mockados"
-import { getOrdemServicoById, updateOrdemServicoStatus, updateLaudoEquipamento, updateHorarioAtendimento } from "@/lib/api/ordem_servicos"
+import {
+  getOrdemServicoById,
+  updateOrdemServicoStatus,
+  updateLaudoEquipamento,
+  updateHorarioAtendimento,
+  addServicoOrdem,
+  removeServicoOrdem,
+} from "@/lib/api/ordem_servicos"
 import { getHistoricoLaudosEquipamento, type Laudo } from "@/lib/api/equipamentos"
+import { getServicos } from "@/lib/api/servicos"
 
 // Opções de status disponíveis
 const statusOptions = [
@@ -91,6 +99,13 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   const [modalHistoricoAberta, setModalHistoricoAberta] = useState(false)
   const [laudosHistorico, setLaudosHistorico] = useState<Laudo[]>([])
   const [historicoLoading, setHistoricoLoading] = useState(false)
+  const [modalServicoAberta, setModalServicoAberta] = useState(false)
+  const [servicoIdInput, setServicoIdInput] = useState("")
+  const [quantidadeInput, setQuantidadeInput] = useState<string>("")
+  const [servicoSaving, setServicoSaving] = useState(false)
+  const [remocaoLoadingId, setRemocaoLoadingId] = useState<number | string | null>(null)
+  const [servicosDisponiveis, setServicosDisponiveis] = useState<Servico[]>([])
+  const [servicosLoading, setServicosLoading] = useState(false)
 
   useEffect(() => {
     async function fetchOrdem() {
@@ -172,6 +187,49 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     await updateHorarioAtendimento(ordem.id, dataInicio, agora)
     await atualizarStatus(3) // Status 3: Concluído
     setAcaoLoading(false)
+  }
+
+  const carregarServicos = async () => {
+    setServicosLoading(true)
+    try {
+      const lista = await getServicos()
+      setServicosDisponiveis(lista)
+    } catch (err) {
+      console.error("Erro ao carregar serviços:", err)
+      setServicosDisponiveis([])
+    } finally {
+      setServicosLoading(false)
+    }
+  }
+
+  const abrirModalAdicionarServico = () => {
+    setServicoIdInput("")
+    setQuantidadeInput("")
+    if (servicosDisponiveis.length === 0) {
+      void carregarServicos()
+    }
+    setModalServicoAberta(true)
+  }
+
+  const salvarServico = async () => {
+    if (!servicoIdInput.trim()) return
+    setServicoSaving(true)
+    const qtd = quantidadeInput === "" ? undefined : Number(quantidadeInput)
+    await addServicoOrdem(ordem.id, servicoIdInput.trim(), qtd)
+    const data = await getOrdemServicoById(ordemId)
+    setOrdem(data)
+    setTarefas(data.tarefas || [])
+    setServicoSaving(false)
+    setModalServicoAberta(false)
+  }
+
+  const removerServico = async (servicoId: number | string) => {
+    setRemocaoLoadingId(servicoId)
+    await removeServicoOrdem(ordem.id, servicoId)
+    const data = await getOrdemServicoById(ordemId)
+    setOrdem(data)
+    setTarefas(data.tarefas || [])
+    setRemocaoLoadingId(null)
   }
 
   const tecnico = ordem ? tenicosMock.find((t) => t.id === ordem.tecnicoId) : null
@@ -365,15 +423,42 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
           {/* Serviços */}
           <Card>
             <CardHeader>
-              <CardTitle>Serviços</CardTitle>
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle>Serviços</CardTitle>
+                {ordem.status_id !== 3 && (
+                  <Button size="sm" onClick={abrirModalAdicionarServico}>
+                    Adicionar serviço
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {ordem.servicos && ordem.servicos.length > 0 ? (
                 <ul className="space-y-2">
                   {ordem.servicos.map((servico: any) => (
                     <li key={servico.id} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
-                      <span className="font-medium">{servico.nome}</span>
-                      <span className="text-sm text-muted-foreground">R$ {Number(servico.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                      <div>
+                        <span className="font-medium">{servico.nome}</span>
+                        {servico.quantidade ? (
+                          <span className="ml-2 text-xs text-muted-foreground">x{servico.quantidade}</span>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-muted-foreground">
+                          R$ {Number(servico.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </span>
+                        {ordem.status_id !== 3 && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => removerServico(servico.id)}
+                            disabled={remocaoLoadingId === servico.id}
+                          >
+                            {remocaoLoadingId === servico.id ? "Removendo..." : "Remover"}
+                          </Button>
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -414,7 +499,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                           className="whitespace-nowrap"
                           onClick={() => abrirModalLaudo(equip)}
                         >
-                          Laudo Técnico
+                          Adicionar Laudo Técnico
                         </Button>
                       </div>
                     </li>
@@ -545,6 +630,57 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               disabled={!equipamentoSelecionado || !textoLaudo.trim() || laudoSaving}
             >
               {laudoSaving ? "Salvando..." : "Salvar laudo"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de adicionar serviço */}
+      <AlertDialog open={modalServicoAberta} onOpenChange={setModalServicoAberta}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Adicionar serviço</AlertDialogTitle>
+          <div className="mt-4 space-y-3">
+            <div className="space-y-2">
+              <label className="text-sm text-muted-foreground" htmlFor="servico-id-input">Selecione o serviço</label>
+              {servicosLoading ? (
+                <p className="text-sm text-muted-foreground">Carregando serviços...</p>
+              ) : servicosDisponiveis.length > 0 ? (
+                <select
+                  id="servico-id-input"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  value={servicoIdInput}
+                  onChange={(e) => setServicoIdInput(e.target.value)}
+                >
+                  <option value="">Selecione um serviço</option>
+                  {servicosDisponiveis.map((servico) => (
+                    <option key={servico.id} value={String(servico.id)}>
+                      {servico.nome} - R$ {Number(servico.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-sm text-muted-foreground">Nenhum serviço disponível.</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-muted-foreground" htmlFor="quantidade-input">Quantidade (opcional)</label>
+              <Input
+                id="quantidade-input"
+                type="number"
+                min={1}
+                placeholder="Ex: 2"
+                value={quantidadeInput}
+                onChange={(e) => setQuantidadeInput(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <AlertDialogCancel disabled={servicoSaving}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={salvarServico}
+              disabled={!servicoIdInput.trim() || servicoSaving || servicosLoading || servicosDisponiveis.length === 0}
+            >
+              {servicoSaving ? "Adicionando..." : "Adicionar"}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>

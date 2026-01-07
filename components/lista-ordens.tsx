@@ -757,9 +757,9 @@ export default function ListaOrdens() {
 
                 {/* Data de Agendamento */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Data de Agendamento</label>
+                  <label className="text-sm font-medium">Data e Hora de Agendamento</label>
                   <Input
-                    type="date"
+                    type="datetime-local"
                     value={novaOrdem.dataAgendamento}
                     onChange={(e) => setNovaOrdem((s) => ({ ...s, dataAgendamento: e.target.value }))}
                   />

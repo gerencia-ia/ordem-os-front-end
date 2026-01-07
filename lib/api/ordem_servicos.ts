@@ -1,5 +1,5 @@
 import { OrdemServico } from "@/lib/tipos"
-import { apiGet, apiPost, apiPatch } from "./api"
+import { apiDelete, apiGet, apiPatch, apiPost } from "./api"
 
 // Buscar detalhes de uma ordem de serviço por ID
 export async function getOrdemServicoById(id: number | string) {
@@ -44,5 +44,21 @@ export async function updateHorarioAtendimento(
       data_fim_atendimento: dataFimAtendimento,
     },
   })
+}
+
+// Adicionar serviço à ordem (quantidade opcional)
+export async function addServicoOrdem(
+  ordemId: number | string,
+  servicoId: number | string,
+  quantidade?: number,
+) {
+  const payload: Record<string, number | string> = { servico_id: servicoId }
+  if (quantidade !== undefined) payload.quantidade = quantidade
+  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/servicos`, payload)
+}
+
+// Remover serviço da ordem
+export async function removeServicoOrdem(ordemId: number | string, servicoId: number | string) {
+  return apiDelete<void>(`/ordem_servicos/${ordemId}/servicos/${servicoId}`)
 }
 
