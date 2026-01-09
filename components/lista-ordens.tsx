@@ -757,9 +757,9 @@ export default function ListaOrdens() {
 
                 {/* Data de Agendamento */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Data de Agendamento</label>
+                  <label className="text-sm font-medium">Data e Hora de Agendamento</label>
                   <Input
-                    type="date"
+                    type="datetime-local"
                     value={novaOrdem.dataAgendamento}
                     onChange={(e) => setNovaOrdem((s) => ({ ...s, dataAgendamento: e.target.value }))}
                   />
@@ -982,6 +982,7 @@ export default function ListaOrdens() {
                     <TableHead>Status</TableHead>
                     <TableHead>Prioridade</TableHead>
                     <TableHead>Cliente</TableHead>
+                    <TableHead>Técnico</TableHead>
                     <TableHead>Agendamento</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
@@ -997,9 +998,10 @@ export default function ListaOrdens() {
                       <TableCell>
                         <Badge className={getBadgePrioridade(ordem.prioridade_descricao)}>{ordem.prioridade_descricao}</Badge>
                       </TableCell>
-                      <TableCell>{
-                        clientes.find((c) => String(c.id) === String(ordem.clienteId))?.nome || ordem.cliente_nome
-                      }</TableCell>
+                      <TableCell>{ ordem.cliente_nome }</TableCell>
+                      <TableCell>{ ordem.tecnico_responsavel?.nome }</TableCell>
+                      
+
                       <TableCell>
                         {ordem.data_agendamento ? new Date(ordem.data_agendamento).toLocaleDateString("pt-BR") : "-"}
                       </TableCell>

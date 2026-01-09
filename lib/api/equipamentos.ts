@@ -1,6 +1,5 @@
 import type { Equipamento } from "@/lib/tipos"
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
+import { apiGet, apiPost } from "./api"
 
 export type NovoEquipamentoPayload = {
   marca: string
@@ -10,23 +9,35 @@ export type NovoEquipamentoPayload = {
   cliente_id: number
 }
 
+export type OrdemServicoResumida = {
+  id: number
+  numero_ordem: string
+  descricao: string
+  data_agendamento: string
+  data_fechamento?: string
+  status: string
+  prioridade: string
+}
+
+export type Laudo = {
+  id: number
+  laudo: string
+  created_at: string
+  updated_at: string
+  ordem_servico: OrdemServicoResumida
+}
+
 // Busca equipamentos de um cliente via query parameter
 export async function getEquipamentosByCliente(clienteId: number): Promise<Equipamento[]> {
-  const res = await fetch(`${API_BASE_URL}/equipamentos?cliente_id=${clienteId}`, { cache: "no-store" })
-  if (!res.ok) throw new Error("Erro ao buscar equipamentos do cliente")
-  return res.json()
+  return apiGet<Equipamento[]>(`/equipamentos?cliente_id=${clienteId}`, { cache: "no-store" })
 }
 
 // Cadastra equipamento
 export async function createEquipamento(data: NovoEquipamentoPayload): Promise<Equipamento & { id: number }> {
-  const res = await fetch(`${API_BASE_URL}/equipamentos`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  })
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "")
-    throw new Error(msg || "Erro ao criar equipamento")
-  }
-  return res.json()
+  return apiPost<Equipamento & { id: number }>("/equipamentos", data)
+}
+
+// Busca histórico de laudos de um equipamento
+export async function getHistoricoLaudosEquipamento(equipamentoId: number | string): Promise<Laudo[]> {
+  return apiGet<Laudo[]>(`/equipamentos/${equipamentoId}/historico_laudos`)
 }

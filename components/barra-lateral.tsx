@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Home, Kanban, List, Users, Settings, X, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react"
 
 interface BarraLateralProps {
   estaAberta: boolean
@@ -13,16 +14,31 @@ interface BarraLateralProps {
 
 export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
   const pathname = usePathname()
+  const [roleUsuario, setRoleUsuario] = useState<string | null>(null)
 
-  const menus = [
-    { href: "/", label: "Painel", icon: Home },
-    { href: "/kanban", label: "Quadro Kanban", icon: Kanban },
-    { href: "/ordens", label: "Ordens de Serviço", icon: List },
-    { href: "/tecnicos", label: "Técnicos", icon: Users },
-    { href: "/clientes", label: "Clientes", icon: Users },
-    { href: "/servicos", label: "Serviços", icon: Wrench },
-    { href: "/configuracoes", label: "Configurações", icon: Settings },
+  useEffect(() => {
+    // Obter role do localStorage
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("role")
+      setRoleUsuario(role)
+    }
+  }, [])
+
+  const todosMenus = [
+    { href: "/", label: "Painel", icon: Home, roles: ["SECRETARIA", "TECNICO"] },
+    { href: "/kanban", label: "Quadro Kanban", icon: Kanban, roles: ["SECRETARIA", "TECNICO"] },
+    { href: "/ordens", label: "Ordens de Serviço", icon: List, roles: ["SECRETARIA", "TECNICO"] },
+    { href: "/clientes", label: "Clientes", icon: Users, roles: ["SECRETARIA", "TECNICO"] },
+    { href: "/tecnicos", label: "Técnicos", icon: Users, roles: ["SECRETARIA"] },
+    { href: "/servicos", label: "Serviços", icon: Wrench, roles: ["SECRETARIA"] },
+    { href: "/configuracoes", label: "Configurações", icon: Settings, roles: ["SECRETARIA"] },
   ]
+
+  // Filtrar menus baseado na role do usuário
+  const menus = todosMenus.filter((menu) => {
+    if (!roleUsuario) return true // Se não houver role, mostrar tudo
+    return menu.roles.includes(roleUsuario)
+  })
 
   const isAtivo = (href: string) => {
     if (href === "/") return pathname === "/"

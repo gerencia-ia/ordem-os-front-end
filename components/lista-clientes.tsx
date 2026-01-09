@@ -16,6 +16,8 @@ import {
 import type { Cliente, Telefone, Endereco } from "@/lib/tipos"
 import { getClientes } from "@/lib/api/clientes"
 import { createCliente } from "@/lib/api/clientes"
+import { updateCliente } from "@/lib/api/clientes"
+import type { AtualizarClientePayload } from "@/lib/api/clientes"
 import { Plus, Edit, Trash2, Phone, Mail, MapPin, PlusCircle } from "lucide-react"
 import { CadastrarEquipamento } from "@/components/cadastrar-equipamento"
 
@@ -44,6 +46,43 @@ export default function ListaClientes() {
 
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  // edição de cliente
+  const [editOpen, setEditOpen] = useState(false)
+  const [editSaving, setEditSaving] = useState(false)
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
+  const [editForm, setEditForm] = useState<{ nome: string; email: string }>({ nome: "", email: "" })
+  const [editTelefones, setEditTelefones] = useState<Array<{ id?: number; numero: string }>>([])
+  const [editEnderecos, setEditEnderecos] = useState<
+    Array<{ id?: number; rua: string; numero: string; bairro: string; complemento?: string; cidade: string }>
+  >([])
+  const [editEquipOpen, setEditEquipOpen] = useState(false)
+  const [editEquipamentos, setEditEquipamentos] = useState<any[]>([])
+
+  const addEditTelefone = () => setEditTelefones((arr) => [...arr, { numero: "" }])
+  const removeEditTelefone = (idx: number) =>
+    setEditTelefones((arr) => arr.filter((_, i) => i !== idx))
+  const updateEditTelefone = (idx: number, numero: string) =>
+    setEditTelefones((arr) => {
+      const next = [...arr]
+      next[idx] = { ...next[idx], numero }
+      return next
+    })
+
+  const addEditEndereco = () =>
+    setEditEnderecos((arr) => [...arr, { rua: "", numero: "", bairro: "", complemento: "", cidade: "" }])
+  const removeEditEndereco = (idx: number) =>
+    setEditEnderecos((arr) => arr.filter((_, i) => i !== idx))
+  const updateEditEndereco = (
+    idx: number,
+    field: "rua" | "numero" | "bairro" | "complemento" | "cidade",
+    value: string,
+  ) =>
+    setEditEnderecos((arr) => {
+      const next = [...arr]
+      next[idx] = { ...next[idx], [field]: value }
+      return next as typeof arr
+    })
 
   // helpers para telefone/endereço
   const addTelefone = () =>
@@ -293,6 +332,203 @@ export default function ListaClientes() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Dialog de edição de cliente */}
+        <Dialog open={editOpen} onOpenChange={(o) => {
+          setEditOpen(o)
+          if (!o) {
+            setClienteSelecionado(null)
+            setEditTelefones([])
+            setEditEnderecos([])
+            setEditEquipamentos([])
+            setEditEquipOpen(false)
+          }
+        }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Editar Cliente</DialogTitle>
+              <DialogDescription>Atualize os dados do cliente</DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end mb-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setEditEquipOpen(true)}>
+                <PlusCircle className="h-4 w-4 mr-1" /> Cadastrar Equipamento
+              </Button>
+            </div>
+            {/* Modal de cadastro de equipamento (edição) */}
+            <CadastrarEquipamento
+              open={editEquipOpen}
+              setOpen={setEditEquipOpen}
+              onSalvarEquipamento={(equip) => setEditEquipamentos((prev) => [...prev, equip])}
+            />
+            {/* Lista de equipamentos adicionados nesta edição */}
+            {editEquipamentos.length > 0 && (
+              <div className="mb-4">
+                <div className="font-medium mb-1">Equipamentos adicionados:</div>
+                <ul className="list-disc pl-5">
+                  {editEquipamentos.map((eq, i) => (
+                    <li key={i} className="text-sm">
+                      {eq.marca} - {eq.btus} BTUs - {eq.local_instalacao} {eq.observacao && `- ${eq.observacao}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="space-y-4">
+              <Input
+                placeholder="Nome do cliente"
+                value={editForm.nome}
+                onChange={(e) => setEditForm((s) => ({ ...s, nome: e.target.value }))}
+              />
+              <Input
+                placeholder="E-mail (opcional)"
+                value={editForm.email}
+                onChange={(e) => setEditForm((s) => ({ ...s, email: e.target.value }))}
+              />
+
+              {/* Telefones (edição) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Telefones</span>
+                  <Button type="button" variant="secondary" size="sm" onClick={addEditTelefone}>
+                    + Telefone
+                  </Button>
+                </div>
+                {editTelefones.map((t, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <Input
+                      placeholder="Número (ex: 11999999999)"
+                      value={t.numero}
+                      onChange={(e) => updateEditTelefone(idx, e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="shrink-0"
+                      onClick={() => removeEditTelefone(idx)}
+                      disabled={editTelefones.length <= 1}
+                    >
+                      Remover
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Endereços (edição) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Endereços</span>
+                  <Button type="button" variant="secondary" size="sm" onClick={addEditEndereco}>
+                    + Endereço
+                  </Button>
+                </div>
+                {editEnderecos.map((e, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Rua"
+                        value={e.rua}
+                        onChange={(ev) => updateEditEndereco(idx, "rua", ev.target.value)}
+                      />
+                      <Input
+                        placeholder="Número"
+                        value={e.numero}
+                        onChange={(ev) => updateEditEndereco(idx, "numero", ev.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Bairro"
+                        value={e.bairro}
+                        onChange={(ev) => updateEditEndereco(idx, "bairro", ev.target.value)}
+                      />
+                      <Input
+                        placeholder="Cidade"
+                        value={e.cidade}
+                        onChange={(ev) => updateEditEndereco(idx, "cidade", ev.target.value)}
+                      />
+                      <Input
+                        placeholder="Complemento"
+                        value={e.complemento ?? ""}
+                        onChange={(ev) => updateEditEndereco(idx, "complemento", ev.target.value)}
+                      />
+                      <div />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => removeEditEndereco(idx)}
+                        disabled={editEnderecos.length <= 1}
+                      >
+                        Remover endereço
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                className="w-full"
+                type="button"
+                onClick={async () => {
+                  if (!clienteSelecionado) return
+                  try {
+                    setEditSaving(true)
+                    // Monta payload de atualização com nested attributes
+                    const originalTels = clienteSelecionado.telefones || []
+                    const originalEnds = clienteSelecionado.enderecos || []
+
+                    const currentTels = editTelefones.filter(t => t.numero.trim())
+                    const currentEnds = editEnderecos.filter(e => e.rua.trim())
+
+                    const removedTels = originalTels
+                      .filter(ot => !currentTels.some(ct => ct.id === ot.id))
+                      .map(ot => ({ id: ot.id, _destroy: true }))
+                    const removedEnds = originalEnds
+                      .filter(oe => !currentEnds.some(ce => ce.id === oe.id))
+                      .map(oe => ({ id: oe.id, _destroy: true }))
+
+                    const telsAttributes = [
+                      ...currentTels.map(t => ({ id: t.id, numero: t.numero.trim() })),
+                      ...removedTels,
+                    ]
+                    const endsAttributes = [
+                      ...currentEnds.map(e => ({
+                        id: e.id,
+                        rua: e.rua.trim(),
+                        numero: e.numero.trim(),
+                        bairro: e.bairro.trim(),
+                        complemento: e.complemento?.toString().trim() || undefined,
+                        cidade: e.cidade.trim(),
+                      })),
+                      ...removedEnds,
+                    ]
+
+                    const payload: AtualizarClientePayload = {
+                      nome: editForm.nome.trim(),
+                      email: editForm.email.trim() ? editForm.email.trim() : null,
+                      telefones_attributes: telsAttributes,
+                      enderecos_attributes: endsAttributes,
+                      equipamentos_attributes: editEquipamentos,
+                    }
+
+                    const atualizado = await updateCliente(String(clienteSelecionado.id), payload)
+                    setClientes((lista) => lista.map((c) => (c.id === atualizado.id ? { ...c, ...atualizado } : c)))
+                    setEditOpen(false)
+                    setClienteSelecionado(null)
+                    setEditEquipamentos([])
+                  } catch (e) {
+                    console.error(e)
+                    setError("Erro ao atualizar cliente")
+                  } finally {
+                    setEditSaving(false)
+                  }
+                }}
+                disabled={editSaving || !editForm.nome.trim()}
+              >
+                {editSaving ? "Salvando..." : "Salvar alterações"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -337,7 +573,24 @@ export default function ListaClientes() {
                     <TableCell>{new Date(cliente.dataRegistro).toLocaleDateString("pt-BR")}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setClienteSelecionado(cliente)
+                            setEditForm({ nome: cliente.nome, email: cliente.email ?? "" })
+                            setEditTelefones((cliente.telefones || []).map(t => ({ id: t.id, numero: t.numero })))
+                            setEditEnderecos((cliente.enderecos || []).map(e => ({
+                              id: e.id,
+                              rua: e.rua,
+                              numero: e.numero,
+                              bairro: e.bairro,
+                              complemento: e.complemento ?? "",
+                              cidade: e.cidade,
+                            })))
+                            setEditOpen(true)
+                          }}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
