@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { dashboardMock } from "@/lib/dados-mockados"
 import { TrendingUp, Clock, DollarSign, CheckCircle } from "lucide-react"
+import AlertaManutencaoClientes from "@/components/alerta-manutencao-clientes"
 
 const dadosGrafico = [
   { data: "1 Nov", completas: 2, emProgresso: 1, pendentes: 3 },
@@ -87,6 +88,9 @@ export default function Painel() {
           )
         })}
       </div>
+
+      {/* Alerta de Manutenção de Clientes */}
+      <AlertaManutencaoClientes />
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

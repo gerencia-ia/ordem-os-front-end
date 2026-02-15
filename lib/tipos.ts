@@ -30,6 +30,7 @@ export interface Cliente {
   cpf?: string
   email?: string | null
   dataRegistro: string
+  data_ultima_visita?: string | null
   telefones: Telefone[]
   enderecos: Endereco[]
 }
