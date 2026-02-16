@@ -75,6 +75,13 @@ export interface Servico {
   }
 }
 
+export interface CategoriaServico {
+  id: number
+  descricao: string
+  created_at?: string
+  updated_at?: string
+}
+
 export interface OrdemServico {
   id: number
   status_id: number
