@@ -67,6 +67,12 @@ export interface Servico {
   id: string
   nome: string
   valor: number
+  tempo_servico: number
+  categorias_servico_id: number
+  categoria?: {
+    id: number
+    descricao: string
+  }
 }
 
 export interface OrdemServico {

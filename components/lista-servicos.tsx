@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, Edit, Trash2, DollarSign } from "lucide-react"
+import { Plus, Edit, Trash2, DollarSign, Clock, Tag } from "lucide-react"
 import { getServicos, createServico } from "@/lib/api/servicos"
 import type { Servico } from "@/lib/tipos"
 
@@ -28,6 +28,8 @@ export default function ListaServicos() {
   const [novoServico, setNovoServico] = useState({
     nome: "",
     valor: "",
+    tempo_servico: "",
+    categorias_servico_id: "",
   })
 
   useEffect(() => {
@@ -50,6 +52,8 @@ export default function ListaServicos() {
     setNovoServico({
       nome: "",
       valor: "",
+      tempo_servico: "",
+      categorias_servico_id: "",
     })
 
   const handleAddServico = async () => {
@@ -58,6 +62,8 @@ export default function ListaServicos() {
       const criado = await createServico({
         nome: novoServico.nome.trim(),
         valor: parseFloat(novoServico.valor),
+        tempo_servico: novoServico.tempo_servico ? parseInt(novoServico.tempo_servico) : 0,
+        categorias_servico_id: novoServico.categorias_servico_id ? parseInt(novoServico.categorias_servico_id) : null,
       })
       setServicos((prev) => [criado, ...prev])
       resetNovoServico()
@@ -114,6 +120,28 @@ export default function ListaServicos() {
                   onChange={(e) => setNovoServico((s) => ({ ...s, valor: e.target.value }))}
                 />
               </div>
+              <div className="relative">
+                <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Tempo de Serviço (minutos)"
+                  type="number"
+                  min="0"
+                  className="pl-9"
+                  value={novoServico.tempo_servico}
+                  onChange={(e) => setNovoServico((s) => ({ ...s, tempo_servico: e.target.value }))}
+                />
+              </div>
+              <div className="relative">
+                <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="ID Categoria de Serviço"
+                  type="number"
+                  min="0"
+                  className="pl-9"
+                  value={novoServico.categorias_servico_id}
+                  onChange={(e) => setNovoServico((s) => ({ ...s, categorias_servico_id: e.target.value }))}
+                />
+              </div>
               <Button
                 className="w-full"
                 onClick={handleAddServico}
@@ -150,6 +178,8 @@ export default function ListaServicos() {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Valor</TableHead>
+                  <TableHead>Tempo de Serviço</TableHead>
+                  <TableHead>Categoria</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -165,6 +195,15 @@ export default function ListaServicos() {
                           currency: "BRL",
                         })}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        {servico.tempo_servico ? `${servico.tempo_servico} min` : "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {servico.categoria?.descricao || "-"}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
