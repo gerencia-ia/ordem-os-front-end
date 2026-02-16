@@ -29,6 +29,7 @@ export default function ListaClientes() {
   const [equipamentos, setEquipamentos] = useState<any[]>([])
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [busca, setBusca] = useState("")
+  const [filtroMarcador, setFiltroMarcador] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -187,8 +188,43 @@ export default function ListaClientes() {
   if (loading) return <div className="p-6">Carregando...</div>
   if (error) return <div className="p-6 text-destructive">{error}</div>
 
+  // Função para calcular e retornar o marcador baseado na última visita
+  const getMarcadorVisita = (dataUltimaVisita?: string | null) => {
+    if (!dataUltimaVisita) {
+      return { id: "nunca-visitado", texto: "Nunca visitado", variant: "secondary" as const }
+    }
+
+    const ultVisita = new Date(dataUltimaVisita)
+    const hoje = new Date()
+    const diasDecorridos = Math.floor((hoje.getTime() - ultVisita.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (diasDecorridos < 60) {
+      return { id: "menos-60", texto: `${diasDecorridos} dias`, variant: "default" as const }
+    } else if (diasDecorridos < 90) {
+      return { id: "60-90", texto: `${diasDecorridos} dias`, variant: "secondary" as const }
+    } else if (diasDecorridos < 180) {
+      return { id: "90-180", texto: `${diasDecorridos} dias`, variant: "outline" as const }
+    } else {
+      return { id: "acima-180", texto: `Acima de 180 dias`, variant: "destructive" as const }
+    }
+  }
+
   const clientesFiltrados = clientes.filter(
-    (c) => c.nome.toLowerCase().includes(busca.toLowerCase()) || (c.email?.toLowerCase() || "").includes(busca.toLowerCase()),
+    (c) => {
+      // Filtro de texto
+      const textoBuscado = 
+        c.nome.toLowerCase().includes(busca.toLowerCase()) || 
+        (c.email?.toLowerCase() || "").includes(busca.toLowerCase()) ||
+        (c.telefones?.some(t => t.numero.replace(/\D/g, "").includes(busca.replace(/\D/g, ""))) || false)
+      
+      // Filtro de marcador
+      if (filtroMarcador) {
+        const marcador = getMarcadorVisita(c.data_ultima_visita)
+        return textoBuscado && marcador.id === filtroMarcador
+      }
+      
+      return textoBuscado
+    }
   )
 
   // Função para abrir WhatsApp
@@ -202,33 +238,11 @@ export default function ListaClientes() {
     window.open(urlWhatsapp, "_blank")
   }
 
-  // Função para calcular e retornar o marcador baseado na última visita
-  const getMarcadorVisita = (dataUltimaVisita?: string | null) => {
-    if (!dataUltimaVisita) {
-      return { texto: "Nunca visitado", variant: "secondary" as const }
-    }
-
-    const ultVisita = new Date(dataUltimaVisita)
-    const hoje = new Date()
-    const diasDecorridos = Math.floor((hoje.getTime() - ultVisita.getTime()) / (1000 * 60 * 60 * 24))
-
-    if (diasDecorridos < 60) {
-      return { texto: `${diasDecorridos} dias`, variant: "default" as const }
-    } else if (diasDecorridos < 90) {
-      return { texto: `${diasDecorridos} dias`, variant: "secondary" as const }
-    } else if (diasDecorridos < 180) {
-      return { texto: `${diasDecorridos} dias`, variant: "outline" as const }
-    } else {
-      return { texto: `Acima de 180 dias`, variant: "destructive" as const }
-    }
-  }
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Clientes</h1>
-          <p className="text-muted-foreground">Gerencie os clientes cadastrados</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -619,8 +633,58 @@ export default function ListaClientes() {
         <CardHeader>
           <CardTitle>Filtrar</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Input placeholder="Buscar por nome ou telefone..." value={busca} onChange={(e) => setBusca(e.target.value)} />
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-2 block">Buscar</label>
+            <Input placeholder="Por nome, email ou telefone..." value={busca} onChange={(e) => setBusca(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Por Marcador</label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={filtroMarcador === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltroMarcador(null)}
+              >
+                Todos
+              </Button>
+              <Button
+                variant={filtroMarcador === "menos-60" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltroMarcador("menos-60")}
+              >
+                &lt; 60 dias
+              </Button>
+              <Button
+                variant={filtroMarcador === "60-90" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltroMarcador("60-90")}
+              >
+                60-90 dias
+              </Button>
+              <Button
+                variant={filtroMarcador === "90-180" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltroMarcador("90-180")}
+              >
+                90-180 dias
+              </Button>
+              <Button
+                variant={filtroMarcador === "acima-180" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltroMarcador("acima-180")}
+              >
+                &gt; 180 dias
+              </Button>
+              <Button
+                variant={filtroMarcador === "nunca-visitado" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltroMarcador("nunca-visitado")}
+              >
+                Nunca visitado
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { getTecnicos, createTecnico, updateTecnico } from "@/lib/api/tecnicos"
-import { Plus, Phone, Edit, Trash2 } from "lucide-react"
+import { Plus, Phone, Edit, Trash2, MessageCircle } from "lucide-react"
 import type { Tecnico } from "@/lib/tipos"
 
 export default function ListaTecnicos() {
@@ -117,6 +117,17 @@ export default function ListaTecnicos() {
       t.cpf?.toLowerCase().includes(busca.toLowerCase()) ||
       t.telefone.toLowerCase().includes(busca.toLowerCase()),
   )
+
+  // Função para abrir WhatsApp
+  const abrirWhatsapp = (numero: string, nomeTecnico: string) => {
+    // Remove caracteres não numéricos
+    const numeroLimpo = numero.replace(/\D/g, "")
+    // Se não começar com 55, adiciona código do Brasil
+    const numeroWhatsapp = numeroLimpo.startsWith("55") ? numeroLimpo : "55" + numeroLimpo
+    const mensagem = `Olá ${nomeTecnico}, tudo bem?`
+    const urlWhatsapp = `https://wa.me/${numeroWhatsapp}?text=${encodeURIComponent(mensagem)}`
+    window.open(urlWhatsapp, "_blank")
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -221,7 +232,15 @@ export default function ListaTecnicos() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
-                        {tecnico.telefone}
+                        <span>{tecnico.telefone}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-1 h-auto"
+                          onClick={() => abrirWhatsapp(tecnico.telefone, tecnico.nome)}
+                        >
+                          <MessageCircle className="h-4 w-4 text-green-500" />
+                        </Button>
                       </div>
                     </TableCell>
                     <TableCell>
