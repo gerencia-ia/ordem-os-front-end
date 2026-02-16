@@ -35,11 +35,13 @@ export default function ListaClientes() {
   const [novoCliente, setNovoCliente] = useState<{
     nome: string
     email?: string
+    data_ultima_visita?: string
     telefones: { numero: string }[]
     enderecos: { rua: string; numero: string; bairro: string; complemento?: string; cidade: string }[]
   }>({
     nome: "",
     email: "",
+    data_ultima_visita: "",
     telefones: [{ numero: "" }],
     enderecos: [{ rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
   })
@@ -51,7 +53,7 @@ export default function ListaClientes() {
   const [editOpen, setEditOpen] = useState(false)
   const [editSaving, setEditSaving] = useState(false)
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
-  const [editForm, setEditForm] = useState<{ nome: string; email: string }>({ nome: "", email: "" })
+  const [editForm, setEditForm] = useState<{ nome: string; email: string; data_ultima_visita?: string }>({ nome: "", email: "", data_ultima_visita: "" })
   const [editTelefones, setEditTelefones] = useState<Array<{ id?: number; numero: string }>>([])
   const [editEnderecos, setEditEnderecos] = useState<
     Array<{ id?: number; rua: string; numero: string; bairro: string; complemento?: string; cidade: string }>
@@ -118,6 +120,7 @@ export default function ListaClientes() {
     setNovoCliente({
       nome: "",
       email: "",
+      data_ultima_visita: "",
       telefones: [{ numero: "" }],
       enderecos: [{ rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
     })
@@ -135,6 +138,7 @@ export default function ListaClientes() {
       const criado = await createCliente({
         nome: novoCliente.nome.trim(),
         email: novoCliente.email?.trim() || null,
+        data_ultima_visita: novoCliente.data_ultima_visita?.trim() || null,
         telefones_attributes: novoCliente.telefones.filter(t => t.numero.trim()).map(t => ({ numero: t.numero.trim() })),
         enderecos_attributes: novoCliente.enderecos
           .filter(e => e.rua.trim())
@@ -239,6 +243,14 @@ export default function ListaClientes() {
                 value={novoCliente.email ?? ""}
                 onChange={(e) => setNovoCliente((s) => ({ ...s, email: e.target.value }))}
               />
+              <div>
+                <label className="text-sm font-medium mb-1 block">Data da Última Visita (opcional)</label>
+                <Input
+                  type="date"
+                  value={novoCliente.data_ultima_visita ?? ""}
+                  onChange={(e) => setNovoCliente((s) => ({ ...s, data_ultima_visita: e.target.value }))}
+                />
+              </div>
 
               {/* Telefones */}
               <div className="space-y-2">
@@ -384,6 +396,14 @@ export default function ListaClientes() {
                 value={editForm.email}
                 onChange={(e) => setEditForm((s) => ({ ...s, email: e.target.value }))}
               />
+              <div>
+                <label className="text-sm font-medium mb-1 block">Data da Última Visita (opcional)</label>
+                <Input
+                  type="date"
+                  value={editForm.data_ultima_visita ?? ""}
+                  onChange={(e) => setEditForm((s) => ({ ...s, data_ultima_visita: e.target.value }))}
+                />
+              </div>
 
               {/* Telefones (edição) */}
               <div className="space-y-2">
@@ -505,6 +525,7 @@ export default function ListaClientes() {
                     const payload: AtualizarClientePayload = {
                       nome: editForm.nome.trim(),
                       email: editForm.email.trim() ? editForm.email.trim() : null,
+                      data_ultima_visita: editForm.data_ultima_visita?.trim() || null,
                       telefones_attributes: telsAttributes,
                       enderecos_attributes: endsAttributes,
                       equipamentos_attributes: editEquipamentos,
@@ -552,7 +573,7 @@ export default function ListaClientes() {
                   <TableHead>Nome</TableHead>
                   <TableHead>Telefone</TableHead>
                   <TableHead>Endereço</TableHead>
-                  <TableHead>Data Registro</TableHead>
+                  <TableHead>Última Visita</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -570,7 +591,7 @@ export default function ListaClientes() {
                         <span className="text-sm max-w-xs truncate">{cliente.enderecos.map(e => `${e.rua}, ${e.numero} - ${e.bairro}${e.complemento ? `, ${e.complemento}` : ""} - ${e.cidade}`).join(" | ")}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{new Date(cliente.dataRegistro).toLocaleDateString("pt-BR")}</TableCell>
+                    <TableCell>{cliente.data_ultima_visita ? new Date(cliente.data_ultima_visita).toLocaleDateString("pt-BR") : "-"}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
@@ -578,7 +599,7 @@ export default function ListaClientes() {
                           size="sm"
                           onClick={() => {
                             setClienteSelecionado(cliente)
-                            setEditForm({ nome: cliente.nome, email: cliente.email ?? "" })
+                            setEditForm({ nome: cliente.nome, email: cliente.email ?? "", data_ultima_visita: cliente.data_ultima_visita ?? "" })
                             setEditTelefones((cliente.telefones || []).map(t => ({ id: t.id, numero: t.numero })))
                             setEditEnderecos((cliente.enderecos || []).map(e => ({
                               id: e.id,
