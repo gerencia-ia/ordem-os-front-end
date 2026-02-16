@@ -61,9 +61,9 @@ export default function AlertaManutencaoClientes() {
   }
 
   function getNivelAlerta(dias: number) {
-    if (dias > 180) return { cor: "destructive", texto: "Crítico" }
-    if (dias > 120) return { cor: "warning", texto: "Urgente" }
-    return { cor: "default", texto: "Atenção" }
+    if (dias > 180) return { cor: "destructive", texto: "Crítico", border: "border-red-300", bg: "bg-red-50/50 dark:bg-red-950/10" }
+    if (dias > 120) return { cor: "warning", texto: "Urgente", border: "border-yellow-300", bg: "bg-yellow-50/50 dark:bg-yellow-950/10" }
+    return { cor: "default", texto: "Atenção", border: "border-blue-300", bg: "bg-blue-50/50 dark:bg-blue-950/10" }
   }
 
   if (carregando) {
@@ -72,7 +72,7 @@ export default function AlertaManutencaoClientes() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Alertas de Manutenção
+            Alertas de Manutenção Preventiva
           </CardTitle>
           <CardDescription>Carregando clientes...</CardDescription>
         </CardHeader>
@@ -82,64 +82,74 @@ export default function AlertaManutencaoClientes() {
 
   if (clientesSemManutencao.length === 0) {
     return (
-      <Card>
+      <Card className="border-green-200 bg-green-50 dark:bg-green-950/30">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-green-500" />
-            Alertas de Manutenção
+          <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
+            <AlertTriangle className="h-5 w-5" />
+            ✅ Alertas de Manutenção Preventiva
           </CardTitle>
-          <CardDescription>Nenhum cliente necessita atenção no momento</CardDescription>
+          <CardDescription className="text-base">
+            Todos os clientes estão com manutenção em dia. Nenhum cliente necessita atenção no momento.
+          </CardDescription>
         </CardHeader>
       </Card>
     )
   }
 
   return (
-    <Card>
+    <Card className="border-amber-100 bg-amber-50/50 dark:bg-amber-950/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-orange-500" />
-          Alertas de Manutenção
+        <CardTitle className="flex items-center gap-2 text-amber-900 dark:text-amber-300">
+          <AlertTriangle className="h-5 w-5" />
+          ⚠️ Alertas de Manutenção Preventiva
         </CardTitle>
-        <CardDescription>
-          {clientesSemManutencao.length} cliente{clientesSemManutencao.length > 1 ? "s" : ""} sem
-          visita há mais de 90 dias
-        </CardDescription>
+        <div className="space-y-3 mt-4">
+          <div className="flex items-center gap-3">
+            <Badge className="bg-amber-200 text-amber-900 dark:bg-amber-800 dark:text-amber-100">
+              {clientesSemManutencao.length} Cliente{clientesSemManutencao.length > 1 ? "s" : ""}
+            </Badge>
+            <CardDescription className="text-base">
+              sem visita há mais de 90 dias
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3 max-h-[400px] overflow-y-auto">
+        <div className="space-y-3 max-h-[500px] overflow-y-auto">
           {clientesSemManutencao.slice(0, 10).map((cliente) => {
             const nivelAlerta = getNivelAlerta(cliente.diasSemVisita)
             return (
-              <Alert key={cliente.id} className="flex items-start justify-between">
+              <Alert key={cliente.id} className={`flex items-start justify-between border-l-4 ${nivelAlerta.border} ${nivelAlerta.bg}`}>
                 <div className="flex-1">
-                  <AlertTitle className="flex items-center gap-2 mb-2">
+                  <AlertTitle className="flex items-center gap-2 mb-2 font-semibold">
                     <User className="h-4 w-4" />
                     {cliente.nome}
-                    <Badge variant={nivelAlerta.cor as any}>{nivelAlerta.texto}</Badge>
+                    <Badge variant={nivelAlerta.cor as any} className="text-xs">
+                      {nivelAlerta.texto}
+                    </Badge>
                   </AlertTitle>
-                  <AlertDescription className="flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1">
+                  <AlertDescription className="flex flex-col gap-1 text-sm">
+                    <div className="flex items-center gap-2">
                       <Calendar className="h-3 w-3" />
-                      Última visita: {formatarData(cliente.data_ultima_visita!)}
-                    </span>
-                    <span className="font-semibold text-orange-600">
-                      {cliente.diasSemVisita} dias atrás
-                    </span>
+                      <span>Última visita: {formatarData(cliente.data_ultima_visita!)}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {cliente.diasSemVisita} dias sem manutenção
+                    </div>
                   </AlertDescription>
                 </div>
                 <Link href={`/clientes`}>
-                  <Button variant="outline" size="sm">
-                    Ver Cliente
+                  <Button variant="outline" size="sm" className="shrink-0">
+                    Contatar
                   </Button>
                 </Link>
               </Alert>
             )
           })}
           {clientesSemManutencao.length > 10 && (
-            <div className="text-center pt-2">
+            <div className="text-center pt-3 border-t">
               <Link href="/clientes">
-                <Button variant="link">
+                <Button variant="outline" size="sm">
                   Ver todos os {clientesSemManutencao.length} clientes
                 </Button>
               </Link>

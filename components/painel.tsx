@@ -91,8 +91,6 @@ export default function Painel() {
 
       {/* Alerta de Manutenção de Clientes */}
       <AlertaManutencaoClientes />
-
-      {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Gráfico de Linhas */}
         <Card className="lg:col-span-2">

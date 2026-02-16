@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -18,7 +19,7 @@ import { getClientes } from "@/lib/api/clientes"
 import { createCliente } from "@/lib/api/clientes"
 import { updateCliente } from "@/lib/api/clientes"
 import type { AtualizarClientePayload } from "@/lib/api/clientes"
-import { Plus, Edit, Trash2, Phone, Mail, MapPin, PlusCircle } from "lucide-react"
+import { Plus, Edit, Trash2, Phone, Mail, MapPin, PlusCircle, MessageCircle } from "lucide-react"
 import { CadastrarEquipamento } from "@/components/cadastrar-equipamento"
 
 export default function ListaClientes() {
@@ -60,6 +61,10 @@ export default function ListaClientes() {
   >([])
   const [editEquipOpen, setEditEquipOpen] = useState(false)
   const [editEquipamentos, setEditEquipamentos] = useState<any[]>([])
+
+  // Estados para modal de WhatsApp
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false)
+  const [clienteWhatsapp, setClienteWhatsapp] = useState<Cliente | null>(null)
 
   const addEditTelefone = () => setEditTelefones((arr) => [...arr, { numero: "" }])
   const removeEditTelefone = (idx: number) =>
@@ -185,6 +190,38 @@ export default function ListaClientes() {
   const clientesFiltrados = clientes.filter(
     (c) => c.nome.toLowerCase().includes(busca.toLowerCase()) || (c.email?.toLowerCase() || "").includes(busca.toLowerCase()),
   )
+
+  // Função para abrir WhatsApp
+  const abrirWhatsapp = (numero: string, nomeCliente: string) => {
+    // Remove caracteres não numéricos
+    const numeroLimpo = numero.replace(/\D/g, "")
+    // Se não começar com 55, adiciona código do Brasil
+    const numeroWhatsapp = numeroLimpo.startsWith("55") ? numeroLimpo : "55" + numeroLimpo
+    const mensagem = `Olá ${nomeCliente}, tudo bem?`
+    const urlWhatsapp = `https://wa.me/${numeroWhatsapp}?text=${encodeURIComponent(mensagem)}`
+    window.open(urlWhatsapp, "_blank")
+  }
+
+  // Função para calcular e retornar o marcador baseado na última visita
+  const getMarcadorVisita = (dataUltimaVisita?: string | null) => {
+    if (!dataUltimaVisita) {
+      return { texto: "Nunca visitado", variant: "secondary" as const }
+    }
+
+    const ultVisita = new Date(dataUltimaVisita)
+    const hoje = new Date()
+    const diasDecorridos = Math.floor((hoje.getTime() - ultVisita.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (diasDecorridos < 60) {
+      return { texto: `${diasDecorridos} dias`, variant: "default" as const }
+    } else if (diasDecorridos < 90) {
+      return { texto: `${diasDecorridos} dias`, variant: "secondary" as const }
+    } else if (diasDecorridos < 180) {
+      return { texto: `${diasDecorridos} dias`, variant: "outline" as const }
+    } else {
+      return { texto: `Acima de 180 dias`, variant: "destructive" as const }
+    }
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -550,6 +587,32 @@ export default function ListaClientes() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Modal de seleção de telefone para WhatsApp */}
+        <Dialog open={whatsappModalOpen} onOpenChange={setWhatsappModalOpen}>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Selecione o telefone</DialogTitle>
+              <DialogDescription>Escolha qual número usar para enviar mensagem no WhatsApp</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              {clienteWhatsapp?.telefones.map((telefone) => (
+                <Button
+                  key={telefone.id}
+                  className="w-full justify-between"
+                  variant="outline"
+                  onClick={() => {
+                    abrirWhatsapp(telefone.numero, clienteWhatsapp.nome)
+                    setWhatsappModalOpen(false)
+                  }}
+                >
+                  <MessageCircle className="h-4 w-4 text-green-500 mr-2" />
+                  <span>{telefone.numero}</span>
+                </Button>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -574,6 +637,7 @@ export default function ListaClientes() {
                   <TableHead>Telefone</TableHead>
                   <TableHead>Endereço</TableHead>
                   <TableHead>Última Visita</TableHead>
+                  <TableHead>Marcador</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -583,7 +647,24 @@ export default function ListaClientes() {
                     <TableCell className="font-medium">{cliente.nome}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {cliente.telefones.map(t => t.numero).join(", ")}
+                        <span>{cliente.telefones.map(t => t.numero).join(", ")}</span>
+                        {cliente.telefones.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1 h-auto"
+                            onClick={() => {
+                              if (cliente.telefones.length === 1) {
+                                abrirWhatsapp(cliente.telefones[0].numero, cliente.nome)
+                              } else {
+                                setClienteWhatsapp(cliente)
+                                setWhatsappModalOpen(true)
+                              }
+                            }}
+                          >
+                            <MessageCircle className="h-4 w-4 text-green-500" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -592,6 +673,12 @@ export default function ListaClientes() {
                       </div>
                     </TableCell>
                     <TableCell>{cliente.data_ultima_visita ? new Date(cliente.data_ultima_visita).toLocaleDateString("pt-BR") : "-"}</TableCell>
+                    <TableCell>
+                      {(() => {
+                        const marcador = getMarcadorVisita(cliente.data_ultima_visita)
+                        return <Badge variant={marcador.variant}>{marcador.texto}</Badge>
+                      })()}
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
