@@ -428,35 +428,21 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     <Badge className={getBadgePrioridade(ordem.prioridade_descricao)}>{ordem.prioridade_descricao}</Badge>
                   </div>
                 </div>
-                <div>
-                  <label className="text-sm text-muted-foreground">Tipo de Serviço</label>
-                  <p className="font-medium mt-1">{ordem.tipoServico}</p>
-                </div>
+         
                 <div>
                   <label className="text-sm text-muted-foreground">Data de Agendamento</label>
                   <p className="font-medium mt-1">{new Date(ordem.data_agendamento).toLocaleDateString("pt-BR")}</p>
                 </div>
               </div>
 
-              {/* Datas importantes */}
-              <div className="border-t pt-4 space-y-2">
-                {ordem.data_vencimento && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm">
-                      Vencimento: <strong>{new Date(ordem.data_vencimento).toLocaleDateString("pt-BR")}</strong>
-                    </span>
-                  </div>
-                )}
-                {ordem.dataFechamento && (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      Concluído em: <strong>{new Date(ordem.dataFechamento).toLocaleDateString("pt-BR")}</strong>
-                    </span>
-                  </div>
-                )}
-              </div>
+
+              {/* Descrição */}
+              {ordem.descricao && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Descrição da Ordem:</p>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{ordem.descricao}</p>
+                </div>
+              )}
 
               {/* Custos */}
               {(ordem.custoEstimado || ordem.custoReal) && (
@@ -665,17 +651,39 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   <div>
                     <p className="text-sm font-medium">Ordem aberta</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(ordem.created_at).toLocaleDateString("pt-BR")}
+                      {new Date(ordem.created_at).toLocaleDateString("pt-BR")} {new Date(ordem.created_at).toLocaleTimeString("pt-BR")}
                     </p>
                   </div>
                 </div>
+                {ordem.data_inicio_atendimento && (
+                  <div className="flex gap-4">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Atendimento iniciado</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(ordem.data_inicio_atendimento).toLocaleDateString("pt-BR")} {new Date(ordem.data_inicio_atendimento).toLocaleTimeString("pt-BR")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {ordem.data_fim_atendimento && (
+                  <div className="flex gap-4">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Atendimento finalizado</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(ordem.data_fim_atendimento).toLocaleDateString("pt-BR")} {new Date(ordem.data_fim_atendimento).toLocaleTimeString("pt-BR")}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {ordem.dataFechamento && (
                   <div className="flex gap-4">
                     <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium">Ordem concluída</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(ordem.dataFechamento).toLocaleDateString("pt-BR")}
+                        {new Date(ordem.dataFechamento).toLocaleDateString("pt-BR")} {new Date(ordem.dataFechamento).toLocaleTimeString("pt-BR")}
                       </p>
                     </div>
                   </div>
@@ -842,21 +850,14 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   {laudosHistorico.map((laudo) => (
                     <tr key={laudo.id} className="border-b hover:bg-muted/50">
                       <td className="py-2 px-3 text-xs">
-                        {new Date(laudo.created_at).toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(laudo.ordem_servico.data_fechamento).toLocaleDateString("pt-BR")} {new Date(laudo.ordem_servico.data_fechamento).toLocaleTimeString("pt-BR")}
                       </td>
                       <td className="py-2 px-3">
                         <p className="text-xs line-clamp-2">{laudo.laudo}</p>
                       </td>
                       <td className="py-2 px-3">
                         <div className="text-xs">
-                          <p className="font-medium">{laudo.ordem_servico.numero_ordem}</p>
-                          <p className="text-muted-foreground">{laudo.ordem_servico.descricao}</p>
+                          <p className="font-medium">{laudo.ordem_servico.id}</p>
                         </div>
                       </td>
                       <td className="py-2 px-3">

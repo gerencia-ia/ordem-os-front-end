@@ -73,6 +73,10 @@ export interface Servico {
     id: number
     descricao: string
   }
+  categorias_servico?: {
+    id: number
+    descricao: string
+  }
 }
 
 export interface CategoriaServico {
@@ -87,6 +91,8 @@ export interface OrdemServico {
   status_id: number
   data_agendamento: string | null
   data_fechamento: string | null
+  data_inicio_atendimento: string | null
+  data_fim_atendimento: string | null
   observacao: string | null
   prioridade_id: number
   valor_total: string
