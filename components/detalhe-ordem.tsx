@@ -37,7 +37,7 @@ import { apiPatch } from "@/lib/api/api"
 
 // Opções de status disponíveis
 const statusOptions = [
-  { id: 1, label: "Pendente" },
+  { id: 1, label: "Agendado" },
   { id: 2, label: "Em Progresso" },
   { id: 3, label: "Concluído" },
   { id: 4, label: "Cancelado" },

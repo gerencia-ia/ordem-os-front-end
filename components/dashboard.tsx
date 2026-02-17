@@ -35,7 +35,7 @@ const dashboardData = {
   statusDistribution: [
     { name: "Concluído", value: 85, color: "#22c55e" },
     { name: "Em Progresso", value: 35, color: "#8b5cf6" },
-    { name: "Pendente", value: 22, color: "#f59e0b" },
+    { name: "Agendado", value: 22, color: "#f59e0b" },
   ],
 }
 

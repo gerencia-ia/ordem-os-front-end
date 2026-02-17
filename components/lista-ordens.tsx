@@ -968,7 +968,7 @@ export default function ListaOrdens() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos os Status</SelectItem>
-                <SelectItem value="Pendente">Pendente</SelectItem>
+                <SelectItem value="Agendado">Agendado</SelectItem>
                 <SelectItem value="Em Progresso">Em Progresso</SelectItem>
                 <SelectItem value="Concluido">Concluído</SelectItem>
               </SelectContent>

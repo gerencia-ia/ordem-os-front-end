@@ -77,7 +77,7 @@ export default function ResumoManutencoes() {
 
   const cards = [
     {
-      titulo: "Total Pendente",
+      titulo: "Total Agendado",
       valor: estatisticas.total,
       icon: AlertTriangle,
       cor: "text-orange-600 dark:text-orange-400",

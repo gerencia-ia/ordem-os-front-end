@@ -7,8 +7,14 @@ export async function getOrdemServicoById(id: number | string) {
 }
 
 // Buscar todas as ordens de serviço
-export async function getOrdensServico(): Promise<OrdemServico[]> {
-  return apiGet<OrdemServico[]>("/ordem_servicos")
+export async function getOrdensServico(mes?: number, ano?: number): Promise<OrdemServico[]> {
+  let url = "/ordem_servicos"
+  
+  if (mes && ano) {
+    url += `?mes=${mes}&ano=${ano}`
+  }
+  
+  return apiGet<OrdemServico[]>(url)
 }
 
 export async function createOrdemServico(ordem: any): Promise<OrdemServico> {
