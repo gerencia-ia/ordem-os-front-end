@@ -88,8 +88,7 @@ export default function ListaOrdens() {
   // Estado para técnicos
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([])
   const [loadingTecnicos, setLoadingTecnicos] = useState(false)
-  const [mostrarAtribuicaoTecnicos, setMostrarAtribuicaoTecnicos] = useState(false)
-  const [buscaTecnico, setBuscaTecnico] = useState("")
+  const [openTecnicoCombo, setOpenTecnicoCombo] = useState(false)
 
   // Estado para equipamentos
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
@@ -130,7 +129,6 @@ export default function ListaOrdens() {
     status: "" as string, // agora armazena o id
     dataAgendamento: "",
     custoEstimado: "",
-    notas: "",
   })
 
   const normalizarTexto = (value?: string | null) =>
@@ -138,6 +136,12 @@ export default function ListaOrdens() {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
+
+  const converterDatetimeLocalParaIso = (value: string) => {
+    if (!value) return undefined
+    const dataLocal = new Date(value)
+    return Number.isNaN(dataLocal.getTime()) ? undefined : dataLocal.toISOString()
+  }
 
   const obterLabelOpcao = (item: { nome?: string; descricao?: string }) =>
     item.nome ?? item.descricao ?? ""
@@ -295,7 +299,6 @@ export default function ListaOrdens() {
       status: "",
       dataAgendamento: "",
       custoEstimado: "",
-      notas: "",
     })
 
   const resetNovoEquipamento = () =>
@@ -321,9 +324,8 @@ export default function ListaOrdens() {
             descricao: novaOrdem.descricao,
             status_id: novaOrdem.status, // agora envia o id
             prioridade_id: novaOrdem.prioridade, // agora envia o id
-            data_agendamento: novaOrdem.dataAgendamento || undefined,
+            data_agendamento: converterDatetimeLocalParaIso(novaOrdem.dataAgendamento),
             custo_estimado: novaOrdem.custoEstimado ? parseFloat(novaOrdem.custoEstimado) : undefined,
-            notas: novaOrdem.notas,
           }
       }
       const criada = await createOrdemServico(payload)
@@ -362,10 +364,19 @@ export default function ListaOrdens() {
 
   const ordensFiltradas = useMemo(() => {
     return ordens.filter((ordem) => {
-      // Filtro de busca por número ou descrição
+      const termoBusca = busca.trim()
+      const termoBuscaNormalizado = normalizarTexto(termoBusca)
+      const termoBuscaDigitos = termoBusca.replace(/\D/g, "")
+
+      const clienteDaOrdem = clientes.find((cliente) => String(cliente.id) === String(ordem.cliente_id))
+      const telefoneCliente = clienteDaOrdem?.telefones?.[0]?.numero ?? ""
+      const telefoneClienteDigitos = telefoneCliente.replace(/\D/g, "")
+
+      // Filtro de busca por nome do cliente ou telefone
       const matchBusca =
-        ordem.numero_ordem == busca ||
-        ordem.descricao.toLowerCase().includes(busca.toLowerCase())
+        !termoBusca ||
+        normalizarTexto(ordem.cliente_nome).includes(termoBuscaNormalizado) ||
+        (termoBuscaDigitos.length > 0 && telefoneClienteDigitos.includes(termoBuscaDigitos))
       
       // Filtro de status
       const matchStatus = filtroStatus === "todos" || String(ordem.status_descricao) === filtroStatus
@@ -385,7 +396,7 @@ export default function ListaOrdens() {
       
       return matchBusca && matchStatus && matchData && matchTecnico
     })
-  }, [ordens, busca, filtroStatus, filtroDataAgendamento, filtroTecnico])
+  }, [ordens, busca, filtroStatus, filtroDataAgendamento, filtroTecnico, clientes])
 
   const getBadgeStatus = (status: string) => {
     const cores: { [key: string]: string } = {
@@ -411,17 +422,6 @@ export default function ListaOrdens() {
   const enderecosClienteSelecionado = clienteSelecionado?.enderecos || []
   const enderecoSelecionado = enderecosClienteSelecionado.find((e) => String(e.id) === novaOrdem.enderecoId)
   const tecnicosSelecionados = tecnicos.filter((t) => novaOrdem.tecnicoIds.includes(String(t.id)))
-  const tecnicosFiltrados = useMemo(() => {
-    const termo = normalizarTexto(buscaTecnico)
-    if (!termo) return tecnicos
-
-    return tecnicos.filter((tecnico) => {
-      const nome = normalizarTexto(tecnico.nome)
-      const telefone = normalizarTexto(tecnico.telefone)
-      const especialidades = normalizarTexto((tecnico.especialidades || []).join(" "))
-      return nome.includes(termo) || telefone.includes(termo) || especialidades.includes(termo)
-    })
-  }, [tecnicos, buscaTecnico])
   const equipamentoSelecionado = equipamentos.find((e) => String(e.id) === novaOrdem.equipamentoId)
   const servicosSelecionados = useMemo(
     () => servicos.filter((s) => novaOrdem.servicoIds.includes(String(s.id))),
@@ -659,127 +659,6 @@ export default function ListaOrdens() {
                   </Popover>
                 </div>
                 
-                {/* Atribuição opcional de técnicos */}
-                <div className="space-y-2 md:col-span-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-sm font-medium">Técnico responsável</label>
-                      <p className="text-xs text-muted-foreground">Opcional. Você pode atribuir agora ou deixar para depois.</p>
-                    </div>
-                    <Link
-                      href="/tecnicos"
-                      target="_blank"
-                      className="text-xs text-primary hover:underline flex items-center gap-1"
-                    >
-                      <Plus className="h-3 w-3" />
-                      Cadastrar novo técnico
-                      <ExternalLink className="h-3 w-3" />
-                    </Link>
-                  </div>
-                  <div className="rounded-md border p-3 space-y-3 bg-muted/20">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        type="button"
-                        variant={mostrarAtribuicaoTecnicos ? "secondary" : "outline"}
-                        onClick={() => setMostrarAtribuicaoTecnicos((v) => !v)}
-                      >
-                        {mostrarAtribuicaoTecnicos ? "Ocultar atribuição" : "Atribuir técnico agora"}
-                      </Button>
-                      {tecnicosSelecionados.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => setNovaOrdem((s) => ({ ...s, tecnicoIds: [] }))}
-                        >
-                          Limpar técnicos
-                        </Button>
-                      )}
-                    </div>
-
-                    {!mostrarAtribuicaoTecnicos && tecnicosSelecionados.length === 0 && (
-                      <p className="text-sm text-muted-foreground">Nenhum técnico definido. A ordem pode ser criada assim mesmo.</p>
-                    )}
-
-                    {tecnicosSelecionados.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {tecnicosSelecionados.map((tecnico) => (
-                          <Badge key={tecnico.id} variant="secondary" className="flex items-center gap-1">
-                            {tecnico.nome}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setNovaOrdem((s) => ({
-                                  ...s,
-                                  tecnicoIds: s.tecnicoIds.filter((id) => id !== String(tecnico.id)),
-                                }))
-                              }
-                              className="ml-1 hover:text-destructive"
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {mostrarAtribuicaoTecnicos && (
-                      <div className="space-y-3">
-                        <Input
-                          placeholder="Buscar técnico por nome, telefone ou especialidade..."
-                          value={buscaTecnico}
-                          onChange={(e) => setBuscaTecnico(e.target.value)}
-                        />
-
-                        {loadingTecnicos ? (
-                          <p className="text-sm text-muted-foreground">Carregando técnicos...</p>
-                        ) : tecnicosFiltrados.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">Nenhum técnico encontrado para essa busca.</p>
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {tecnicosFiltrados.map((tecnico) => {
-                              const idStr = String(tecnico.id)
-                              const selecionado = novaOrdem.tecnicoIds.includes(idStr)
-                              return (
-                                <button
-                                  key={tecnico.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setNovaOrdem((s) => ({
-                                      ...s,
-                                      tecnicoIds: selecionado
-                                        ? s.tecnicoIds.filter((id) => id !== idStr)
-                                        : [...s.tecnicoIds, idStr],
-                                    }))
-                                  }}
-                                  className={cn(
-                                    "rounded-md border p-3 text-left transition-colors",
-                                    selecionado
-                                      ? "border-primary bg-primary/5"
-                                      : "border-border bg-background hover:border-primary/50",
-                                  )}
-                                >
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="space-y-1">
-                                      <p className="text-sm font-medium leading-none">{tecnico.nome}</p>
-                                      <p className="text-xs text-muted-foreground">{tecnico.telefone || "Sem telefone"}</p>
-                                      {tecnico.especialidades?.length > 0 && (
-                                        <p className="text-xs text-muted-foreground line-clamp-2">
-                                          {tecnico.especialidades.slice(0, 3).join(", ")}
-                                        </p>
-                                      )}
-                                    </div>
-                                    <Check className={cn("h-4 w-4", selecionado ? "opacity-100 text-primary" : "opacity-20")} />
-                                  </div>
-                                </button>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
                 {/* Combobox de Serviços (multiselect) */}
                 <div className="space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between">
@@ -936,6 +815,47 @@ export default function ListaOrdens() {
                   </Select>
                 </div>
 
+                {/* Atribuição de Técnicos Simplificada */}
+                <div className="space-y-2 md:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm font-medium">Técnico(s) Responsável(is)</label>
+                      <span className="text-xs text-muted-foreground ml-2">(Opcional)</span>
+                    </div>
+                  </div>
+                  
+                  {loadingTecnicos ? (
+                    <p className="text-sm text-muted-foreground">Carregando técnicos...</p>
+                  ) : tecnicos.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nenhum técnico cadastrado.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {tecnicos.map((tecnico) => {
+                        const idStr = String(tecnico.id);
+                        const selecionado = novaOrdem.tecnicoIds.includes(idStr);
+                        return (
+                          <Badge
+                            key={tecnico.id}
+                            variant={selecionado ? "default" : "outline"}
+                            className="cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => {
+                              setNovaOrdem((s) => ({
+                                ...s,
+                                tecnicoIds: selecionado
+                                  ? s.tecnicoIds.filter((id) => id !== idStr)
+                                  : [...s.tecnicoIds, idStr],
+                              }))
+                            }}
+                          >
+                            {tecnico.nome}
+                            {selecionado && <Check className="ml-1 h-3 w-3" />}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
                 {/* Custo Estimado (calculado automaticamente) */}
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-medium">Custo Estimado (calculado automaticamente)</label>
@@ -964,16 +884,6 @@ export default function ListaOrdens() {
                   rows={3}
                   value={novaOrdem.descricao}
                   onChange={(e) => setNovaOrdem((s) => ({ ...s, descricao: e.target.value }))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Notas</label>
-                <Textarea
-                  placeholder="Notas adicionais..."
-                  rows={2}
-                  value={novaOrdem.notas}
-                  onChange={(e) => setNovaOrdem((s) => ({ ...s, notas: e.target.value }))}
                 />
               </div>
 
@@ -1104,7 +1014,7 @@ export default function ListaOrdens() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por número ou descrição..."
+                placeholder="Buscar por nome do cliente ou telefone..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 className="pl-10"
@@ -1174,12 +1084,11 @@ export default function ListaOrdens() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Número</TableHead>
-                    <TableHead>Descrição</TableHead>
+                    <TableHead>Agendamento</TableHead>
+                    <TableHead>Cliente</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Prioridade</TableHead>
-                    <TableHead>Cliente</TableHead>
                     <TableHead>Técnico</TableHead>
-                    <TableHead>Agendamento</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1187,20 +1096,29 @@ export default function ListaOrdens() {
                   {ordensFiltradas.map((ordem) => (
                     <TableRow key={ordem.id}>
                       <TableCell className="font-mono font-bold text-primary">{ordem.id}</TableCell>
-                      <TableCell className="max-w-xs truncate">{ordem.descricao.substring(0, 20)}{ordem.descricao.length > 20 ? "..." : ""}</TableCell>
+                      <TableCell>
+                        {ordem.data_agendamento
+                          ? new Date(ordem.data_agendamento).toLocaleString("pt-BR", {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                            })
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{ordem.cliente_nome}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {clientes.find((cliente) => String(cliente.id) === String(ordem.cliente_id))?.telefones?.[0]?.numero || "-"}
+                          </span>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge className={getBadgeStatus(ordem.status_descricao)}>{ordem.status_descricao}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge className={getBadgePrioridade(ordem.prioridade_descricao)}>{ordem.prioridade_descricao}</Badge>
                       </TableCell>
-                      <TableCell>{ ordem.cliente_nome }</TableCell>
                       <TableCell>{ordem.tecnico_responsavel?.nome ?? "-"}</TableCell>
-                      
-
-                      <TableCell>
-                        {ordem.data_agendamento ? new Date(ordem.data_agendamento).toLocaleDateString("pt-BR") : "-"}
-                      </TableCell>
                       <TableCell>
                         <Link href={`/ordens/${ordem.id}`}>
                           <Button variant="ghost" size="sm">
