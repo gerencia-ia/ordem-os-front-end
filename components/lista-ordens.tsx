@@ -36,7 +36,7 @@ import { getEquipamentosByCliente, createEquipamento } from "@/lib/api/equipamen
 import { getServicos } from "@/lib/api/servicos"
 import { getStatus } from "@/lib/api/status"
 import { getPrioridades } from "@/lib/api/prioridades"
-import type { OrdemServico, Cliente, Tecnico, Equipamento, Servico } from "@/lib/tipos"
+import type { OrdemServico, Cliente, Tecnico, Equipamento, Servico, Status } from "@/lib/tipos"
 import { createOrdemServico, getOrdensServico } from "@/lib/api/ordem_servicos"
 import { Search, Eye, Plus, Check, ChevronsUpDown, ExternalLink } from "lucide-react"
 import { NaoEncontrado } from "./nao-encontrado"
@@ -44,6 +44,11 @@ import { cn } from "@/lib/utils"
 
 export default function ListaOrdens() {
   const btusOptions = ["7000", "7500", "9000", "10000", "12000", "18000", "22000", "23000"]
+  type OpcaoLookup = {
+    id: string | number
+    nome?: string
+    descricao?: string
+  }
 
   const [ordens, setOrdens] = useState<OrdemServico[]>([])
   const [loadingOrdens, setLoadingOrdens] = useState(false)
@@ -83,7 +88,8 @@ export default function ListaOrdens() {
   // Estado para técnicos
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([])
   const [loadingTecnicos, setLoadingTecnicos] = useState(false)
-  const [openTecnicoCombo, setOpenTecnicoCombo] = useState(false)
+  const [mostrarAtribuicaoTecnicos, setMostrarAtribuicaoTecnicos] = useState(false)
+  const [buscaTecnico, setBuscaTecnico] = useState("")
 
   // Estado para equipamentos
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
@@ -96,10 +102,10 @@ export default function ListaOrdens() {
   const [openServicoCombo, setOpenServicoCombo] = useState(false)
 
   // Estado para status
-  const [statusList, setStatusList] = useState<{ id: string; nome: string }[]>([])
+  const [statusList, setStatusList] = useState<Status[]>([])
   const [loadingStatus, setLoadingStatus] = useState(false)
   // Estado para prioridades
-  const [prioridadesList, setPrioridadesList] = useState<{ id: string; nome: string }[]>([])
+  const [prioridadesList, setPrioridadesList] = useState<OpcaoLookup[]>([])
   const [loadingPrioridades, setLoadingPrioridades] = useState(false)
 
   // Modal de Equipamento
@@ -127,6 +133,15 @@ export default function ListaOrdens() {
     notas: "",
   })
 
+  const normalizarTexto = (value?: string | null) =>
+    (value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+
+  const obterLabelOpcao = (item: { nome?: string; descricao?: string }) =>
+    item.nome ?? item.descricao ?? ""
+
   // Carregar dados ao abrir o dialog
   useEffect(() => {
     if (open) {
@@ -138,11 +153,28 @@ export default function ListaOrdens() {
     }
   }, [open])
 
+  useEffect(() => {
+    if (!open) return
+
+    const statusAgendadoId =
+      statusList.find((item) => normalizarTexto(obterLabelOpcao(item)).includes("agend"))?.id || statusList[0]?.id || ""
+    const prioridadeBaixaId =
+      prioridadesList.find((item) => normalizarTexto(obterLabelOpcao(item)).includes("baix"))?.id || prioridadesList[0]?.id || ""
+
+    if (!statusAgendadoId && !prioridadeBaixaId) return
+
+    setNovaOrdem((s) => ({
+      ...s,
+      status: s.status || String(statusAgendadoId),
+      prioridade: s.prioridade || String(prioridadeBaixaId),
+    }))
+  }, [open, statusList, prioridadesList])
+
   const fetchPrioridades = async () => {
     try {
       setLoadingPrioridades(true)
       const data = await getPrioridades()
-      setPrioridadesList(data)
+      setPrioridadesList(data as unknown as OpcaoLookup[])
     } catch (err) {
       console.error("Erro ao carregar prioridades:", err)
     } finally {
@@ -259,8 +291,8 @@ export default function ListaOrdens() {
       equipamentoId: "",
       servicoIds: [],
       descricao: "",
-      prioridade: "media",
-      status: "pendente",
+      prioridade: "",
+      status: "",
       dataAgendamento: "",
       custoEstimado: "",
       notas: "",
@@ -379,6 +411,17 @@ export default function ListaOrdens() {
   const enderecosClienteSelecionado = clienteSelecionado?.enderecos || []
   const enderecoSelecionado = enderecosClienteSelecionado.find((e) => String(e.id) === novaOrdem.enderecoId)
   const tecnicosSelecionados = tecnicos.filter((t) => novaOrdem.tecnicoIds.includes(String(t.id)))
+  const tecnicosFiltrados = useMemo(() => {
+    const termo = normalizarTexto(buscaTecnico)
+    if (!termo) return tecnicos
+
+    return tecnicos.filter((tecnico) => {
+      const nome = normalizarTexto(tecnico.nome)
+      const telefone = normalizarTexto(tecnico.telefone)
+      const especialidades = normalizarTexto((tecnico.especialidades || []).join(" "))
+      return nome.includes(termo) || telefone.includes(termo) || especialidades.includes(termo)
+    })
+  }, [tecnicos, buscaTecnico])
   const equipamentoSelecionado = equipamentos.find((e) => String(e.id) === novaOrdem.equipamentoId)
   const servicosSelecionados = useMemo(
     () => servicos.filter((s) => novaOrdem.servicoIds.includes(String(s.id))),
@@ -616,10 +659,13 @@ export default function ListaOrdens() {
                   </Popover>
                 </div>
                 
-                {/* Combobox de Técnicos (multiselect) */}
+                {/* Atribuição opcional de técnicos */}
                 <div className="space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Técnicos</label>
+                    <div>
+                      <label className="text-sm font-medium">Técnico responsável</label>
+                      <p className="text-xs text-muted-foreground">Opcional. Você pode atribuir agora ou deixar para depois.</p>
+                    </div>
                     <Link
                       href="/tecnicos"
                       target="_blank"
@@ -630,48 +676,74 @@ export default function ListaOrdens() {
                       <ExternalLink className="h-3 w-3" />
                     </Link>
                   </div>
-                  <Popover open={openTecnicoCombo} onOpenChange={setOpenTecnicoCombo}>
-                    <PopoverTrigger asChild>
+                  <div className="rounded-md border p-3 space-y-3 bg-muted/20">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={openTecnicoCombo}
-                        className="w-full justify-between"
+                        type="button"
+                        variant={mostrarAtribuicaoTecnicos ? "secondary" : "outline"}
+                        onClick={() => setMostrarAtribuicaoTecnicos((v) => !v)}
                       >
-                        {tecnicosSelecionados.length > 0
-                          ? tecnicosSelecionados.map((t) => t.nome).slice(0, 2).join(", ") +
-                            (tecnicosSelecionados.length > 2 ? ` +${tecnicosSelecionados.length - 2}` : "")
-                          : "Selecione técnicos (opcional)..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        {mostrarAtribuicaoTecnicos ? "Ocultar atribuição" : "Atribuir técnico agora"}
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Buscar técnico..." />
-                        <CommandList>
-                          <CommandEmpty>
-                            {loadingTecnicos ? "Carregando..." : "Nenhum técnico encontrado."}
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {/* Limpar seleção */}
-                            <CommandItem
-                              value="limpar"
-                              onSelect={() => {
-                                setNovaOrdem((s) => ({ ...s, tecnicoIds: [] }))
-                                setOpenTecnicoCombo(false)
-                              }}
-                            >
-                              <span className="text-muted-foreground italic">Limpar seleção</span>
-                            </CommandItem>
+                      {tecnicosSelecionados.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setNovaOrdem((s) => ({ ...s, tecnicoIds: [] }))}
+                        >
+                          Limpar técnicos
+                        </Button>
+                      )}
+                    </div>
 
-                            {tecnicos.map((tecnico) => {
+                    {!mostrarAtribuicaoTecnicos && tecnicosSelecionados.length === 0 && (
+                      <p className="text-sm text-muted-foreground">Nenhum técnico definido. A ordem pode ser criada assim mesmo.</p>
+                    )}
+
+                    {tecnicosSelecionados.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {tecnicosSelecionados.map((tecnico) => (
+                          <Badge key={tecnico.id} variant="secondary" className="flex items-center gap-1">
+                            {tecnico.nome}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setNovaOrdem((s) => ({
+                                  ...s,
+                                  tecnicoIds: s.tecnicoIds.filter((id) => id !== String(tecnico.id)),
+                                }))
+                              }
+                              className="ml-1 hover:text-destructive"
+                            >
+                              ×
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {mostrarAtribuicaoTecnicos && (
+                      <div className="space-y-3">
+                        <Input
+                          placeholder="Buscar técnico por nome, telefone ou especialidade..."
+                          value={buscaTecnico}
+                          onChange={(e) => setBuscaTecnico(e.target.value)}
+                        />
+
+                        {loadingTecnicos ? (
+                          <p className="text-sm text-muted-foreground">Carregando técnicos...</p>
+                        ) : tecnicosFiltrados.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Nenhum técnico encontrado para essa busca.</p>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {tecnicosFiltrados.map((tecnico) => {
                               const idStr = String(tecnico.id)
                               const selecionado = novaOrdem.tecnicoIds.includes(idStr)
                               return (
-                                <CommandItem
+                                <button
                                   key={tecnico.id}
-                                  value={`${tecnico.nome} ${tecnico.telefone}`}
-                                  onSelect={() => {
+                                  type="button"
+                                  onClick={() => {
                                     setNovaOrdem((s) => ({
                                       ...s,
                                       tecnicoIds: selecionado
@@ -679,25 +751,33 @@ export default function ListaOrdens() {
                                         : [...s.tecnicoIds, idStr],
                                     }))
                                   }}
+                                  className={cn(
+                                    "rounded-md border p-3 text-left transition-colors",
+                                    selecionado
+                                      ? "border-primary bg-primary/5"
+                                      : "border-border bg-background hover:border-primary/50",
+                                  )}
                                 >
-                                  <Check className={`mr-2 h-4 w-4 ${selecionado ? "opacity-100" : "opacity-0"}`} />
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">{tecnico.nome}</span>
-                                    <span className="text-xs text-muted-foreground">{tecnico.telefone}</span>
-                                    {tecnico.especialidades?.length > 0 && (
-                                      <span className="text-xs text-muted-foreground">
-                                        {tecnico.especialidades.slice(0, 3).join(", ")}
-                                      </span>
-                                    )}
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="space-y-1">
+                                      <p className="text-sm font-medium leading-none">{tecnico.nome}</p>
+                                      <p className="text-xs text-muted-foreground">{tecnico.telefone || "Sem telefone"}</p>
+                                      {tecnico.especialidades?.length > 0 && (
+                                        <p className="text-xs text-muted-foreground line-clamp-2">
+                                          {tecnico.especialidades.slice(0, 3).join(", ")}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <Check className={cn("h-4 w-4", selecionado ? "opacity-100 text-primary" : "opacity-20")} />
                                   </div>
-                                </CommandItem>
+                                </button>
                               )
                             })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Combobox de Serviços (multiselect) */}
@@ -808,6 +888,16 @@ export default function ListaOrdens() {
                   )}
                 </div>
 
+                {/* Data de Agendamento */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Data e Hora de Agendamento</label>
+                  <Input
+                    type="datetime-local"
+                    value={novaOrdem.dataAgendamento}
+                    onChange={(e) => setNovaOrdem((s) => ({ ...s, dataAgendamento: e.target.value }))}
+                  />
+                </div>
+
                 {/* Status */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status *</label>
@@ -821,7 +911,7 @@ export default function ListaOrdens() {
                     </SelectTrigger>
                     <SelectContent>
                       {statusList.map((status) => (
-                        <SelectItem key={status.id} value={status.id}>{status.nome}</SelectItem>
+                        <SelectItem key={status.id} value={String(status.id)}>{obterLabelOpcao(status)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -840,20 +930,10 @@ export default function ListaOrdens() {
                     </SelectTrigger>
                     <SelectContent>
                       {prioridadesList.map((prioridade) => (
-                        <SelectItem key={prioridade.id} value={prioridade.id}>{prioridade.descricao}</SelectItem>
+                        <SelectItem key={prioridade.id} value={String(prioridade.id)}>{obterLabelOpcao(prioridade)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                {/* Data de Agendamento */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Data e Hora de Agendamento</label>
-                  <Input
-                    type="datetime-local"
-                    value={novaOrdem.dataAgendamento}
-                    onChange={(e) => setNovaOrdem((s) => ({ ...s, dataAgendamento: e.target.value }))}
-                  />
                 </div>
 
                 {/* Custo Estimado (calculado automaticamente) */}
@@ -1115,7 +1195,7 @@ export default function ListaOrdens() {
                         <Badge className={getBadgePrioridade(ordem.prioridade_descricao)}>{ordem.prioridade_descricao}</Badge>
                       </TableCell>
                       <TableCell>{ ordem.cliente_nome }</TableCell>
-                      <TableCell>{ ordem.tecnico_responsavel?.nome }</TableCell>
+                      <TableCell>{ordem.tecnico_responsavel?.nome ?? "-"}</TableCell>
                       
 
                       <TableCell>
