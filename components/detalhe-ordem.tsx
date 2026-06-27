@@ -34,6 +34,7 @@ import { getHistoricoLaudosEquipamento, type Laudo } from "@/lib/api/equipamento
 import { getServicos } from "@/lib/api/servicos"
 import { getTecnicos } from "@/lib/api/tecnicos"
 import { apiPatch } from "@/lib/api/api"
+import { formatadores } from "@/lib/utilitarios"
 
 // Opções de status disponíveis
 const statusOptions = [
@@ -374,6 +375,8 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     setTarefas(tarefas.filter((t) => t.id !== tarefaId))
   }
 
+  const formatarDataHora = (data: string | Date | null | undefined) => formatadores.dataHoraCurta(data)
+
   if (loading) {
     return <div className="p-6">Carregando...</div>
   }
@@ -466,7 +469,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
          
                 <div>
                   <label className="text-sm text-muted-foreground">Data de Agendamento</label>
-                  <p className="font-medium mt-1">{new Date(ordem.data_agendamento).toLocaleDateString("pt-BR")} {new Date(ordem.data_agendamento).toLocaleTimeString("pt-BR")}</p>
+                  <p className="font-medium mt-1">{formatarDataHora(ordem.data_agendamento)}</p>
                 </div>
                
               </div>
@@ -734,7 +737,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   <div>
                     <p className="text-sm font-medium">Ordem aberta</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(ordem.created_at).toLocaleDateString("pt-BR")} {new Date(ordem.created_at).toLocaleTimeString("pt-BR")}
+                      {formatarDataHora(ordem.created_at)}
                     </p>
                   </div>
                 </div>
@@ -744,7 +747,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     <div>
                       <p className="text-sm font-medium">Atendimento iniciado</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(ordem.data_inicio_atendimento).toLocaleDateString("pt-BR")} {new Date(ordem.data_inicio_atendimento).toLocaleTimeString("pt-BR")}
+                        {formatarDataHora(ordem.data_inicio_atendimento)}
                       </p>
                     </div>
                   </div>
@@ -755,7 +758,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     <div>
                       <p className="text-sm font-medium">Atendimento finalizado</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(ordem.data_fim_atendimento).toLocaleDateString("pt-BR")} {new Date(ordem.data_fim_atendimento).toLocaleTimeString("pt-BR")}
+                        {formatarDataHora(ordem.data_fim_atendimento)}
                       </p>
                     </div>
                   </div>
@@ -766,7 +769,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     <div>
                       <p className="text-sm font-medium">Ordem concluída</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(ordem.dataFechamento).toLocaleDateString("pt-BR")} {new Date(ordem.dataFechamento).toLocaleTimeString("pt-BR")}
+                        {formatarDataHora(ordem.dataFechamento)}
                       </p>
                     </div>
                   </div>
@@ -933,7 +936,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   {laudosHistorico.map((laudo) => (
                     <tr key={laudo.id} className="border-b hover:bg-muted/50">
                       <td className="py-2 px-3 text-xs">
-                        {new Date(laudo.ordem_servico.data_fechamento).toLocaleDateString("pt-BR")} {new Date(laudo.ordem_servico.data_fechamento).toLocaleTimeString("pt-BR")}
+                        {formatarDataHora(laudo.ordem_servico.data_fechamento ?? null)}
                       </td>
                       <td className="py-2 px-3">
                         <p className="text-xs line-clamp-2">{laudo.laudo}</p>
