@@ -43,6 +43,8 @@ import { NaoEncontrado } from "./nao-encontrado"
 import { cn } from "@/lib/utils"
 
 export default function ListaOrdens() {
+  const btusOptions = ["7000", "7500", "9000", "10000", "12000", "18000", "22000", "23000"]
+
   const [ordens, setOrdens] = useState<OrdemServico[]>([])
   const [loadingOrdens, setLoadingOrdens] = useState(false)
     // Carregar ordens, clientes e técnicos ao montar
@@ -105,8 +107,7 @@ export default function ListaOrdens() {
   const [savingEquip, setSavingEquip] = useState(false)
   const [novoEquipamento, setNovoEquipamento] = useState({
     marca: "",
-    modelo: "",
-    numeroSerie: "",
+    localInstalacao: "",
     capacidade: "",
     observacao: "",
     clienteId: "", // vinculando ao cliente selecionado
@@ -114,6 +115,7 @@ export default function ListaOrdens() {
 
   const [novaOrdem, setNovaOrdem] = useState({
     clienteId: "",
+    enderecoId: "",
     tecnicoIds: [] as string[],
     equipamentoId: "",
     servicoIds: [] as string[],
@@ -160,9 +162,33 @@ export default function ListaOrdens() {
       fetchEquipamentos(parseInt(novaOrdem.clienteId, 10))
     } else {
       setEquipamentos([])
-      setNovaOrdem((s) => ({ ...s, equipamentoId: "" }))
+      setNovaOrdem((s) => ({ ...s, equipamentoId: "", enderecoId: "" }))
     }
   }, [novaOrdem.clienteId])
+
+  useEffect(() => {
+    const cliente = clientes.find((c) => String(c.id) === novaOrdem.clienteId)
+    if (!cliente) return
+
+    const enderecos = cliente.enderecos || []
+    if (enderecos.length === 1) {
+      const unicoEnderecoId = String(enderecos[0].id)
+      if (novaOrdem.enderecoId !== unicoEnderecoId) {
+        setNovaOrdem((s) => ({ ...s, enderecoId: unicoEnderecoId }))
+      }
+      return
+    }
+
+    if (enderecos.length === 0 && novaOrdem.enderecoId) {
+      setNovaOrdem((s) => ({ ...s, enderecoId: "" }))
+      return
+    }
+
+    const enderecoAindaExiste = enderecos.some((e) => String(e.id) === novaOrdem.enderecoId)
+    if (!enderecoAindaExiste && novaOrdem.enderecoId) {
+      setNovaOrdem((s) => ({ ...s, enderecoId: "" }))
+    }
+  }, [novaOrdem.clienteId, novaOrdem.enderecoId, clientes])
 
   const fetchClientes = async () => {
     try {
@@ -228,6 +254,7 @@ export default function ListaOrdens() {
   const resetNovaOrdem = () =>
     setNovaOrdem({
       clienteId: "",
+      enderecoId: "",
       tecnicoIds: [],
       equipamentoId: "",
       servicoIds: [],
@@ -242,8 +269,7 @@ export default function ListaOrdens() {
   const resetNovoEquipamento = () =>
     setNovoEquipamento({
       marca: "",
-      modelo: "",
-      numeroSerie: "",
+      localInstalacao: "",
       capacidade: "",
       observacao: "",
       clienteId: novaOrdem.clienteId,
@@ -256,6 +282,7 @@ export default function ListaOrdens() {
       const payload = {
           ordem_servico: {
             cliente_id: novaOrdem.clienteId,
+            endereco_id: novaOrdem.enderecoId ? parseInt(novaOrdem.enderecoId, 10) : undefined,
             tecnico_ids: novaOrdem.tecnicoIds.map((id) => parseInt(id, 10)),
             equipamento_ids: novaOrdem.equipamentoId ? [parseInt(novaOrdem.equipamentoId, 10)] : [],
             servico_ids: novaOrdem.servicoIds.map((id) => parseInt(id, 10)),
@@ -283,9 +310,8 @@ export default function ListaOrdens() {
       setSavingEquip(true)
       const criado = await createEquipamento({
         marca: novoEquipamento.marca.trim(),
-        modelo: novoEquipamento.modelo.trim(),
-        numero_serie: novoEquipamento.numeroSerie.trim(),
-        capacidade: novoEquipamento.capacidade ? parseInt(novoEquipamento.capacidade, 10) : undefined,
+        btus: novoEquipamento.capacidade,
+        local_instalacao: novoEquipamento.localInstalacao.trim(),
         observacao: novoEquipamento.observacao.trim(),
         cliente_id: parseInt(novoEquipamento.clienteId, 10),
       })
@@ -350,12 +376,20 @@ export default function ListaOrdens() {
   }
 
   const clienteSelecionado = clientes.find((c) => String(c.id) === novaOrdem.clienteId)
+  const enderecosClienteSelecionado = clienteSelecionado?.enderecos || []
+  const enderecoSelecionado = enderecosClienteSelecionado.find((e) => String(e.id) === novaOrdem.enderecoId)
   const tecnicosSelecionados = tecnicos.filter((t) => novaOrdem.tecnicoIds.includes(String(t.id)))
   const equipamentoSelecionado = equipamentos.find((e) => String(e.id) === novaOrdem.equipamentoId)
   const servicosSelecionados = useMemo(
     () => servicos.filter((s) => novaOrdem.servicoIds.includes(String(s.id))),
     [servicos, novaOrdem.servicoIds]
   )
+
+  const formatarEndereco = (endereco: { rua: string; numero: string; bairro: string; complemento?: string; cidade: string; cep?: string }) => {
+    const cep = endereco.cep ? ` - CEP ${endereco.cep}` : ""
+    const complemento = endereco.complemento ? `, ${endereco.complemento}` : ""
+    return `${endereco.rua}, ${endereco.numero}${complemento} - ${endereco.bairro} - ${endereco.cidade}${cep}`
+  }
 
   // Calcular custo estimado automaticamente ao selecionar serviços
   useEffect(() => {
@@ -461,6 +495,43 @@ export default function ListaOrdens() {
 
                 {/* Combobox de Equipamento */}
                 <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">Endereço *</label>
+
+                  {!novaOrdem.clienteId && (
+                    <p className="text-sm text-muted-foreground">Selecione um cliente para escolher o endereço.</p>
+                  )}
+
+                  {novaOrdem.clienteId && enderecosClienteSelecionado.length === 0 && (
+                    <p className="text-sm text-destructive">Cliente sem endereço cadastrado. Cadastre um endereço no cliente para continuar.</p>
+                  )}
+
+                  {novaOrdem.clienteId && enderecosClienteSelecionado.length === 1 && enderecoSelecionado && (
+                    <div className="rounded-md border p-3 text-sm bg-muted/30">
+                      {formatarEndereco(enderecoSelecionado)}
+                    </div>
+                  )}
+
+                  {novaOrdem.clienteId && enderecosClienteSelecionado.length > 1 && (
+                    <Select
+                      value={novaOrdem.enderecoId}
+                      onValueChange={(v) => setNovaOrdem((s) => ({ ...s, enderecoId: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o endereço para esta ordem" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {enderecosClienteSelecionado.map((endereco) => (
+                          <SelectItem key={endereco.id} value={String(endereco.id)}>
+                            {formatarEndereco(endereco)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                {/* Combobox de Equipamento */}
+                <div className="space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium">Equipamento</label>
                     <Button
@@ -487,7 +558,7 @@ export default function ListaOrdens() {
                         {loadingEquipamentos
                           ? "Carregando equipamentos..."
                           : equipamentoSelecionado
-                            ? `${equipamentoSelecionado.marca} ${equipamentoSelecionado.modelo}`
+                            ? `${equipamentoSelecionado.marca} - ${equipamentoSelecionado.btus} BTUs`
                             : equipamentos.length > 0
                               ? "Selecione um equipamento (opcional)..."
                               : "Nenhum equipamento cadastrado"}
@@ -516,7 +587,7 @@ export default function ListaOrdens() {
                             {equipamentos.map((equipamento) => (
                               <CommandItem
                                 key={equipamento.id}
-                                value={`${equipamento.marca} ${equipamento.modelo}`}
+                                value={`${equipamento.marca} ${equipamento.btus} ${equipamento.local_instalacao || ""}`}
                                 onSelect={() => {
                                   setNovaOrdem((s) => ({ ...s, equipamentoId: String(equipamento.id) }))
                                   setOpenEquipamentoCombo(false)
@@ -530,13 +601,10 @@ export default function ListaOrdens() {
                                 />
                                 <div className="flex flex-col">
                                   <span className="font-medium">
-                                    {equipamento.marca} {equipamento.modelo}
+                                    {equipamento.marca} - {equipamento.btus} BTUs
                                   </span>
-                                  {equipamento.numero_serie && (
-                                    <span className="text-xs text-muted-foreground">S/N: {equipamento.numero_serie}</span>
-                                  )}
-                                  {equipamento.capacidade && (
-                                    <span className="text-xs text-muted-foreground">Cap: {equipamento.capacidade}</span>
+                                  {equipamento.local_instalacao && (
+                                    <span className="text-xs text-muted-foreground">Local: {equipamento.local_instalacao}</span>
                                   )}
                                 </div>
                               </CommandItem>
@@ -835,6 +903,7 @@ export default function ListaOrdens() {
                 disabled={
                   saving ||
                   !novaOrdem.clienteId.trim() ||
+                  (enderecosClienteSelecionado.length > 0 && !novaOrdem.enderecoId.trim()) ||
                   !novaOrdem.descricao.trim() ||
                   novaOrdem.servicoIds.length === 0
                 }
@@ -853,11 +922,10 @@ export default function ListaOrdens() {
             <DialogTitle>Cadastrar Equipamento</DialogTitle>
             <DialogDescription>Preencha os dados do equipamento para o cliente selecionado</DialogDescription>
           </DialogHeader>
-
           <div className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-sm font-medium">Marca</label>
+                <label className="text-sm font-medium">Marca <span className="text-destructive">*</span></label>
                 <Input
                   value={novoEquipamento.marca}
                   onChange={(e) => setNovoEquipamento((s) => ({ ...s, marca: e.target.value }))}
@@ -865,15 +933,7 @@ export default function ListaOrdens() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium">Modelo</label>
-                <Input
-                  value={novoEquipamento.modelo}
-                  onChange={(e) => setNovoEquipamento((s) => ({ ...s, modelo: e.target.value }))}
-                  placeholder="Ex: X200"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Local de Instalação</label>
+                <label className="text-sm font-medium">Local de Instalação <span className="text-destructive">*</span></label>
                 <Input
                   value={novoEquipamento.localInstalacao}
                   onChange={(e) => setNovoEquipamento((s) => ({ ...s, localInstalacao: e.target.value }))}
@@ -881,38 +941,47 @@ export default function ListaOrdens() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium">Capacidade</label>
+                <label className="text-sm font-medium">Cliente ID <span className="text-destructive">*</span></label>
                 <Input
-                  type="number"
-                  min="0"
-                  value={novoEquipamento.capacidade}
-                  onChange={(e) => setNovoEquipamento((s) => ({ ...s, capacidade: e.target.value }))}
-                  placeholder="Ex: 500"
+                  value={novoEquipamento.clienteId}
+                  onChange={(e) => setNovoEquipamento((s) => ({ ...s, clienteId: e.target.value }))}
+                  placeholder="ID do cliente"
+                  disabled
                 />
+                {!novoEquipamento.clienteId && (
+                  <p className="text-xs text-muted-foreground">Selecione um cliente na modal de ordem para habilitar.</p>
+                )}
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Observação</label>
-              <Textarea
-                rows={3}
-                value={novoEquipamento.observacao}
-                onChange={(e) => setNovoEquipamento((s) => ({ ...s, observacao: e.target.value }))}
-                placeholder="Observações adicionais..."
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Cliente ID</label>
-              <Input
-                value={novoEquipamento.clienteId}
-                onChange={(e) => setNovoEquipamento((s) => ({ ...s, clienteId: e.target.value }))}
-                placeholder="ID do cliente"
-                disabled
-              />
-              {!novoEquipamento.clienteId && (
-                <p className="text-xs text-muted-foreground">Selecione um cliente na modal de ordem para habilitar.</p>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-sm font-medium">BTUs <span className="text-destructive">*</span></label>
+                <Select
+                  value={novoEquipamento.capacidade}
+                  onValueChange={(value) => setNovoEquipamento((s) => ({ ...s, capacidade: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a capacidade em BTUs" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {btusOptions.map((btu) => (
+                      <SelectItem key={btu} value={btu}>
+                        {btu} BTUs
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <label className="text-sm font-medium">Observação (opcional)</label>
+                <Textarea
+                  rows={3}
+                  value={novoEquipamento.observacao}
+                  onChange={(e) => setNovoEquipamento((s) => ({ ...s, observacao: e.target.value }))}
+                  placeholder="Observações adicionais..."
+                />
+              </div>
             </div>
 
             <Button
@@ -921,8 +990,8 @@ export default function ListaOrdens() {
               disabled={
                 savingEquip ||
                 !novoEquipamento.marca.trim() ||
-                !novoEquipamento.modelo.trim() ||
                 !novoEquipamento.localInstalacao.trim() ||
+                !novoEquipamento.capacidade.trim() ||
                 !novoEquipamento.clienteId
               }
             >

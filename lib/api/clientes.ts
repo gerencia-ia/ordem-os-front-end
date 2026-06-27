@@ -6,7 +6,7 @@ export type NovoClientePayload = {
   email?: string | null
   data_ultima_visita?: string | null
   telefones_attributes: { numero: string }[]
-  enderecos_attributes: { rua: string; numero: string; bairro: string; complemento?: string; cidade: string }[]
+  enderecos_attributes: { cep?: string; rua: string; numero: string; bairro: string; complemento?: string; cidade: string }[]
   equipamentos_attributes?: Array<{
     marca?: string
     btus?: string
@@ -22,6 +22,7 @@ export type AtualizarClientePayload = {
   telefones_attributes?: Array<{ id?: number; numero?: string; _destroy?: boolean }>
   enderecos_attributes?: Array<{
     id?: number
+    cep?: string
     rua?: string
     numero?: string
     bairro?: string

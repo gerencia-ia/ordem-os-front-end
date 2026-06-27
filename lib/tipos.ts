@@ -14,6 +14,7 @@ export type Telefone = {
 
 export type Endereco = {
   id: number
+  cep?: string
   rua: string
   numero: string
   bairro: string

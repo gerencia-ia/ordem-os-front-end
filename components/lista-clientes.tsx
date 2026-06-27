@@ -22,6 +22,26 @@ import type { AtualizarClientePayload } from "@/lib/api/clientes"
 import { Plus, Edit, Trash2, Phone, Mail, MapPin, PlusCircle, MessageCircle } from "lucide-react"
 import { CadastrarEquipamento } from "@/components/cadastrar-equipamento"
 
+type EnderecoForm = {
+  id?: number
+  cep?: string
+  rua: string
+  numero: string
+  bairro: string
+  complemento?: string
+  cidade: string
+}
+
+type ViaCepResponse = {
+  cep?: string
+  logradouro?: string
+  complemento?: string
+  bairro?: string
+  localidade?: string
+  uf?: string
+  erro?: boolean
+}
+
 export default function ListaClientes() {
   // Estado para modal de equipamento
   const [openEquipModal, setOpenEquipModal] = useState(false)
@@ -39,13 +59,13 @@ export default function ListaClientes() {
     email?: string
     data_ultima_visita?: string
     telefones: { numero: string }[]
-    enderecos: { rua: string; numero: string; bairro: string; complemento?: string; cidade: string }[]
+    enderecos: EnderecoForm[]
   }>({
     nome: "",
     email: "",
     data_ultima_visita: "",
     telefones: [{ numero: "" }],
-    enderecos: [{ rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
+    enderecos: [{ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
   })
 
   const [open, setOpen] = useState(false)
@@ -57,15 +77,76 @@ export default function ListaClientes() {
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
   const [editForm, setEditForm] = useState<{ nome: string; email: string; data_ultima_visita?: string }>({ nome: "", email: "", data_ultima_visita: "" })
   const [editTelefones, setEditTelefones] = useState<Array<{ id?: number; numero: string }>>([])
-  const [editEnderecos, setEditEnderecos] = useState<
-    Array<{ id?: number; rua: string; numero: string; bairro: string; complemento?: string; cidade: string }>
-  >([])
+  const [editEnderecos, setEditEnderecos] = useState<EnderecoForm[]>([])
   const [editEquipOpen, setEditEquipOpen] = useState(false)
   const [editEquipamentos, setEditEquipamentos] = useState<any[]>([])
 
   // Estados para modal de WhatsApp
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false)
   const [clienteWhatsapp, setClienteWhatsapp] = useState<Cliente | null>(null)
+
+  const onlyDigits = (value: string) => value.replace(/\D/g, "")
+
+  const formatCep = (value: string) => {
+    const digits = onlyDigits(value).slice(0, 8)
+    if (digits.length <= 5) return digits
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`
+  }
+
+  const fetchViaCep = async (cep: string): Promise<ViaCepResponse | null> => {
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      if (!response.ok) return null
+      const data = (await response.json()) as ViaCepResponse
+      if (data.erro) return null
+      return data
+    } catch (err) {
+      console.error("Erro ao consultar ViaCEP", err)
+      return null
+    }
+  }
+
+  const preencherNovoEnderecoPorCep = async (idx: number, cep: string) => {
+    const data = await fetchViaCep(cep)
+    if (!data) return
+
+    setNovoCliente((s) => {
+      const arr = [...s.enderecos]
+      const atual = arr[idx]
+      if (!atual || onlyDigits(atual.cep ?? "") !== cep) return s
+
+      arr[idx] = {
+        ...atual,
+        rua: data.logradouro ?? atual.rua,
+        bairro: data.bairro ?? atual.bairro,
+        cidade: data.localidade ?? atual.cidade,
+        complemento: atual.complemento?.trim() ? atual.complemento : data.complemento ?? atual.complemento,
+      }
+
+      return { ...s, enderecos: arr }
+    })
+  }
+
+  const preencherEditEnderecoPorCep = async (idx: number, cep: string) => {
+    const data = await fetchViaCep(cep)
+    if (!data) return
+
+    setEditEnderecos((arr) => {
+      const next = [...arr]
+      const atual = next[idx]
+      if (!atual || onlyDigits(atual.cep ?? "") !== cep) return arr
+
+      next[idx] = {
+        ...atual,
+        rua: data.logradouro ?? atual.rua,
+        bairro: data.bairro ?? atual.bairro,
+        cidade: data.localidade ?? atual.cidade,
+        complemento: atual.complemento?.trim() ? atual.complemento : data.complemento ?? atual.complemento,
+      }
+
+      return next
+    })
+  }
 
   const addEditTelefone = () => setEditTelefones((arr) => [...arr, { numero: "" }])
   const removeEditTelefone = (idx: number) =>
@@ -78,12 +159,12 @@ export default function ListaClientes() {
     })
 
   const addEditEndereco = () =>
-    setEditEnderecos((arr) => [...arr, { rua: "", numero: "", bairro: "", complemento: "", cidade: "" }])
+    setEditEnderecos((arr) => [...arr, { cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }])
   const removeEditEndereco = (idx: number) =>
     setEditEnderecos((arr) => arr.filter((_, i) => i !== idx))
   const updateEditEndereco = (
     idx: number,
-    field: "rua" | "numero" | "bairro" | "complemento" | "cidade",
+    field: "cep" | "rua" | "numero" | "bairro" | "complemento" | "cidade",
     value: string,
   ) =>
     setEditEnderecos((arr) => {
@@ -107,13 +188,13 @@ export default function ListaClientes() {
   const addEndereco = () =>
     setNovoCliente((s) => ({
       ...s,
-      enderecos: [...s.enderecos, { rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
+      enderecos: [...s.enderecos, { cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
     }))
   const removeEndereco = (idx: number) =>
     setNovoCliente((s) => ({ ...s, enderecos: s.enderecos.filter((_, i) => i !== idx) }))
   const updateEndereco = (
     idx: number,
-    field: "rua" | "numero" | "bairro" | "complemento" | "cidade",
+    field: "cep" | "rua" | "numero" | "bairro" | "complemento" | "cidade",
     value: string,
   ) =>
     setNovoCliente((s) => {
@@ -128,7 +209,7 @@ export default function ListaClientes() {
       email: "",
       data_ultima_visita: "",
       telefones: [{ numero: "" }],
-      enderecos: [{ rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
+      enderecos: [{ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
     })
   }
 
@@ -149,6 +230,7 @@ export default function ListaClientes() {
         enderecos_attributes: novoCliente.enderecos
           .filter(e => e.rua.trim())
           .map(e => ({
+            cep: onlyDigits(e.cep ?? "") || undefined,
             rua: e.rua.trim(),
             numero: e.numero.trim(),
             bairro: e.bairro.trim(),
@@ -212,10 +294,11 @@ export default function ListaClientes() {
   const clientesFiltrados = clientes.filter(
     (c) => {
       // Filtro de texto
+      const buscaNormalizada = busca.trim()
+      const buscaNumerica = buscaNormalizada.replace(/\D/g, "")
       const textoBuscado = 
-        c.nome.toLowerCase().includes(busca.toLowerCase()) || 
-        (c.email?.toLowerCase() || "").includes(busca.toLowerCase()) ||
-        (c.telefones?.some(t => t.numero.replace(/\D/g, "").includes(busca.replace(/\D/g, ""))) || false)
+        c.nome.toLowerCase().includes(buscaNormalizada.toLowerCase()) || 
+        (buscaNumerica.length > 0 && (c.telefones?.some(t => t.numero.replace(/\D/g, "").includes(buscaNumerica)) || false))
       
       // Filtro de marcador
       if (filtroMarcador) {
@@ -342,6 +425,20 @@ export default function ListaClientes() {
                 {novoCliente.enderecos.map((e, idx) => (
                   <div key={idx} className="space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <Input
+                        placeholder="CEP"
+                        value={e.cep ?? ""}
+                        maxLength={9}
+                        onChange={(ev) => {
+                          const cepFormatado = formatCep(ev.target.value)
+                          updateEndereco(idx, "cep", cepFormatado)
+
+                          const cepLimpo = onlyDigits(cepFormatado)
+                          if (cepLimpo.length === 8) {
+                            void preencherNovoEnderecoPorCep(idx, cepLimpo)
+                          }
+                        }}
+                      />
                       <Input
                         placeholder="Rua"
                         value={e.rua}
@@ -496,6 +593,20 @@ export default function ListaClientes() {
                   <div key={idx} className="space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <Input
+                        placeholder="CEP"
+                        value={e.cep ?? ""}
+                        maxLength={9}
+                        onChange={(ev) => {
+                          const cepFormatado = formatCep(ev.target.value)
+                          updateEditEndereco(idx, "cep", cepFormatado)
+
+                          const cepLimpo = onlyDigits(cepFormatado)
+                          if (cepLimpo.length === 8) {
+                            void preencherEditEnderecoPorCep(idx, cepLimpo)
+                          }
+                        }}
+                      />
+                      <Input
                         placeholder="Rua"
                         value={e.rua}
                         onChange={(ev) => updateEditEndereco(idx, "rua", ev.target.value)}
@@ -564,6 +675,7 @@ export default function ListaClientes() {
                     const endsAttributes = [
                       ...currentEnds.map(e => ({
                         id: e.id,
+                        cep: onlyDigits(e.cep ?? "") || undefined,
                         rua: e.rua.trim(),
                         numero: e.numero.trim(),
                         bairro: e.bairro.trim(),
@@ -636,7 +748,7 @@ export default function ListaClientes() {
         <CardContent className="space-y-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Buscar</label>
-            <Input placeholder="Por nome, email ou telefone..." value={busca} onChange={(e) => setBusca(e.target.value)} />
+            <Input placeholder="Por nome ou telefone..." value={busca} onChange={(e) => setBusca(e.target.value)} />
           </div>
           <div>
             <label className="text-sm font-medium mb-2 block">Por Marcador</label>
@@ -754,6 +866,7 @@ export default function ListaClientes() {
                             setEditTelefones((cliente.telefones || []).map(t => ({ id: t.id, numero: t.numero })))
                             setEditEnderecos((cliente.enderecos || []).map(e => ({
                               id: e.id,
+                              cep: e.cep ?? "",
                               rua: e.rua,
                               numero: e.numero,
                               bairro: e.bairro,
