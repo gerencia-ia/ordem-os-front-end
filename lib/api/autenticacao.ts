@@ -24,10 +24,12 @@ export async function loginUsuario(cpf: string, senha: string): Promise<LoginRes
 }
 
 // Armazenar token no localStorage
-export function salvarToken(token: string, role: string): void {
+export function salvarToken(token: string, role: string | number): void {
   localStorage.setItem("token", token)
-
-  localStorage.setItem("role", role == 0 ? "SECRETARIA" : "TECNICO")
+  
+  // Normalizar o role para string
+  const roleString = role == 0 || role === "0" || role === "SECRETARIA" ? "SECRETARIA" : "TECNICO"
+  localStorage.setItem("role", roleString)
 }
 
 // Recuperar token do localStorage

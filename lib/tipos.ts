@@ -14,6 +14,7 @@ export type Telefone = {
 
 export type Endereco = {
   id: number
+  cep?: string
   rua: string
   numero: string
   bairro: string
@@ -30,6 +31,7 @@ export interface Cliente {
   cpf?: string
   email?: string | null
   dataRegistro: string
+  data_ultima_visita?: string | null
   telefones: Telefone[]
   enderecos: Endereco[]
 }
@@ -66,6 +68,23 @@ export interface Servico {
   id: string
   nome: string
   valor: number
+  tempo_servico: number
+  categorias_servico_id: number
+  categoria?: {
+    id: number
+    descricao: string
+  }
+  categorias_servico?: {
+    id: number
+    descricao: string
+  }
+}
+
+export interface CategoriaServico {
+  id: number
+  descricao: string
+  created_at?: string
+  updated_at?: string
 }
 
 export interface OrdemServico {
@@ -73,6 +92,8 @@ export interface OrdemServico {
   status_id: number
   data_agendamento: string | null
   data_fechamento: string | null
+  data_inicio_atendimento: string | null
+  data_fim_atendimento: string | null
   observacao: string | null
   prioridade_id: number
   valor_total: string

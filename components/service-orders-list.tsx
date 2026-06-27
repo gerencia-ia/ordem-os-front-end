@@ -95,7 +95,7 @@ const mockOrders: ServiceOrder[] = [
 
 const statusConfig = {
   pending: {
-    label: "Pendente",
+    label: "Agendado",
     color: "bg-yellow-100 dark:bg-yellow-950",
     text: "text-yellow-700 dark:text-yellow-300",
   },

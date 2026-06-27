@@ -4,6 +4,8 @@ import { Bell, LogOut, Menu, Moon, Sun, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
+import { useRouter } from "next/navigation"
+import { removerToken } from "@/lib/api/autenticacao"
 
 interface BarraNavegacaoProps {
   onMenuToggle: () => void
@@ -11,6 +13,12 @@ interface BarraNavegacaoProps {
 
 export function BarraNavegacao({ onMenuToggle }: BarraNavegacaoProps) {
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    removerToken()
+    window.location.href = "/login"
+  }
 
   return (
     <div className="flex items-center justify-between bg-card border-b border-border px-6 py-3 sticky top-0 z-40 shadow-sm">
@@ -39,7 +47,7 @@ export function BarraNavegacao({ onMenuToggle }: BarraNavegacaoProps) {
           <DropdownMenuContent align="end">
             <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
             <DropdownMenuItem>Configurações</DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>

@@ -33,10 +33,11 @@ import {
 import { getHistoricoLaudosEquipamento, type Laudo } from "@/lib/api/equipamentos"
 import { getServicos } from "@/lib/api/servicos"
 import { getTecnicos } from "@/lib/api/tecnicos"
+import { apiPatch } from "@/lib/api/api"
 
 // Opções de status disponíveis
 const statusOptions = [
-  { id: 1, label: "Pendente" },
+  { id: 1, label: "Agendado" },
   { id: 2, label: "Em Progresso" },
   { id: 3, label: "Concluído" },
   { id: 4, label: "Cancelado" },
@@ -114,6 +115,10 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   const [tecnicoSaving, setTecnicoSaving] = useState(false)
   const [modalTecnicoAberta, setModalTecnicoAberta] = useState(false)
   const [tecnicoIdInput, setTecnicoIdInput] = useState("")
+  const [modalFinalizarAberta, setModalFinalizarAberta] = useState(false)
+  const [valorFinal, setValorFinal] = useState("")
+  const [observacaoFinal, setObservacaoFinal] = useState("")
+  const [finalizandoSalvo, setFinalizandoSalvo] = useState(false)
 
   useEffect(() => {
     async function fetchOrdem() {
@@ -188,13 +193,43 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   }
 
   const finalizarAtendimento = async () => {
-    setAcaoLoading(true)
-    const agora = new Date().toISOString()
-    // Usar data_inicio_atendimento existente ou pegar da ordem
-    const dataInicio = ordem.data_inicio_atendimento || new Date().toISOString()
-    await updateHorarioAtendimento(ordem.id, dataInicio, agora)
-    await atualizarStatus(3) // Status 3: Concluído
-    setAcaoLoading(false)
+    setValorFinal(ordem.valor_total || "")
+    setObservacaoFinal(ordem.observacao || "")
+    setModalFinalizarAberta(true)
+  }
+
+  const salvarFinalizacao = async () => {
+    if (!valorFinal.trim()) return
+    setFinalizandoSalvo(true)
+    try {
+      const agora = new Date().toISOString()
+      const dataInicio = ordem.data_inicio_atendimento || new Date().toISOString()
+      
+      // Primeiro atualiza os horários, valor e observação
+      await updateHorarioAtendimento(ordem.id, dataInicio, agora)
+      
+      // Depois atualiza valor_total e observacao via PATCH
+      await apiPatch(`/ordem_servicos/${ordem.id}`, {
+        ordem_servico: {
+          valor_total: valorFinal,
+          observacao: observacaoFinal,
+        },
+      })
+      
+      // Por último atualiza status
+      await updateOrdemServicoStatus(ordem.id, 3) // Status 3: Concluído
+      
+      // Recarrega os dados
+      const data = await getOrdemServicoById(ordemId)
+      setOrdem(data)
+      setTarefas(data.tarefas || [])
+      
+      setModalFinalizarAberta(false)
+    } catch (err) {
+      console.error("Erro ao finalizar:", err)
+    } finally {
+      setFinalizandoSalvo(false)
+    }
   }
 
   const carregarServicos = async () => {
@@ -428,35 +463,22 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     <Badge className={getBadgePrioridade(ordem.prioridade_descricao)}>{ordem.prioridade_descricao}</Badge>
                   </div>
                 </div>
-                <div>
-                  <label className="text-sm text-muted-foreground">Tipo de Serviço</label>
-                  <p className="font-medium mt-1">{ordem.tipoServico}</p>
-                </div>
+         
                 <div>
                   <label className="text-sm text-muted-foreground">Data de Agendamento</label>
-                  <p className="font-medium mt-1">{new Date(ordem.data_agendamento).toLocaleDateString("pt-BR")}</p>
+                  <p className="font-medium mt-1">{new Date(ordem.data_agendamento).toLocaleDateString("pt-BR")} {new Date(ordem.data_agendamento).toLocaleTimeString("pt-BR")}</p>
                 </div>
+               
               </div>
 
-              {/* Datas importantes */}
-              <div className="border-t pt-4 space-y-2">
-                {ordem.data_vencimento && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm">
-                      Vencimento: <strong>{new Date(ordem.data_vencimento).toLocaleDateString("pt-BR")}</strong>
-                    </span>
-                  </div>
-                )}
-                {ordem.dataFechamento && (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      Concluído em: <strong>{new Date(ordem.dataFechamento).toLocaleDateString("pt-BR")}</strong>
-                    </span>
-                  </div>
-                )}
-              </div>
+
+              {/* Descrição */}
+              {ordem.descricao && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Descrição da Ordem:</p>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{ordem.descricao}</p>
+                </div>
+              )}
 
               {/* Custos */}
               {(ordem.custoEstimado || ordem.custoReal) && (
@@ -481,6 +503,26 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   <p className="text-sm bg-muted p-3 rounded-lg">{ordem.notas}</p>
                 </div>
               )}
+
+              {/* Valor Total e Observações Finais */}
+              {(ordem.status_id === 3 || ordem.valor_total || ordem.observacao) && (
+                <div className="border-t pt-4 space-y-3">
+                  {ordem.valor_total && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Valor Total Cobrado:</p>
+                      <p className="text-lg font-bold text-green-600">
+                        R$ {Number(ordem.valor_total).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  )}
+                  {ordem.observacao && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Observações Finais:</p>
+                      <p className="text-sm bg-muted p-3 rounded-lg">{ordem.observacao}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -498,34 +540,61 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               {ordem.servicos && ordem.servicos.length > 0 ? (
-                <ul className="space-y-2">
-                  {ordem.servicos.map((servico: any) => (
-                    <li key={servico.id} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
-                      <div>
-                        <span className="font-medium">{servico.nome}</span>
-                        {servico.quantidade ? (
-                          <span className="ml-2 text-xs text-muted-foreground">x{servico.quantidade}</span>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-muted-foreground">
-                          R$ {Number(servico.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                        </span>
-                        {ordem.status_id !== 3 && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => removerServico(servico.id)}
-                            disabled={remocaoLoadingId === servico.id}
-                          >
-                            {remocaoLoadingId === servico.id ? "Removendo..." : "Remover"}
-                          </Button>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="space-y-2">
+                    {ordem.servicos.map((servico: any) => (
+                      <li key={servico.id} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
+                        <div>
+                          <span className="font-medium">{servico.nome}</span>
+                          {servico.quantidade ? (
+                            <span className="ml-2 text-xs text-muted-foreground">x{servico.quantidade}</span>
+                          ) : null}
+                          {servico.tempo_servico && (
+                            <div className="text-xs text-muted-foreground mt-1">Tempo: {servico.tempo_servico} min</div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-muted-foreground">
+                            R$ {Number(servico.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          </span>
+                          {ordem.status_id !== 3 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => removerServico(servico.id)}
+                              disabled={remocaoLoadingId === servico.id}
+                            >
+                              {remocaoLoadingId === servico.id ? "Removendo..." : "Remover"}
+                            </Button>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  {/* Totais */}
+                  <div className="border-t pt-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tempo Total de Serviço:</span>
+                      <span className="font-medium">
+                        {(() => {
+                          const tempoTotal = ordem.servicos.reduce((sum: number, s: any) => sum + (s.tempo_servico || 0), 0)
+                          return tempoTotal > 0 ? `${tempoTotal} min` : "-"
+                        })()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Valor Total dos Serviços:</span>
+                      <span className="font-medium">
+                        R$ {(() => {
+                          const valorTotal = ordem.servicos.reduce((sum: number, s: any) => sum + Number(s.valor), 0)
+                          return valorTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <p className="text-sm text-muted-foreground">Nenhum serviço relacionado.</p>
               )}
@@ -665,17 +734,39 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   <div>
                     <p className="text-sm font-medium">Ordem aberta</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(ordem.created_at).toLocaleDateString("pt-BR")}
+                      {new Date(ordem.created_at).toLocaleDateString("pt-BR")} {new Date(ordem.created_at).toLocaleTimeString("pt-BR")}
                     </p>
                   </div>
                 </div>
+                {ordem.data_inicio_atendimento && (
+                  <div className="flex gap-4">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Atendimento iniciado</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(ordem.data_inicio_atendimento).toLocaleDateString("pt-BR")} {new Date(ordem.data_inicio_atendimento).toLocaleTimeString("pt-BR")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {ordem.data_fim_atendimento && (
+                  <div className="flex gap-4">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Atendimento finalizado</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(ordem.data_fim_atendimento).toLocaleDateString("pt-BR")} {new Date(ordem.data_fim_atendimento).toLocaleTimeString("pt-BR")}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {ordem.dataFechamento && (
                   <div className="flex gap-4">
                     <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium">Ordem concluída</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(ordem.dataFechamento).toLocaleDateString("pt-BR")}
+                        {new Date(ordem.dataFechamento).toLocaleDateString("pt-BR")} {new Date(ordem.dataFechamento).toLocaleTimeString("pt-BR")}
                       </p>
                     </div>
                   </div>
@@ -842,21 +933,14 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   {laudosHistorico.map((laudo) => (
                     <tr key={laudo.id} className="border-b hover:bg-muted/50">
                       <td className="py-2 px-3 text-xs">
-                        {new Date(laudo.created_at).toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(laudo.ordem_servico.data_fechamento).toLocaleDateString("pt-BR")} {new Date(laudo.ordem_servico.data_fechamento).toLocaleTimeString("pt-BR")}
                       </td>
                       <td className="py-2 px-3">
                         <p className="text-xs line-clamp-2">{laudo.laudo}</p>
                       </td>
                       <td className="py-2 px-3">
                         <div className="text-xs">
-                          <p className="font-medium">{laudo.ordem_servico.numero_ordem}</p>
-                          <p className="text-muted-foreground">{laudo.ordem_servico.descricao}</p>
+                          <p className="font-medium">{laudo.ordem_servico.id}</p>
                         </div>
                       </td>
                       <td className="py-2 px-3">
@@ -880,6 +964,54 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal de finalizar atendimento */}
+      <AlertDialog open={modalFinalizarAberta} onOpenChange={setModalFinalizarAberta}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Finalizar Atendimento</AlertDialogTitle>
+          <AlertDialogDescription>
+            Preencha os dados finais do atendimento
+          </AlertDialogDescription>
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm text-muted-foreground" htmlFor="valor-final-input">
+                Valor Total Cobrado
+              </label>
+              <Input
+                id="valor-final-input"
+                type="number"
+                step="0.01"
+                placeholder="Ex: 250.00"
+                value={valorFinal}
+                onChange={(e) => setValorFinal(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-muted-foreground" htmlFor="observacao-final-input">
+                Observações Finais
+              </label>
+              <textarea
+                id="observacao-final-input"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                rows={4}
+                placeholder="Digite suas observações finais..."
+                value={observacaoFinal}
+                onChange={(e) => setObservacaoFinal(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <AlertDialogCancel disabled={finalizandoSalvo}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={salvarFinalizacao}
+              disabled={!valorFinal.trim() || finalizandoSalvo}
+            >
+              {finalizandoSalvo ? "Finalizando..." : "Finalizar Atendimento"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
+
