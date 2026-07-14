@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Kanban, List, Users, Settings, X, Wrench } from "lucide-react"
+import { Home, Kanban, List, Users, Settings, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
@@ -10,6 +10,20 @@ import { useEffect, useState } from "react"
 interface BarraLateralProps {
   estaAberta: boolean
   aoFechar: () => void
+}
+
+type SubmenuItem = {
+  href: string
+  label: string
+  roles: string[]
+}
+
+type MenuItem = {
+  href: string
+  label: string
+  icon: any
+  roles: string[]
+  children?: SubmenuItem[]
 }
 
 export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
@@ -24,25 +38,52 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
     }
   }, [])
 
-  const todosMenus = [
+  const todosMenus: MenuItem[] = [
     { href: "/", label: "Painel", icon: Home, roles: ["SECRETARIA", "TECNICO"] },
     { href: "/kanban", label: "Quadro Kanban", icon: Kanban, roles: ["SECRETARIA", "TECNICO"] },
     { href: "/ordens", label: "Ordens de Serviço", icon: List, roles: ["SECRETARIA", "TECNICO"] },
     { href: "/clientes", label: "Clientes", icon: Users, roles: ["SECRETARIA", "TECNICO"] },
-    { href: "/tecnicos", label: "Técnicos", icon: Users, roles: ["SECRETARIA"] },
-    { href: "/servicos", label: "Serviços", icon: Wrench, roles: ["SECRETARIA"] },
-    { href: "/configuracoes", label: "Configurações", icon: Settings, roles: ["SECRETARIA"] },
+    {
+      href: "/configuracoes",
+      label: "Configurações",
+      icon: Settings,
+      roles: ["SECRETARIA"],
+      children: [
+        { href: "/tecnicos", label: "Técnicos", roles: ["SECRETARIA"] },
+        { href: "/servicos", label: "Serviços", roles: ["SECRETARIA"] },
+        { href: "/categorias-servicos", label: "Categorias de Serviço", roles: ["SECRETARIA"] },
+      ],
+    },
   ]
 
   // Filtrar menus baseado na role do usuário
-  const menus = todosMenus.filter((menu) => {
-    if (!roleUsuario) return true // Se não houver role, mostrar tudo
-    return menu.roles.includes(roleUsuario)
-  })
+  const menus = todosMenus
+    .filter((menu) => {
+      if (!roleUsuario) return true // Se não houver role, mostrar tudo
+      return menu.roles.includes(roleUsuario)
+    })
+    .map((menu) => {
+      if (!menu.children) return menu
+
+      const childrenFilhos = menu.children.filter((child) => {
+        if (!roleUsuario) return true
+        return child.roles.includes(roleUsuario)
+      })
+
+      return { ...menu, children: childrenFilhos }
+    })
 
   const isAtivo = (href: string) => {
     if (href === "/") return pathname === "/"
     return pathname.startsWith(href)
+  }
+
+  const isAtivoExato = (href: string) => pathname === href
+
+  const isAtivoOuFilho = (href: string, children?: SubmenuItem[]) => {
+    const ativoNoPai = isAtivo(href)
+    const ativoNoFilho = (children || []).some((child) => isAtivoExato(child.href))
+    return ativoNoPai || ativoNoFilho
   }
 
   return (
@@ -72,22 +113,48 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
         <nav className="flex-1 overflow-y-auto p-4 space-y-2">
           {menus.map((menu) => {
             const Icon = menu.icon
-            const ativo = isAtivo(menu.href)
+            const ativo = isAtivoOuFilho(menu.href, menu.children)
             return (
-              <Link key={menu.href} href={menu.href}>
-                <button
-                  onClick={aoFechar}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left",
-                    ativo
-                      ? "bg-primary-foreground text-primary font-semibold"
-                      : "hover:bg-primary/80 text-primary-foreground/90",
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{menu.label}</span>
-                </button>
-              </Link>
+              <div key={menu.href} className="space-y-1">
+                <Link href={menu.href}>
+                  <button
+                    onClick={aoFechar}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left",
+                      ativo
+                        ? "bg-primary-foreground text-primary font-semibold"
+                        : "hover:bg-primary/80 text-primary-foreground/90",
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{menu.label}</span>
+                  </button>
+                </Link>
+
+                {menu.children && menu.children.length > 0 && (
+                  <div className="ml-4 pl-3 border-l border-primary-foreground/20 space-y-1">
+                    {menu.children.map((child) => {
+                      const childAtivo = isAtivoExato(child.href)
+
+                      return (
+                        <Link key={child.href} href={child.href}>
+                          <button
+                            onClick={aoFechar}
+                            className={cn(
+                              "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                              childAtivo
+                                ? "bg-primary-foreground text-primary font-semibold"
+                                : "text-primary-foreground/80 hover:bg-primary/80",
+                            )}
+                          >
+                            {child.label}
+                          </button>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             )
           })}
         </nav>

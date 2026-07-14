@@ -4,6 +4,8 @@ import { apiGet, apiPost, apiPut, apiDelete } from "./api"
 export type NovoServicoPayload = {
   nome: string
   valor: number
+  tempo_servico?: number
+  categorias_servico_id?: number | null
 }
 
 export async function getServicos(): Promise<Servico[]> {

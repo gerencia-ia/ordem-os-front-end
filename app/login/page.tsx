@@ -1,64 +1,56 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
-import { LogIn, AlertCircle } from "lucide-react";
-import { loginUsuario, salvarToken } from "@/lib/api/autenticacao";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Checkbox } from "@/components/ui/checkbox"
+import { LogIn, AlertCircle } from "lucide-react"
+import { loginUsuario, salvarToken } from "@/lib/api/autenticacao"
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [cpf, setCpf] = useState("");
-  const [senha, setSenha] = useState("");
-  const [lembrarMe, setLembrarMe] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
+  const router = useRouter()
+  const [cpf, setCpf] = useState("")
+  const [senha, setSenha] = useState("")
+  const [lembrarMe, setLembrarMe] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErro(null);
-    setLoading(true);
+    e.preventDefault()
+    setErro(null)
+    setLoading(true)
 
     try {
       if (!cpf || !senha) {
-        setErro("Por favor, preencha todos os campos");
-        setLoading(false);
-        return;
+        setErro("Por favor, preencha todos os campos")
+        setLoading(false)
+        return
       }
 
       // Chamar a API de login
-      const response = await loginUsuario(cpf, senha);
+      const response = await loginUsuario(cpf, senha)
 
       // Salvar token
-      salvarToken(response.token, response.role);
+      salvarToken(response.token,response.role)
 
       // Salvar preferências se marcar "Lembrar-me"
       if (lembrarMe) {
-        localStorage.setItem("cpf", cpf);
+        localStorage.setItem("cpf", cpf)
       }
 
       // Redirecionar para o dashboard
-      router.push("/ordens");
+      router.push("/ordens")
     } catch (err: any) {
-      setErro(
-        err.message || "Erro ao fazer login. Verifique suas credenciais.",
-      );
-      console.error(err);
+      setErro(err.message || "Erro ao fazer login. Verifique suas credenciais.")
+      console.error(err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 p-4">
@@ -140,9 +132,7 @@ export default function LoginPage() {
                 <Checkbox
                   id="lembrar"
                   checked={lembrarMe}
-                  onCheckedChange={(checked) =>
-                    setLembrarMe(checked as boolean)
-                  }
+                  onCheckedChange={(checked) => setLembrarMe(checked as boolean)}
                   disabled={loading}
                 />
                 <label
@@ -179,9 +169,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-slate-950 text-muted-foreground">
-                  Ou continue com
-                </span>
+                <span className="px-2 bg-white dark:bg-slate-950 text-muted-foreground">Ou continue com</span>
               </div>
             </div>
 
@@ -197,6 +185,14 @@ export default function LoginPage() {
                 </p>
               </div>
             </div>
+
+            {/* Footer */}
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              Não possui uma conta?{" "}
+              <a href="#" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold">
+                Cadastre-se
+              </a>
+            </p>
           </CardContent>
         </Card>
 
@@ -206,5 +202,5 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-  );
+  )
 }

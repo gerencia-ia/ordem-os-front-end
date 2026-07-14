@@ -20,6 +20,17 @@ export const formatadores = {
     return new Date(data).toLocaleString("pt-BR")
   },
 
+  dataHoraCurta: (data?: string | Date | null): string => {
+    if (!data) return "-"
+
+    const dataFormatada = new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    })
+
+    return dataFormatada.format(new Date(data))
+  },
+
   telefone: (telefone: string): string => {
     const digitos = telefone.replace(/\D/g, "")
     if (digitos.length === 11) {
