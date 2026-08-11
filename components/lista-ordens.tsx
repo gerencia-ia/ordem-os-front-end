@@ -38,7 +38,7 @@ import { getStatus } from "@/lib/api/status"
 import { getPrioridades } from "@/lib/api/prioridades"
 import type { OrdemServico, Cliente, Tecnico, Equipamento, Servico, Status } from "@/lib/tipos"
 import { createOrdemServico, getOrdensServico } from "@/lib/api/ordem_servicos"
-import { Search, Eye, Plus, Check, ChevronsUpDown, ExternalLink } from "lucide-react"
+import { Search, Eye, Plus, Check, ChevronsUpDown, ExternalLink, X } from "lucide-react"
 import { NaoEncontrado } from "./nao-encontrado"
 import { cn } from "@/lib/utils"
 
@@ -88,7 +88,7 @@ export default function ListaOrdens() {
   // Estado para técnicos
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([])
   const [loadingTecnicos, setLoadingTecnicos] = useState(false)
-  const [openTecnicoCombo, setOpenTecnicoCombo] = useState(false)
+  const [openTecnicoCombo, setOpenTecnicoCombo] = useState(false);
 
   // Estado para equipamentos
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
@@ -122,7 +122,7 @@ export default function ListaOrdens() {
     clienteId: "",
     enderecoId: "",
     tecnicoIds: [] as string[],
-    equipamentoId: "",
+    equipamentoIds: [] as string[],
     servicoIds: [] as string[],
     descricao: "",
     prioridade: "" as string, // agora armazena o id
@@ -292,7 +292,7 @@ export default function ListaOrdens() {
       clienteId: "",
       enderecoId: "",
       tecnicoIds: [],
-      equipamentoId: "",
+      equipamentoIds: [],
       servicoIds: [],
       descricao: "",
       prioridade: "",
@@ -319,7 +319,7 @@ export default function ListaOrdens() {
             cliente_id: novaOrdem.clienteId,
             endereco_id: novaOrdem.enderecoId ? parseInt(novaOrdem.enderecoId, 10) : undefined,
             tecnico_ids: novaOrdem.tecnicoIds.map((id) => parseInt(id, 10)),
-            equipamento_ids: novaOrdem.equipamentoId ? [parseInt(novaOrdem.equipamentoId, 10)] : [],
+            equipamento_ids: novaOrdem.equipamentoIds.map((id) => parseInt(id, 10)),
             servico_ids: novaOrdem.servicoIds.map((id) => parseInt(id, 10)),
             descricao: novaOrdem.descricao,
             status_id: novaOrdem.status, // agora envia o id
@@ -422,7 +422,7 @@ export default function ListaOrdens() {
   const enderecosClienteSelecionado = clienteSelecionado?.enderecos || []
   const enderecoSelecionado = enderecosClienteSelecionado.find((e) => String(e.id) === novaOrdem.enderecoId)
   const tecnicosSelecionados = tecnicos.filter((t) => novaOrdem.tecnicoIds.includes(String(t.id)))
-  const equipamentoSelecionado = equipamentos.find((e) => String(e.id) === novaOrdem.equipamentoId)
+  const equipamentoSelecionado = equipamentos.find((e) => novaOrdem.equipamentoIds.includes(String(e.id)))
   const servicosSelecionados = useMemo(
     () => servicos.filter((s) => novaOrdem.servicoIds.includes(String(s.id))),
     [servicos, novaOrdem.servicoIds]
@@ -536,7 +536,7 @@ export default function ListaOrdens() {
                   </Popover>
                 </div>
 
-                {/* Combobox de Equipamento */}
+                {/* Combobox de Endereço */}
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-medium">Endereço *</label>
 
@@ -576,20 +576,29 @@ export default function ListaOrdens() {
                 {/* Combobox de Equipamento */}
                 <div className="space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Equipamento</label>
+                    <label className="text-sm font-medium">Equipamentos</label>
+
                     <Button
                       type="button"
                       variant="link"
                       className="p-0 h-auto"
                       onClick={() => setOpenEquipModal(true)}
                       disabled={!novaOrdem.clienteId}
-                      title={!novaOrdem.clienteId ? "Selecione um cliente antes de cadastrar o equipamento" : ""}
+                      title={
+                        !novaOrdem.clienteId
+                          ? "Selecione um cliente antes de cadastrar o equipamento"
+                          : ""
+                      }
                     >
                       <Plus className="h-3 w-3 mr-1" />
                       Cadastrar equipamento
                     </Button>
                   </div>
-                  <Popover open={openEquipamentoCombo} onOpenChange={setOpenEquipamentoCombo}>
+
+                  <Popover
+                    open={openEquipamentoCombo}
+                    onOpenChange={setOpenEquipamentoCombo}
+                  >
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
@@ -600,63 +609,133 @@ export default function ListaOrdens() {
                       >
                         {loadingEquipamentos
                           ? "Carregando equipamentos..."
-                          : equipamentoSelecionado
-                            ? `${equipamentoSelecionado.marca} - ${equipamentoSelecionado.btus} BTUs`
-                            : equipamentos.length > 0
-                              ? "Selecione um equipamento (opcional)..."
-                              : "Nenhum equipamento cadastrado"}
+                          : novaOrdem.equipamentoIds.length === 0
+                            ? equipamentos.length > 0
+                              ? "Selecione os equipamentos (opcional)..."
+                              : "Nenhum equipamento cadastrado"
+                            : `${novaOrdem.equipamentoIds.length} equipamento(s) selecionado(s)`}
+
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
+
                     <PopoverContent className="w-full p-0">
                       <Command>
                         <CommandInput placeholder="Buscar equipamento..." />
+
                         <CommandList>
                           <CommandEmpty>
-                            {equipamentos.length === 0 ? "Nenhum equipamento cadastrado." : "Equipamento não encontrado."}
+                            {equipamentos.length === 0
+                              ? "Nenhum equipamento cadastrado."
+                              : "Equipamento não encontrado."}
                           </CommandEmpty>
-                          <CommandGroup>
-                            {/* Limpar seleção */}
-                            <CommandItem
-                              value="limpar"
-                              onSelect={() => {
-                                setNovaOrdem((s) => ({ ...s, equipamentoId: "" }))
-                                setOpenEquipamentoCombo(false)
-                              }}
-                            >
-                              <span className="text-muted-foreground italic">Nenhum equipamento</span>
-                            </CommandItem>
 
-                            {equipamentos.map((equipamento) => (
+                          <CommandGroup>
+                            {equipamentos.map((equipamento) => {
+                              const equipamentoId = String(equipamento.id)
+
+                              const selecionado =
+                                novaOrdem.equipamentoIds.includes(equipamentoId)
+
+                              return (
+                                <CommandItem
+                                  key={equipamento.id}
+                                  value={`${equipamento.marca} ${equipamento.btus} ${
+                                    equipamento.local_instalacao || ""
+                                  }`}
+                                  onSelect={() => {
+                                    setNovaOrdem((s) => ({
+                                      ...s,
+                                      equipamentoIds: selecionado
+                                        ? s.equipamentoIds.filter(
+                                            (id) => id !== equipamentoId
+                                          )
+                                        : [...s.equipamentoIds, equipamentoId],
+                                    }))
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selecionado ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">
+                                      {equipamento.marca} - {equipamento.btus} BTUs
+                                    </span>
+
+                                    {equipamento.local_instalacao && (
+                                      <span className="text-xs text-muted-foreground">
+                                        Local: {equipamento.local_instalacao}
+                                      </span>
+                                    )}
+                                  </div>
+                                </CommandItem>
+                              )
+                            })}
+                          </CommandGroup>
+                          {novaOrdem.equipamentoIds.length > 0 && (
+                            <CommandGroup className="border-t">
                               <CommandItem
-                                key={equipamento.id}
-                                value={`${equipamento.marca} ${equipamento.btus} ${equipamento.local_instalacao || ""}`}
+                                value="limpar seleção"
                                 onSelect={() => {
-                                  setNovaOrdem((s) => ({ ...s, equipamentoId: String(equipamento.id) }))
-                                  setOpenEquipamentoCombo(false)
+                                  setNovaOrdem((s) => ({
+                                    ...s,
+                                    equipamentoIds: [],
+                                  }));
                                 }}
                               >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    String(equipamento.id) === novaOrdem.equipamentoId ? "opacity-100" : "opacity-0",
-                                  )}
-                                />
-                                <div className="flex flex-col">
-                                  <span className="font-medium">
-                                    {equipamento.marca} - {equipamento.btus} BTUs
-                                  </span>
-                                  {equipamento.local_instalacao && (
-                                    <span className="text-xs text-muted-foreground">Local: {equipamento.local_instalacao}</span>
-                                  )}
-                                </div>
+                                <span className="text-muted-foreground">
+                                  Limpar seleção
+                                </span>
                               </CommandItem>
-                            ))}
-                          </CommandGroup>
+                            </CommandGroup>
+                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>
                   </Popover>
+
+                  {/* Equipamentos selecionados */}
+                  {novaOrdem.equipamentoIds.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {novaOrdem.equipamentoIds.map((id) => {
+                        const equipamento = equipamentos.find(
+                          (item) => String(item.id) === id
+                        )
+
+                        if (!equipamento) return null
+
+                        return (
+                          <div
+                            key={id}
+                            className="flex items-center gap-2 rounded-md border bg-muted px-2 py-1 text-sm"
+                          >
+                            <span>
+                              {equipamento.marca} - {equipamento.btus} BTUs
+                            </span>
+
+                            <button
+                              type="button"
+                              className="text-muted-foreground hover:text-foreground"
+                              onClick={() => {
+                                setNovaOrdem((s) => ({
+                                  ...s,
+                                  equipamentoIds: s.equipamentoIds.filter(
+                                    (equipamentoId) => equipamentoId !== id
+                                  ),
+                                }))
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Combobox de Serviços (multiselect) */}
@@ -682,7 +761,7 @@ export default function ListaOrdens() {
                         className="w-full justify-between"
                       >
                         {servicosSelecionados.length > 0
-                          ? servicosSelecionados.length === 1
+                          ? servicosSelecionados.length === 0
                             ? servicosSelecionados[0].nome
                             : `${servicosSelecionados.length} serviços selecionados`
                           : "Selecione serviços..."}
@@ -738,6 +817,23 @@ export default function ListaOrdens() {
                               )
                             })}
                           </CommandGroup>
+                          {novaOrdem.servicoIds.length > 0 && (
+                            <CommandGroup className="border-t">
+                              <CommandItem
+                                value="limpar seleção"
+                                onSelect={() => {
+                                  setNovaOrdem((s) => ({
+                                    ...s,
+                                    servicoIds: [],
+                                  }));
+                                }}
+                              >
+                                <span className="text-muted-foreground">
+                                  Limpar seleção
+                                </span>
+                              </CommandItem>
+                            </CommandGroup>
+                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>
@@ -745,23 +841,23 @@ export default function ListaOrdens() {
 
                   {/* Exibir serviços selecionados */}
                   {servicosSelecionados.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-wrap gap-2 pt-1">
                       {servicosSelecionados.map((servico) => (
-                        <Badge key={servico.id} variant="secondary" className="flex items-center gap-1">
+                        <div key={servico.id} className="flex items-center gap-2 rounded-md border bg-muted px-2 py-1 text-sm">
                           {servico.nome}
                           <button
                             type="button"
+                            className="text-muted-foreground hover:text-foreground"
                             onClick={() =>
                               setNovaOrdem((s) => ({
                                 ...s,
                                 servicoIds: s.servicoIds.filter((id) => id !== String(servico.id)),
                               }))
                             }
-                            className="ml-1 hover:text-destructive"
                           >
                             ×
                           </button>
-                        </Badge>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -819,43 +915,154 @@ export default function ListaOrdens() {
                 <div className="space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between">
                     <div>
-                      <label className="text-sm font-medium">Técnico(s) Responsável(is)</label>
-                      <span className="text-xs text-muted-foreground ml-2">(Opcional)</span>
+                      <label className="text-sm font-medium">
+                        Técnico(s) Responsável(is)
+                      </label>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        (Opcional)
+                      </span>
                     </div>
                   </div>
-                  
-                  {loadingTecnicos ? (
-                    <p className="text-sm text-muted-foreground">Carregando técnicos...</p>
-                  ) : tecnicos.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Nenhum técnico cadastrado.</p>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {tecnicos.map((tecnico) => {
-                        const idStr = String(tecnico.id);
-                        const selecionado = novaOrdem.tecnicoIds.includes(idStr);
-                        return (
-                          <Badge
-                            key={tecnico.id}
-                            variant={selecionado ? "default" : "outline"}
-                            className="cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => {
-                              setNovaOrdem((s) => ({
-                                ...s,
-                                tecnicoIds: selecionado
-                                  ? s.tecnicoIds.filter((id) => id !== idStr)
-                                  : [...s.tecnicoIds, idStr],
-                              }))
-                            }}
+                    <>
+                      <Popover
+                        open={openTecnicoCombo}
+                        onOpenChange={setOpenTecnicoCombo}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openTecnicoCombo}
+                            disabled={!novaOrdem.tecnicoIds || loadingTecnicos}
+                            className="w-full justify-between"
                           >
-                            {tecnico.nome}
-                            {selecionado && <Check className="ml-1 h-3 w-3" />}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                        {loadingTecnicos
+                          ? "Carregando técnicos..."
+                          : novaOrdem.tecnicoIds.length === 0
+                            ? tecnicos.length > 0
+                              ? "Selecione os técnicos (opcional)..."
+                              : "Nenhum técnico cadastrado"
+                            : `${novaOrdem.tecnicoIds.length} técnicos(s) selecionado(s)`}
 
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent
+                          className="w-[--radix-popover-trigger-width] p-0"
+                          align="start"
+                        >
+                          <Command>
+                            <CommandInput placeholder="Buscar técnico..." />
+
+                            <CommandList>
+                             <CommandEmpty>
+                                {equipamentos.length === 0
+                                  ? "Nenhum técnico cadastrado."
+                                  : "Técnico não encontrado."}
+                              </CommandEmpty>
+
+                              <CommandGroup>
+                                {tecnicos.map((tecnico) => {
+                                  const idStr = String(tecnico.id);
+
+                                  const selecionado =
+                                    novaOrdem.tecnicoIds.includes(idStr);
+
+                                  return (
+                                    <CommandItem
+                                      key={tecnico.id}
+                                      value={tecnico.nome}
+                                      onSelect={() => {
+                                        setNovaOrdem((s) => ({
+                                          ...s,
+                                          tecnicoIds: selecionado
+                                            ? s.tecnicoIds.filter(
+                                                (id) => id !== idStr
+                                              )
+                                            : [...s.tecnicoIds, idStr],
+                                        }));
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          selecionado
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+
+                                      <span className="flex-1">
+                                        {tecnico.nome}
+                                      </span>
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+
+                              {novaOrdem.tecnicoIds.length > 0 && (
+                                <CommandGroup className="border-t">
+                                  <CommandItem
+                                    value="limpar seleção"
+                                    onSelect={() => {
+                                      setNovaOrdem((s) => ({
+                                        ...s,
+                                        tecnicoIds: [],
+                                      }));
+                                    }}
+                                  >
+                                    <span className="text-muted-foreground">
+                                      Limpar seleção
+                                    </span>
+                                  </CommandItem>
+                                </CommandGroup>
+                              )}
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      
+                      {/* Exibição dos técnicos selecionados */}
+                      {novaOrdem.tecnicoIds.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {novaOrdem.tecnicoIds.map((id) => {
+                            const tecnico = tecnicos.find(
+                              (item) => String(item.id) === id
+                            );
+
+                            if (!tecnico) return null;
+
+                            return (
+                              <div
+                                key={id}
+                                className="flex items-center gap-2 rounded-md border bg-muted px-2 py-1 text-sm"
+                              >
+                                {tecnico.nome}
+
+                                <button
+                                  type="button"
+                                  className="text-muted-foreground hover:text-foreground"
+                                  onClick={() => {
+                                    setNovaOrdem((s) => ({
+                                      ...s,
+                                      tecnicoIds: s.tecnicoIds.filter(
+                                        (tecnicoId) => tecnicoId !== id
+                                      ),
+                                    }));
+                                  }}
+                                  aria-label={`Remover ${tecnico.nome}`}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                </div>
                 {/* Custo Estimado (calculado automaticamente) */}
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-medium">Custo Estimado (calculado automaticamente)</label>
@@ -866,6 +1073,7 @@ export default function ListaOrdens() {
                     placeholder="0.00"
                     value={novaOrdem.custoEstimado}
                     onChange={(e) => setNovaOrdem((s) => ({ ...s, custoEstimado: e.target.value }))}
+                    readOnly
                     className="bg-muted"
                     
                   />
