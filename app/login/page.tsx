@@ -19,30 +19,45 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
+  const formatCPF = (value: string) => {
+  const numbers = value.replace(/\D/g, "").slice(0, 11);
+
+  return numbers
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErro(null)
     setLoading(true)
 
     try {
-      if (!cpf || !senha) {
+      // Remove pontos e hífen
+      const cpfLimpo = cpf.replace(/\D/g, "")
+
+      if (!cpfLimpo || !senha) {
         setErro("Por favor, preencha todos os campos")
         setLoading(false)
         return
       }
 
-      // Chamar a API de login
-      const response = await loginUsuario(cpf, senha)
-
-      // Salvar token
-      salvarToken(response.token,response.role)
-
-      // Salvar preferências se marcar "Lembrar-me"
-      if (lembrarMe) {
-        localStorage.setItem("cpf", cpf)
+      // Opcional: validar se possui exatamente 11 dígitos
+      if (cpfLimpo.length !== 11) {
+        setErro("CPF inválido")
+        setLoading(false)
+        return
       }
 
-      // Redirecionar para o dashboard
+      // Envia o CPF sem máscara para a API
+      const response = await loginUsuario(cpfLimpo, senha)
+
+      salvarToken(response.token, response.role)
+
+      if (lembrarMe) {
+        localStorage.setItem("cpf", cpfLimpo)
+      }
+
       router.push("/ordens")
     } catch (err: any) {
       setErro(err.message || "Erro ao fazer login. Verifique suas credenciais.")
@@ -51,7 +66,6 @@ export default function LoginPage() {
       setLoading(false)
     }
   }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 p-4">
       {/* Decorative elements */}
@@ -97,7 +111,8 @@ export default function LoginPage() {
                   type="text"
                   placeholder="000.000.000-00"
                   value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
+                  onChange={(e) => setCpf(formatCPF(e.target.value))}
+                  maxLength={14}
                   disabled={loading}
                   className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                 />
