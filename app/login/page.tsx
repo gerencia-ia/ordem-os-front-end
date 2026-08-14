@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LogIn, AlertCircle } from "lucide-react"
-import { loginUsuario, salvarToken } from "@/lib/api/autenticacao"
+import { loginUsuario, salvarToken, getUsuario } from "@/lib/api/autenticacao"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -51,8 +51,10 @@ export default function LoginPage() {
 
       // Envia o CPF sem máscara para a API
       const response = await loginUsuario(cpfLimpo, senha)
+      
+      salvarToken(response.token)
 
-      salvarToken(response.token, response.role)
+      const usuario = getUsuario();
 
       if (lembrarMe) {
         localStorage.setItem("cpf", cpfLimpo)

@@ -1,8 +1,28 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
+import { jwtDecode } from "jwt-decode"
 
 export type LoginResponse = {
   token: string
-  role: "SECRETARIA" | "TECNICO" | string
+}
+
+export type TokenPayload = {
+  user_id: number
+  nome: string
+  cpf: string
+  role: string 
+}
+
+export function getUsuario(): TokenPayload | null {
+  const token = obterToken()
+  if (!token) {
+    return null
+  }
+
+  try {
+    return jwtDecode<TokenPayload>(token)
+  } catch {
+    return null
+  }
 }
 
 // Fazer login com CPF e senha
@@ -24,12 +44,8 @@ export async function loginUsuario(cpf: string, senha: string): Promise<LoginRes
 }
 
 // Armazenar token no localStorage
-export function salvarToken(token: string, role: string | number): void {
+export function salvarToken(token: string): void {
   localStorage.setItem("token", token)
-  
-  // Normalizar o role para string
-  const roleString = role == 0 || role === "0" || role === "SECRETARIA" ? "SECRETARIA" : "TECNICO"
-  localStorage.setItem("role", roleString)
 }
 
 // Recuperar token do localStorage
