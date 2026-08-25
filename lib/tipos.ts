@@ -28,6 +28,14 @@ export type Telefone = {
   updated_at: string
 }
 
+export type Servico = {
+  id: number
+  nome: string
+  valor: number
+  tempo_servico: number
+  categorias_servico?: CategoriaServico | null
+}
+
 export type Endereco = {
   id: number
   cep?: string
@@ -36,7 +44,6 @@ export type Endereco = {
   bairro: string
   complemento?: string
   cidade: string
-  cliente: Cliente | null
   created_at: string
   updated_at: string
 }
@@ -110,19 +117,11 @@ export interface OrdemServico {
   data_vencimento: string | null
   custo_estimado: string
   cliente: Cliente | null
+  servicos?: Servico [] | null
+  tecnicos?: User [] | null
+  equipamentos?: Equipamento [] | null
   created_at: string
   updated_at: string
-  tecnicos?: {
-    id?: number | string
-    nome?: string
-    cpf?: string
-    email?: string
-    telefone?: string
-    role?: {
-      id: number
-      nome: string
-    } | null
-  } | null
 }
 
 export interface Dashboard {

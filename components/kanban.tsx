@@ -37,7 +37,6 @@ export default function Kanban() {
         // Busca ordens da API com filtro de mês e ano
         const data = await getOrdensServico(parseInt(mes), parseInt(ano))
         
-        console.log("📋 Ordens carregadas:", data.map(o => ({ id: o.id, status_descricao: o.status_descricao })))
         setOrdens(data)
       } catch (err) {
         console.error("Erro ao carregar ordens:", err)
