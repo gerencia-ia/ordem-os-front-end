@@ -1,8 +1,24 @@
 // Tipos centrais do sistema de Ordem de Serviço
 
-export type StatusOrdem = "pendente" | "em_progresso" | "concluido" | "cancelado"
-export type StatusTaref = "nao_iniciada" | "em_andamento" | "concluida" | "bloqueada"
-export type TipoServico = "manutencao" | "reparo" | "instalacao" | "diagnostico"
+export interface Status {
+  id: string
+  nome: string
+}
+
+export interface Prioridade {
+  id: string
+  nome: string
+}
+
+export interface Role {
+  id: string
+  nome: string
+}
+
+export interface CategoriaServico {
+  id: number
+  descricao: string
+}
 
 export type Telefone = {
   id: number
@@ -10,6 +26,14 @@ export type Telefone = {
   cliente_id: number
   created_at: string
   updated_at: string
+}
+
+export type Servico = {
+  id: number
+  nome: string
+  valor: number
+  tempo_servico: number
+  categorias_servico?: CategoriaServico | null
 }
 
 export type Endereco = {
@@ -20,7 +44,6 @@ export type Endereco = {
   bairro: string
   complemento?: string
   cidade: string
-  cliente_id: number
   created_at: string
   updated_at: string
 }
@@ -28,7 +51,6 @@ export type Endereco = {
 export interface Cliente {
   id: number
   nome: string
-  cpf?: string
   email?: string | null
   dataRegistro: string
   data_ultima_visita?: string | null
@@ -36,14 +58,13 @@ export interface Cliente {
   enderecos: Endereco[]
 }
 
-export interface Tecnico {
+export interface User {
   id: string
   nome: string
-  email: string
   cpf: string
+  email: string
   telefone: string
-  especialidades: string[]
-  statusDisponibilidade: "disponivel" | "ocupado" | "ausente"
+  role: Role | null
 }
 
 export interface Equipamento {
@@ -52,19 +73,20 @@ export interface Equipamento {
   btus: string
   local_instalacao: string
   observacao: string
-  cliente_id: string
+  cliente: Cliente | null
 }
 
 export interface Tarefa {
   id: string
   descricao: string
-  status: StatusTaref
-  tecnicoAssignado?: string
-  dataInicio?: string
-  dataFim?: string
+  status: Status | null
+  user: User | null
+  ordem_servico?: OrdemServico | null
+  data_inicio?: string
+  data_fim?: string
 }
 
-export interface Servico {
+export interface OsServico {
   id: string
   nome: string
   valor: number
@@ -80,38 +102,26 @@ export interface Servico {
   }
 }
 
-export interface CategoriaServico {
-  id: number
-  descricao: string
-  created_at?: string
-  updated_at?: string
-}
-
 export interface OrdemServico {
   id: number
-  status_id: number
+  status: Status | null
   data_agendamento: string | null
+  prioridade: Prioridade | null
   data_fechamento: string | null
   data_inicio_atendimento: string | null
   data_fim_atendimento: string | null
   observacao: string | null
-  prioridade_id: number
   valor_total: string
   numero_ordem: string
   descricao: string
-  tipo_servico: string
   data_vencimento: string | null
   custo_estimado: string
-  cliente_id: number
+  cliente: Cliente | null
+  servicos?: Servico [] | null
+  tecnicos?: User [] | null
+  equipamentos?: Equipamento [] | null
   created_at: string
   updated_at: string
-  cliente_nome: string
-  prioridade_descricao: string
-  status_descricao: string
-  tecnico_responsavel?: {
-    id?: number | string
-    nome?: string
-  } | null
 }
 
 export interface Dashboard {
@@ -122,9 +132,4 @@ export interface Dashboard {
   taxaConclusao: number
   custoDia: number
   tempoMedioAtencimento: number
-}
-
-export interface Status {
-  id: string
-  nome: string
 }

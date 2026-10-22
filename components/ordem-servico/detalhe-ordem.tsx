@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ArrowLeft, Edit, Trash2, Plus, Clock, CheckCircle, PlayCircle } from "lucide-react"
 import Link from "next/link"
-import type { Servico, Tecnico, Tarefa } from "@/lib/tipos"
+import type { Servico, User, Tarefa, OrdemServico } from "@/lib/tipos"
 import { tenicosMock, clientesMock } from "@/lib/dados-mockados"
 import {
   getOrdemServicoById,
@@ -32,7 +32,7 @@ import {
 } from "@/lib/api/ordem_servicos"
 import { getHistoricoLaudosEquipamento, type Laudo } from "@/lib/api/equipamentos"
 import { getServicos } from "@/lib/api/servicos"
-import { getTecnicos } from "@/lib/api/tecnicos"
+import { getUsers } from "@/lib/api/users"
 import { apiPatch } from "@/lib/api/api"
 import { formatadores } from "@/lib/utilitarios"
 
@@ -90,7 +90,7 @@ interface DetalheOrdemProps {
 export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   const router = useRouter()
 
-  const [ordem, setOrdem] = useState<any>(null)
+  const [ordem, setOrdem] = useState<OrdemServico>(null as any)
   const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [novaDescricao, setNovaDescricao] = useState("")
   const [loading, setLoading] = useState(true)
@@ -111,7 +111,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   const [remocaoLoadingId, setRemocaoLoadingId] = useState<number | string | null>(null)
   const [servicosDisponiveis, setServicosDisponiveis] = useState<Servico[]>([])
   const [servicosLoading, setServicosLoading] = useState(false)
-  const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState<Tecnico[]>([])
+  const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState<User[]>([])
   const [tecnicoLoading, setTecnicoLoading] = useState(false)
   const [tecnicoSaving, setTecnicoSaving] = useState(false)
   const [modalTecnicoAberta, setModalTecnicoAberta] = useState(false)
@@ -258,7 +258,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
   const carregarTecnicos = async () => {
     setTecnicoLoading(true)
     try {
-      const lista = await getTecnicos()
+      const lista = await getUsers()
       setTecnicosDisponiveis(lista)
     } catch (err) {
       console.error("Erro ao carregar técnicos:", err)
@@ -484,26 +484,18 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               )}
 
               {/* Custos */}
-              {(ordem.custoEstimado || ordem.custoReal) && (
+              {(ordem.custo_estimado || ordem.valor_total) && (
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Custo Estimado:</span>
-                    <span className="font-medium">R$ {ordem.custoEstimado?.toFixed(2) || "-"}</span>
+                    <span className="font-medium">R$ {ordem.custo_estimado || "-"}</span>
                   </div>
-                  {ordem.custoReal && (
+                  {ordem.valor_total && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Custo Real:</span>
-                      <span className="font-medium">R$ {ordem.custoReal.toFixed(2)}</span>
+                      <span className="font-medium">R$ {ordem.valor_total || "-"}</span>
                     </div>
                   )}
-                </div>
-              )}
-
-              {/* Notas */}
-              {ordem.notas && (
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Notas:</p>
-                  <p className="text-sm bg-muted p-3 rounded-lg">{ordem.notas}</p>
                 </div>
               )}
 
@@ -689,35 +681,54 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               <CardTitle className="text-lg">Técnico Responsável</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {ordem.tecnico_responsavel ? (
+              {ordem.tecnicos?.length ? (
                 <>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Nome</p>
-                    <p className="font-medium">{ordem.tecnico_responsavel.nome}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Telefone</p>
-                    <p className="font-medium">{ordem.tecnico_responsavel.telefone}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={abrirModalTecnico} disabled={tecnicoSaving}>
-                      Alterar técnico
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700"
-                      onClick={removerTecnico}
-                      disabled={tecnicoSaving}
-                    >
-                      Remover
-                    </Button>
-                  </div>
+                  {ordem.tecnicos.map((tecnico) => (
+                    <div key={tecnico.id} className="space-y-2 border-b pb-3 last:border-b-0">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Nome</p>
+                        <p className="font-medium">{tecnico.nome}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-muted-foreground">Telefone</p>
+                        <p className="font-medium">{tecnico.telefone}</p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => abrirModalTecnico(tecnico)}
+                          disabled={tecnicoSaving}
+                        >
+                          Alterar técnico
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => removerTecnico(tecnico.id)}
+                          disabled={tecnicoSaving}
+                        >
+                          Remover
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Nenhum técnico atribuído</p>
-                  <Button size="sm" onClick={abrirModalTecnico} disabled={tecnicoSaving}>
+                  <p className="text-sm text-muted-foreground">
+                    Nenhum técnico atribuído
+                  </p>
+
+                  <Button
+                    size="sm"
+                    onClick={abrirModalTecnico}
+                    disabled={tecnicoSaving}
+                  >
                     Atribuir técnico
                   </Button>
                 </div>
@@ -1017,4 +1028,3 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     </div>
   )
 }
-

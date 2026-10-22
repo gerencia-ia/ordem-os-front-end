@@ -3,8 +3,8 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { BarraNavegacao } from "@/components/barra-navegacao"
-import { BarraLateral } from "@/components/barra-lateral"
+import { BarraNavegacao } from "@/components/layout/barra-navegacao"
+import { BarraLateral } from "@/components/layout/barra-lateral"
 import { ProveedorTema } from "@/components/provedor-tema"
 import { estaAutenticado } from "@/lib/api/autenticacao"
 

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { Home, Kanban, List, Users, Settings, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { getUsuario } from "@/lib/api/autenticacao"
 
 interface BarraLateralProps {
   estaAberta: boolean
@@ -27,31 +27,23 @@ type MenuItem = {
 }
 
 export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
-  const pathname = usePathname()
-  const [roleUsuario, setRoleUsuario] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Obter role do localStorage
-    if (typeof window !== "undefined") {
-      const role = localStorage.getItem("role")
-      setRoleUsuario(role)
-    }
-  }, [])
+  const pathname = usePathname();
+  const usuario = getUsuario();
 
   const todosMenus: MenuItem[] = [
-    { href: "/", label: "Painel", icon: Home, roles: ["SECRETARIA", "TECNICO"] },
-    { href: "/kanban", label: "Quadro Kanban", icon: Kanban, roles: ["SECRETARIA", "TECNICO"] },
-    { href: "/ordens", label: "Ordens de Serviço", icon: List, roles: ["SECRETARIA", "TECNICO"] },
-    { href: "/clientes", label: "Clientes", icon: Users, roles: ["SECRETARIA", "TECNICO"] },
+    { href: "/painel", label: "Painel", icon: Home, roles: ["Secretaria", "Técnico"] },
+    { href: "/kanban", label: "Quadro Kanban", icon: Kanban, roles: ["Secretaria", "Técnico"] },
+    { href: "/ordens", label: "Ordens de Serviço", icon: List, roles: ["Secretaria", "Técnico"] },
+    { href: "/clientes", label: "Clientes", icon: Users, roles: ["Secretaria", "Técnico"] },
     {
       href: "/configuracoes",
       label: "Configurações",
       icon: Settings,
-      roles: ["SECRETARIA"],
+      roles: ["Secretaria"],
       children: [
-        { href: "/tecnicos", label: "Técnicos", roles: ["SECRETARIA"] },
-        { href: "/servicos", label: "Serviços", roles: ["SECRETARIA"] },
-        { href: "/categorias-servicos", label: "Categorias de Serviço", roles: ["SECRETARIA"] },
+        { href: "/tecnicos", label: "Técnicos", roles: ["Secretaria"] },
+        { href: "/servicos", label: "Serviços", roles: ["Secretaria"] },
+        { href: "/categorias-servicos", label: "Categorias de Serviço", roles: ["Secretaria"] },
       ],
     },
   ]
@@ -59,15 +51,15 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
   // Filtrar menus baseado na role do usuário
   const menus = todosMenus
     .filter((menu) => {
-      if (!roleUsuario) return true // Se não houver role, mostrar tudo
-      return menu.roles.includes(roleUsuario)
+      if (!usuario?.role) return false
+      return menu.roles.includes(usuario.role)
     })
     .map((menu) => {
       if (!menu.children) return menu
 
       const childrenFilhos = menu.children.filter((child) => {
-        if (!roleUsuario) return true
-        return child.roles.includes(roleUsuario)
+        if (!usuario?.role) return false
+        return child.roles.includes(usuario.role)
       })
 
       return { ...menu, children: childrenFilhos }
