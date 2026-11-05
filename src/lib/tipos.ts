@@ -130,13 +130,3 @@ export interface OrdemServico {
   created_at: string;
   updated_at: string;
 }
-
-export interface Dashboard {
-  totalOrdens: number;
-  ordensAbertos: number;
-  ordensEmProgresso: number;
-  ordensConcluidas: number;
-  taxaConclusao: number;
-  custoDia: number;
-  tempoMedioAtencimento: number;
-}

@@ -190,31 +190,6 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-slate-950 text-muted-foreground">
-                  Ou continue com
-                </span>
-              </div>
-            </div>
-
-            {/* Demo Login */}
-            <div className="space-y-2 text-sm text-center text-muted-foreground">
-              <p>Credenciais de Demonstração:</p>
-              <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg space-y-1 text-xs">
-                <p>
-                  <strong>CPF:</strong> 12345678900
-                </p>
-                <p>
-                  <strong>Senha:</strong> sua_senha
-                </p>
-              </div>
-            </div>
-
             {/* Footer */}
             <p className="text-center text-sm text-muted-foreground mt-6">
               Não possui uma conta?{' '}
