@@ -115,14 +115,14 @@ export default function Kanban() {
     }
   };
 
-  const getPriorityColor = (prioridade: string) => {
+  const getPriorityColor = (prioridade?: string) => {
     const cores: { [key: string]: string } = {
       critica: 'bg-red-500 text-white',
       alta: 'bg-orange-500 text-white',
       media: 'bg-yellow-500 text-white',
       baixa: 'bg-blue-500 text-white',
     };
-    return cores[prioridade] || 'bg-gray-500 text-white';
+    return (prioridade ? cores[prioridade] : undefined) || 'bg-gray-500 text-white';
   };
 
   return (
@@ -204,7 +204,7 @@ export default function Kanban() {
                                 {ordem.descricao}
                               </p>
                               <div className="text-xs text-muted-foreground space-y-1">
-                                <p>Cliente: {ordem.cliente_nome}</p>
+                                <p>Cliente: {ordem.cliente?.nome}</p>
                                 {ordem.data_agendamento && (
                                   <p>
                                     Agendado:{' '}

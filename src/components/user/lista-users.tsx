@@ -6,7 +6,7 @@ import type { User } from '@/src/lib/tipos';
 
 import FiltrosUsers from './filtros-users';
 import TabelaUsers from './tabela-users';
-import ModalCriarUser from './modal-criar-user';
+import ModalCriarUser, { type UserForm } from './modal-criar-user';
 import ModalEditarUser from './modal-editar-user';
 
 export default function ListaUsers() {
@@ -24,7 +24,7 @@ export default function ListaUsers() {
 
   const [userSelecionado, setUserSelecionado] = useState<User | null>(null);
 
-  const [novoUser, setNovoUser] = useState({
+  const [novoUser, setNovoUser] = useState<UserForm>({
     nome: '',
     cpf: '',
     email: '',
@@ -38,8 +38,6 @@ export default function ListaUsers() {
     cpf: '',
     email: '',
     telefone: '',
-    senha: '',
-    role_id: null,
   });
 
   useEffect(() => {
@@ -67,6 +65,10 @@ export default function ListaUsers() {
   }, []);
 
   async function handleCriarUser() {
+    if (!novoUser.role_id) {
+      setError('Selecione uma função');
+      return;
+    }
     try {
       setSaving(true);
 
@@ -107,8 +109,6 @@ export default function ListaUsers() {
       cpf: user.cpf ?? '',
       email: user.email ?? '',
       telefone: user.telefone ?? '',
-      senha: user.senha ?? '',
-      role_id: user.role_id ?? null,
     });
 
     setModalEditarOpen(true);

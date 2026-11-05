@@ -61,7 +61,10 @@ export function CadastrarEquipamento({
     if (!novoEquipamento.cliente_id) return;
     try {
       setSavingEquip(true);
-      await createEquipamento(novoEquipamento);
+      await createEquipamento({
+        ...novoEquipamento,
+        cliente_id: novoEquipamento.cliente_id,
+      });
       resetNovoEquipamento();
       setOpen(false);
     } catch {

@@ -282,8 +282,8 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     }
   };
 
-  const abrirModalTecnico = () => {
-    setTecnicoIdInput('');
+  const abrirModalTecnico = (tecnico?: User | null) => {
+    setTecnicoIdInput(tecnico?.id ? String(tecnico.id) : '');
     if (tecnicosDisponiveis.length === 0) {
       void carregarTecnicos();
     }
@@ -300,10 +300,12 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     setModalTecnicoAberta(false);
   };
 
-  const removerTecnico = async () => {
+  const removerTecnico = async (tecnicoId?: string | number) => {
     if (!ordem) return;
+    const targetId = tecnicoId ?? ordem.tecnico_responsavel?.id;
+    if (!targetId) return;
     setTecnicoSaving(true);
-    await removeTecnicoOrdem(ordem.id, ordem.tecnico_responsavel?.id);
+    await removeTecnicoOrdem(ordem.id, targetId);
     const data = await getOrdemServicoById(ordemId);
     setOrdem(data);
     setTecnicoSaving(false);
@@ -347,7 +349,8 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
     window.open(url, '_blank');
   };
 
-  const getBadgePrioridade = (prioridade: string) => {
+  const getBadgePrioridade = (prioridade?: string | null) => {
+    if (!prioridade) return '';
     const cores: { [key: string]: string } = {
       critica: 'bg-red-500 text-white',
       alta: 'bg-orange-500 text-white',
@@ -784,7 +787,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
 
                   <Button
                     size="sm"
-                    onClick={abrirModalTecnico}
+                    onClick={() => abrirModalTecnico()}
                     disabled={tecnicoSaving}
                   >
                     Atribuir técnico
@@ -836,13 +839,13 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                     </div>
                   </div>
                 )}
-                {ordem.dataFechamento && (
+                {ordem.data_fechamento && (
                   <div className="flex gap-4">
                     <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium">Ordem concluída</p>
                       <p className="text-xs text-muted-foreground">
-                        {formatarDataHora(ordem.dataFechamento)}
+                        {formatarDataHora(ordem.data_fechamento)}
                       </p>
                     </div>
                   </div>

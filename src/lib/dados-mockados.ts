@@ -1,6 +1,52 @@
-import type { OrdemServico, Cliente, Tecnico, Dashboard } from './tipos';
+import type { Dashboard } from './tipos';
 
-export const clientesMock: Cliente[] = [
+export interface ClienteMock {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  dataRegistro: string;
+}
+
+export interface TecnicoMock {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  especialidades: string[];
+  statusDisponibilidade: string;
+}
+
+export interface TarefaMock {
+  id: string;
+  descricao: string;
+  status: string;
+  tecnicoAssignado?: string;
+  dataInicio?: string;
+  dataFim?: string;
+}
+
+export interface OrdemServicoMock {
+  id: string;
+  numeroOrdem: string;
+  clienteId: string;
+  tecnicoId?: string;
+  equipamentoId?: string;
+  tipoServico: string;
+  descricao: string;
+  status: string;
+  prioridade: string;
+  tarefas: TarefaMock[];
+  dataAbertura: string;
+  dataFechamento?: string;
+  dataVencimento?: string;
+  notas?: string;
+  custoEstimado?: number;
+  custoReal?: number;
+}
+
+export const clientesMock: ClienteMock[] = [
   {
     id: 'cli-001',
     nome: 'Empresa Tech Solutions',
@@ -27,7 +73,7 @@ export const clientesMock: Cliente[] = [
   },
 ];
 
-export const tenicosMock: Tecnico[] = [
+export const tenicosMock: TecnicoMock[] = [
   {
     id: 'tec-001',
     nome: 'Carlos Silva',
@@ -66,7 +112,7 @@ export const tenicosMock: Tecnico[] = [
   },
 ];
 
-export const ordensServico: OrdemServico[] = [
+export const ordensServico: OrdemServicoMock[] = [
   {
     id: 'os-001',
     numeroOrdem: 'OS-2025-001',

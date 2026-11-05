@@ -14,13 +14,13 @@ import { useEffect, useState } from 'react';
 import { Role } from '@/src/lib/tipos';
 import { getRoles } from '@/src/lib/api/roles';
 
-interface UserForm {
+export interface UserForm {
   nome: string;
   cpf: string;
   email: string;
   telefone: string;
   senha: string;
-  role_id: number;
+  role_id: number | null;
 }
 
 interface ModalCriarUserProps {

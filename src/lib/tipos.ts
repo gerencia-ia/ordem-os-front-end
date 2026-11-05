@@ -5,6 +5,8 @@ export interface Status {
   nome: string;
 }
 
+export type StatusOrdem = 'pendente' | 'em_progresso' | 'concluido' | 'cancelado';
+
 export interface Prioridade {
   id: string;
   nome: string;

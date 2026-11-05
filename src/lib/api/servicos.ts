@@ -23,12 +23,12 @@ export async function createServico(
 }
 
 export async function updateServico(
-  id: string,
+  id: string | number,
   data: Partial<NovoServicoPayload>,
 ): Promise<Servico> {
   return apiPut<Servico>(`/servicos/${id}`, data);
 }
 
-export async function deleteServico(id: string): Promise<void> {
+export async function deleteServico(id: string | number): Promise<void> {
   return apiDelete(`/servicos/${id}`);
 }

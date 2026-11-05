@@ -138,7 +138,7 @@ export default function ListaServicos() {
     }
   };
 
-  const handleDeleteServico = async (id: string) => {
+  const handleDeleteServico = async (id: number) => {
     if (!confirm('Tem certeza que deseja deletar este serviço?')) return;
     try {
       await deleteServico(id);
@@ -388,9 +388,7 @@ export default function ListaServicos() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {servico.categorias_servico?.descricao ||
-                        servico.categoria?.descricao ||
-                        '-'}
+                      {servico.categorias_servico?.descricao || '-'}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -405,7 +403,7 @@ export default function ListaServicos() {
                               tempo_servico:
                                 servico.tempo_servico?.toString() || '',
                               categorias_servico_id:
-                                servico.categorias_servico_id?.toString() || '',
+                                servico.categorias_servico?.id?.toString() || '',
                             });
                             setEditOpen(true);
                           }}
