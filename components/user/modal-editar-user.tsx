@@ -4,25 +4,25 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface UserForm {
-  nome: string
-  cpf: string
-  email: string
-  telefone: string
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
 }
 
 interface ModalEditarUserProps {
-  open: boolean
-  setOpen: (open: boolean) => void
-  user: UserForm
-  setUser: React.Dispatch<React.SetStateAction<UserForm>>
-  saving: boolean
-  onSubmit: () => void
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  user: UserForm;
+  setUser: React.Dispatch<React.SetStateAction<UserForm>>;
+  saving: boolean;
+  onSubmit: () => void;
 }
 
 export default function ModalEditarUser({
@@ -35,21 +35,14 @@ export default function ModalEditarUser({
 }: ModalEditarUserProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-
       <DialogContent>
-
         <DialogHeader>
-          <DialogTitle>
-            Editar Técnico
-          </DialogTitle>
+          <DialogTitle>Editar Técnico</DialogTitle>
 
-          <DialogDescription>
-            Atualize os dados do técnico
-          </DialogDescription>
+          <DialogDescription>Atualize os dados do técnico</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-
           <Input
             placeholder="Nome completo"
             value={user.nome}
@@ -106,15 +99,10 @@ export default function ModalEditarUser({
               !user.telefone.trim()
             }
           >
-            {saving
-              ? "Salvando..."
-              : "Salvar alterações"}
+            {saving ? 'Salvando...' : 'Salvar alterações'}
           </Button>
-
         </div>
-
       </DialogContent>
-
     </Dialog>
-  )
+  );
 }

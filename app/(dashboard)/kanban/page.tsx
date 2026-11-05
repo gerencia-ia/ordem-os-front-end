@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import Kanban from "@/components/kanban"
+import Kanban from '@/components/kanban';
 
 export default function PaginaKanban() {
-  return <Kanban />
+  return <Kanban />;
 }

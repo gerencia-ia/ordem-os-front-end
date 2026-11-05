@@ -1,19 +1,23 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { BarraNavegacao } from "./barra-navegacao"
-import { BarraLateral } from "./barra-lateral"
+import { useState } from 'react';
+import { BarraNavegacao } from './barra-navegacao';
+import { BarraLateral } from './barra-lateral';
 
 interface LayoutPrincipalProps {
-  children: React.ReactNode
-  currentView: string
-  onViewChange: (view: string) => void
+  children: React.ReactNode;
+  currentView: string;
+  onViewChange: (view: string) => void;
 }
 
-export function LayoutPrincipal({ children, currentView, onViewChange }: LayoutPrincipalProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+export function LayoutPrincipal({
+  children,
+  currentView,
+  onViewChange,
+}: LayoutPrincipalProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-background">
@@ -29,5 +33,5 @@ export function LayoutPrincipal({ children, currentView, onViewChange }: LayoutP
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

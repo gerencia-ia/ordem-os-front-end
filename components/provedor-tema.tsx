@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { ThemeProvider } from "next-themes"
-import type React from "react"
+import { ThemeProvider } from 'next-themes';
+import type React from 'react';
 
 interface ProvedorTemaProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function ProveedorTema({ children }: ProvedorTemaProps) {
@@ -12,5 +12,5 @@ export function ProveedorTema({ children }: ProvedorTemaProps) {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       {children}
     </ThemeProvider>
-  )
+  );
 }

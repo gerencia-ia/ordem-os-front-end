@@ -5,31 +5,31 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Plus } from "lucide-react"
-import { useEffect, useState } from "react"
-import { Role } from "@/lib/tipos"
-import { getRoles } from "@/lib/api/roles"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Role } from '@/lib/tipos';
+import { getRoles } from '@/lib/api/roles';
 
 interface UserForm {
-  nome: string
-  cpf: string
-  email: string
-  telefone: string
-  senha: string
-  role_id: number
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
+  senha: string;
+  role_id: number;
 }
 
 interface ModalCriarUserProps {
-  open: boolean
-  setOpen: (open: boolean) => void
-  user: UserForm
-  setUser: React.Dispatch<React.SetStateAction<UserForm>>
-  saving: boolean
-  onSubmit: () => void
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  user: UserForm;
+  setUser: React.Dispatch<React.SetStateAction<UserForm>>;
+  saving: boolean;
+  onSubmit: () => void;
 }
 
 export default function ModalCriarUser({
@@ -40,23 +40,22 @@ export default function ModalCriarUser({
   saving,
   onSubmit,
 }: ModalCriarUserProps) {
-    const [roles, setRoles] = useState<Role[]>([])
+  const [roles, setRoles] = useState<Role[]>([]);
 
-    useEffect(() => {
+  useEffect(() => {
     async function carregarRoles() {
-        try {
-        const data = await getRoles()
-        setRoles(data)
-        } catch (error) {
-        console.error("Erro ao carregar roles:", error)
-        }
+      try {
+        const data = await getRoles();
+        setRoles(data);
+      } catch (error) {
+        console.error('Erro ao carregar roles:', error);
+      }
     }
 
-    carregarRoles()
-    }, [])  
+    carregarRoles();
+  }, []);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
@@ -65,11 +64,8 @@ export default function ModalCriarUser({
       </DialogTrigger>
 
       <DialogContent>
-
         <DialogHeader>
-          <DialogTitle>
-            Adicionar Novo Técnico
-          </DialogTitle>
+          <DialogTitle>Adicionar Novo Técnico</DialogTitle>
 
           <DialogDescription>
             Preencha os dados do novo técnico
@@ -77,7 +73,6 @@ export default function ModalCriarUser({
         </DialogHeader>
 
         <div className="space-y-4">
-
           <Input
             placeholder="Nome completo"
             value={user.nome}
@@ -123,7 +118,7 @@ export default function ModalCriarUser({
             }
           />
 
-            <Input
+          <Input
             placeholder="Senha"
             value={user.senha}
             onChange={(e) =>
@@ -135,21 +130,21 @@ export default function ModalCriarUser({
           />
 
           <select
-            value={user.role_id ?? ""}
+            value={user.role_id ?? ''}
             onChange={(e) =>
-                setUser((state) => ({
+              setUser((state) => ({
                 ...state,
                 role_id: Number(e.target.value),
-                }))
+              }))
             }
             className="w-full rounded-md border px-3 py-2"
-            >
+          >
             <option value="">Selecione uma função</option>
 
             {roles.map((role) => (
-                <option key={role.id} value={role.id}>
+              <option key={role.id} value={role.id}>
                 {role.nome}
-                </option>
+              </option>
             ))}
           </select>
 
@@ -164,13 +159,10 @@ export default function ModalCriarUser({
               !user.telefone.trim()
             }
           >
-            {saving ? "Salvando..." : "Adicionar"}
+            {saving ? 'Salvando...' : 'Adicionar'}
           </Button>
-
         </div>
-
       </DialogContent>
-
     </Dialog>
-  )
+  );
 }

@@ -1,21 +1,13 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { Input } from "@/components/ui/input"
+import { Input } from '@/components/ui/input';
 
 interface FiltrosUsersProps {
-  busca: string
-  setBusca: (value: string) => void
+  busca: string;
+  setBusca: (value: string) => void;
 }
 
-export default function FiltrosUsers({
-  busca,
-  setBusca,
-}: FiltrosUsersProps) {
+export default function FiltrosUsers({ busca, setBusca }: FiltrosUsersProps) {
   return (
     <Card>
       <CardHeader>
@@ -30,5 +22,5 @@ export default function FiltrosUsers({
         />
       </CardContent>
     </Card>
-  )
+  );
 }

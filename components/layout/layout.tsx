@@ -1,22 +1,22 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { Menu, X, LogOut, Settings } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Sidebar from "./sidebar"
+import { useState } from 'react';
+import { Menu, X, LogOut, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Sidebar from './sidebar';
 
 export default function Layout({
   children,
   currentView,
   onViewChange,
 }: {
-  children: React.ReactNode
-  currentView: string
-  onViewChange: (view: any) => void
+  children: React.ReactNode;
+  currentView: string;
+  onViewChange: (view: string) => void;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -24,7 +24,7 @@ export default function Layout({
       <div
         className={`
         fixed inset-y-0 left-0 w-64 bg-card border-r border-border transition-transform duration-300 z-40
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:static lg:translate-x-0 lg:border-r
       `}
       >
@@ -46,11 +46,17 @@ export default function Layout({
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold">OS</span>
             </div>
-            <h1 className="text-xl font-bold text-foreground hidden lg:block">Ordem de Serviço</h1>
+            <h1 className="text-xl font-bold text-foreground hidden lg:block">
+              Ordem de Serviço
+            </h1>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="hidden md:inline-flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden md:inline-flex"
+            >
               <Settings size={18} />
             </Button>
             <Button variant="ghost" size="icon">
@@ -67,8 +73,11 @@ export default function Layout({
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
     </div>
-  )
+  );
 }

@@ -1,73 +1,81 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
-import { LogIn, AlertCircle } from "lucide-react"
-import { loginUsuario, salvarToken, getUsuario } from "@/lib/api/autenticacao"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { LogIn, AlertCircle } from 'lucide-react';
+import { loginUsuario, salvarToken } from '@/lib/api/autenticacao';
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [cpf, setCpf] = useState("")
-  const [senha, setSenha] = useState("")
-  const [lembrarMe, setLembrarMe] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState<string | null>(null)
+  const router = useRouter();
+  const [cpf, setCpf] = useState('');
+  const [senha, setSenha] = useState('');
+  const [lembrarMe, setLembrarMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   const formatCPF = (value: string) => {
-  const numbers = value.replace(/\D/g, "").slice(0, 11);
+    const numbers = value.replace(/\D/g, '').slice(0, 11);
 
-  return numbers
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    return numbers
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
   };
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setErro(null)
-    setLoading(true)
+    e.preventDefault();
+    setErro(null);
+    setLoading(true);
 
     try {
       // Remove pontos e hífen
-      const cpfLimpo = cpf.replace(/\D/g, "")
+      const cpfLimpo = cpf.replace(/\D/g, '');
 
       if (!cpfLimpo || !senha) {
-        setErro("Por favor, preencha todos os campos")
-        setLoading(false)
-        return
+        setErro('Por favor, preencha todos os campos');
+        setLoading(false);
+        return;
       }
 
       // Opcional: validar se possui exatamente 11 dígitos
       if (cpfLimpo.length !== 11) {
-        setErro("CPF inválido")
-        setLoading(false)
-        return
+        setErro('CPF inválido');
+        setLoading(false);
+        return;
       }
 
       // Envia o CPF sem máscara para a API
-      const response = await loginUsuario(cpfLimpo, senha)
-      
-      salvarToken(response.token)
+      const response = await loginUsuario(cpfLimpo, senha);
 
-      const usuario = getUsuario();
+      salvarToken(response.token);
 
       if (lembrarMe) {
-        localStorage.setItem("cpf", cpfLimpo)
+        localStorage.setItem('cpf', cpfLimpo);
       }
 
-      router.push("/ordens")
-    } catch (err: any) {
-      setErro(err.message || "Erro ao fazer login. Verifique suas credenciais.")
-      console.error(err)
+      router.push('/ordens');
+    } catch (err: unknown) {
+      const mensagemErro =
+        err instanceof Error
+          ? err.message
+          : 'Erro ao fazer login. Verifique suas credenciais.';
+      setErro(mensagemErro);
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 p-4">
       {/* Decorative elements */}
@@ -149,7 +157,9 @@ export default function LoginPage() {
                 <Checkbox
                   id="lembrar"
                   checked={lembrarMe}
-                  onCheckedChange={(checked) => setLembrarMe(checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    setLembrarMe(checked as boolean)
+                  }
                   disabled={loading}
                 />
                 <label
@@ -186,7 +196,9 @@ export default function LoginPage() {
                 <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-slate-950 text-muted-foreground">Ou continue com</span>
+                <span className="px-2 bg-white dark:bg-slate-950 text-muted-foreground">
+                  Ou continue com
+                </span>
               </div>
             </div>
 
@@ -205,8 +217,11 @@ export default function LoginPage() {
 
             {/* Footer */}
             <p className="text-center text-sm text-muted-foreground mt-6">
-              Não possui uma conta?{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold">
+              Não possui uma conta?{' '}
+              <a
+                href="#"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+              >
                 Cadastre-se
               </a>
             </p>
@@ -219,5 +234,5 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

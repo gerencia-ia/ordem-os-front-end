@@ -1,12 +1,11 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,12 +13,9 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { ArrowLeft, Edit, Trash2, Plus, Clock, CheckCircle, PlayCircle } from "lucide-react"
-import Link from "next/link"
-import type { Servico, User, Tarefa, OrdemServico } from "@/lib/tipos"
-import { tenicosMock, clientesMock } from "@/lib/dados-mockados"
+} from '@/components/ui/alert-dialog';
+import { ArrowLeft, Clock, CheckCircle, PlayCircle } from 'lucide-react';
+import type { Servico, User, OrdemServico, Equipamento } from '@/lib/tipos';
 import {
   getOrdemServicoById,
   updateOrdemServicoStatus,
@@ -29,45 +25,50 @@ import {
   removeServicoOrdem,
   addTecnicoOrdem,
   removeTecnicoOrdem,
-} from "@/lib/api/ordem_servicos"
-import { getHistoricoLaudosEquipamento, type Laudo } from "@/lib/api/equipamentos"
-import { getServicos } from "@/lib/api/servicos"
-import { getUsers } from "@/lib/api/users"
-import { apiPatch } from "@/lib/api/api"
-import { formatadores } from "@/lib/utilitarios"
+} from '@/lib/api/ordem_servicos';
+import {
+  getHistoricoLaudosEquipamento,
+  type Laudo,
+} from '@/lib/api/equipamentos';
+import { getServicos } from '@/lib/api/servicos';
+import { getUsers } from '@/lib/api/users';
+import { apiPatch } from '@/lib/api/api';
+import { formatadores } from '@/lib/utilitarios';
 
 // Opções de status disponíveis
 const statusOptions = [
-  { id: 1, label: "Agendado" },
-  { id: 2, label: "Em Progresso" },
-  { id: 3, label: "Concluído" },
-  { id: 4, label: "Cancelado" },
-  { id: 5, label: "Não Iniciada" },
-  { id: 6, label: "Em Andamento" },
-  { id: 7, label: "Bloqueada" },
-]
+  { id: 1, label: 'Agendado' },
+  { id: 2, label: 'Em Progresso' },
+  { id: 3, label: 'Concluído' },
+  { id: 4, label: 'Cancelado' },
+  { id: 5, label: 'Não Iniciada' },
+  { id: 6, label: 'Em Andamento' },
+  { id: 7, label: 'Bloqueada' },
+];
 
 type StatusSelectProps = {
-  ordemId: number | string
-  statusAtual: number
-  onStatusChange: (novoStatusId: number) => void | Promise<void>
-}
+  ordemId?: number | string;
+  statusAtual?: number;
+  onStatusChange: (novoStatusId: number) => void | Promise<void>;
+};
 
-function StatusSelect({ ordemId, statusAtual, onStatusChange }: StatusSelectProps) {
-  const [value, setValue] = useState(statusAtual)
-  const [loading, setLoading] = useState(false)
+function StatusSelect({ statusAtual = 1, onStatusChange }: StatusSelectProps) {
+  const [value, setValue] = useState(statusAtual);
+  const [prevStatusAtual, setPrevStatusAtual] = useState(statusAtual);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setValue(statusAtual)
-  }, [statusAtual])
+  if (statusAtual !== prevStatusAtual) {
+    setPrevStatusAtual(statusAtual);
+    setValue(statusAtual);
+  }
 
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const novoStatusId = Number(e.target.value)
-    setLoading(true)
-    setValue(novoStatusId)
-    await onStatusChange(novoStatusId)
-    setLoading(false)
-  }
+    const novoStatusId = Number(e.target.value);
+    setLoading(true);
+    setValue(novoStatusId);
+    await onStatusChange(novoStatusId);
+    setLoading(false);
+  };
 
   return (
     <select
@@ -77,314 +78,296 @@ function StatusSelect({ ordemId, statusAtual, onStatusChange }: StatusSelectProp
       disabled={loading}
     >
       {statusOptions.map((opt) => (
-        <option key={opt.id} value={opt.id}>{opt.label}</option>
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
       ))}
     </select>
-  )
+  );
 }
 
 interface DetalheOrdemProps {
-  ordemId: string
+  ordemId: string;
 }
 
 export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [ordem, setOrdem] = useState<OrdemServico>(null as any)
-  const [tarefas, setTarefas] = useState<Tarefa[]>([])
-  const [novaDescricao, setNovaDescricao] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [roleUsuario, setRoleUsuario] = useState<string>("SECRETARIA")
-  const [acaoLoading, setAcaoLoading] = useState(false)
-  const [modalLaudoAberta, setModalLaudoAberta] = useState(false)
-  const [equipamentoSelecionado, setEquipamentoSelecionado] = useState<any>(null)
-  const [textoLaudo, setTextoLaudo] = useState("")
-  const [laudoSaving, setLaudoSaving] = useState(false)
-  const [modalHistoricoAberta, setModalHistoricoAberta] = useState(false)
-  const [laudosHistorico, setLaudosHistorico] = useState<Laudo[]>([])
-  const [historicoLoading, setHistoricoLoading] = useState(false)
-  const [modalServicoAberta, setModalServicoAberta] = useState(false)
-  const [servicoIdInput, setServicoIdInput] = useState("")
-  const [quantidadeInput, setQuantidadeInput] = useState<string>("")
-  const [servicoSaving, setServicoSaving] = useState(false)
-  const [remocaoLoadingId, setRemocaoLoadingId] = useState<number | string | null>(null)
-  const [servicosDisponiveis, setServicosDisponiveis] = useState<Servico[]>([])
-  const [servicosLoading, setServicosLoading] = useState(false)
-  const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState<User[]>([])
-  const [tecnicoLoading, setTecnicoLoading] = useState(false)
-  const [tecnicoSaving, setTecnicoSaving] = useState(false)
-  const [modalTecnicoAberta, setModalTecnicoAberta] = useState(false)
-  const [tecnicoIdInput, setTecnicoIdInput] = useState("")
-  const [modalFinalizarAberta, setModalFinalizarAberta] = useState(false)
-  const [valorFinal, setValorFinal] = useState("")
-  const [observacaoFinal, setObservacaoFinal] = useState("")
-  const [finalizandoSalvo, setFinalizandoSalvo] = useState(false)
+  const [ordem, setOrdem] = useState<OrdemServico | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [roleUsuario] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const roleSalva = localStorage.getItem('role');
+      if (roleSalva === '1') return 'TECNICO';
+      if (roleSalva === '0') return 'SECRETARIA';
+      if (roleSalva) return roleSalva;
+    }
+    return 'SECRETARIA';
+  });
+  const [acaoLoading, setAcaoLoading] = useState(false);
+  const [modalLaudoAberta, setModalLaudoAberta] = useState(false);
+  const [equipamentoSelecionado, setEquipamentoSelecionado] =
+    useState<Equipamento | null>(null);
+  const [textoLaudo, setTextoLaudo] = useState('');
+  const [laudoSaving, setLaudoSaving] = useState(false);
+  const [modalHistoricoAberta, setModalHistoricoAberta] = useState(false);
+  const [laudosHistorico, setLaudosHistorico] = useState<Laudo[]>([]);
+  const [historicoLoading, setHistoricoLoading] = useState(false);
+  const [modalServicoAberta, setModalServicoAberta] = useState(false);
+  const [servicoIdInput, setServicoIdInput] = useState('');
+  const [quantidadeInput, setQuantidadeInput] = useState<string>('');
+  const [servicoSaving, setServicoSaving] = useState(false);
+  const [remocaoLoadingId, setRemocaoLoadingId] = useState<
+    number | string | null
+  >(null);
+  const [servicosDisponiveis, setServicosDisponiveis] = useState<Servico[]>([]);
+  const [servicosLoading, setServicosLoading] = useState(false);
+  const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState<User[]>([]);
+  const [tecnicoLoading, setTecnicoLoading] = useState(false);
+  const [tecnicoSaving, setTecnicoSaving] = useState(false);
+  const [modalTecnicoAberta, setModalTecnicoAberta] = useState(false);
+  const [tecnicoIdInput, setTecnicoIdInput] = useState('');
+  const [modalFinalizarAberta, setModalFinalizarAberta] = useState(false);
+  const [valorFinal, setValorFinal] = useState('');
+  const [observacaoFinal, setObservacaoFinal] = useState('');
+  const [finalizandoSalvo, setFinalizandoSalvo] = useState(false);
 
   useEffect(() => {
     async function fetchOrdem() {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
-        const data = await getOrdemServicoById(ordemId)
-        setOrdem(data)
-        setTarefas(data.tarefas || [])
-      } catch (err: any) {
-        setError(err.message || "Erro ao buscar ordem de serviço")
+        const data = await getOrdemServicoById(ordemId);
+        setOrdem(data);
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Erro ao buscar ordem de serviço',
+        );
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    fetchOrdem()
-    if (typeof window !== "undefined") {
-      const roleSalva = localStorage.getItem("role")
-      if (roleSalva === "1") setRoleUsuario("TECNICO")
-      else if (roleSalva === "0") setRoleUsuario("SECRETARIA")
-      else if (roleSalva) setRoleUsuario(roleSalva)
-    }
-  }, [ordemId])
+    void fetchOrdem();
+  }, [ordemId]);
 
   const atualizarStatus = async (novoStatusId: number) => {
-    setAcaoLoading(true)
-    await updateOrdemServicoStatus(ordem.id, novoStatusId)
-    const data = await getOrdemServicoById(ordemId)
-    setOrdem(data)
-    setTarefas(data.tarefas || [])
-    setAcaoLoading(false)
-  }
+    if (!ordem) return;
+    setAcaoLoading(true);
+    await updateOrdemServicoStatus(ordem.id, novoStatusId);
+    const data = await getOrdemServicoById(ordemId);
+    setOrdem(data);
+    setAcaoLoading(false);
+  };
 
-  const abrirModalLaudo = (equip: any) => {
-    setEquipamentoSelecionado(equip)
-    setTextoLaudo("")
-    setModalLaudoAberta(true)
-  }
+  const abrirModalLaudo = (equip: Equipamento) => {
+    setEquipamentoSelecionado(equip);
+    setTextoLaudo('');
+    setModalLaudoAberta(true);
+  };
 
   const salvarLaudo = async () => {
-    if (!equipamentoSelecionado || !textoLaudo.trim()) return
-    setLaudoSaving(true)
-    await updateLaudoEquipamento(ordem.id, equipamentoSelecionado.id, textoLaudo.trim())
-    const data = await getOrdemServicoById(ordemId)
-    setOrdem(data)
-    setTarefas(data.tarefas || [])
-    setLaudoSaving(false)
-    setModalLaudoAberta(false)
-  }
+    if (!ordem || !equipamentoSelecionado || !textoLaudo.trim()) return;
+    setLaudoSaving(true);
+    await updateLaudoEquipamento(
+      ordem.id,
+      equipamentoSelecionado.id,
+      textoLaudo.trim(),
+    );
+    const data = await getOrdemServicoById(ordemId);
+    setOrdem(data);
+    setLaudoSaving(false);
+    setModalLaudoAberta(false);
+  };
 
-  const abrirModalHistorico = async (equip: any) => {
-    setEquipamentoSelecionado(equip)
-    setHistoricoLoading(true)
+  const abrirModalHistorico = async (equip: Equipamento) => {
+    setEquipamentoSelecionado(equip);
+    setHistoricoLoading(true);
     try {
-      const laudos = await getHistoricoLaudosEquipamento(equip.id)
-      setLaudosHistorico(laudos)
+      const laudos = await getHistoricoLaudosEquipamento(equip.id);
+      setLaudosHistorico(laudos);
     } catch (err) {
-      console.error("Erro ao carregar histórico:", err)
-      setLaudosHistorico([])
+      console.error('Erro ao carregar histórico:', err);
+      setLaudosHistorico([]);
     } finally {
-      setHistoricoLoading(false)
-      setModalHistoricoAberta(true)
+      setHistoricoLoading(false);
+      setModalHistoricoAberta(true);
     }
-  }
+  };
 
   const iniciarAtendimento = async () => {
-    setAcaoLoading(true)
-    const agora = new Date().toISOString()
-    await updateHorarioAtendimento(ordem.id, agora, "")
-    await atualizarStatus(2) // Status 6: Em Andamento
-    setAcaoLoading(false)
-  }
+    if (!ordem) return;
+    setAcaoLoading(true);
+    const agora = new Date().toISOString();
+    await updateHorarioAtendimento(ordem.id, agora, '');
+    await atualizarStatus(2); // Status 6: Em Andamento
+    setAcaoLoading(false);
+  };
 
   const finalizarAtendimento = async () => {
-    setValorFinal(ordem.valor_total || "")
-    setObservacaoFinal(ordem.observacao || "")
-    setModalFinalizarAberta(true)
-  }
+    if (!ordem) return;
+    setValorFinal(ordem.valor_total || '');
+    setObservacaoFinal(ordem.observacao || '');
+    setModalFinalizarAberta(true);
+  };
 
   const salvarFinalizacao = async () => {
-    if (!valorFinal.trim()) return
-    setFinalizandoSalvo(true)
+    if (!ordem || !valorFinal.trim()) return;
+    setFinalizandoSalvo(true);
     try {
-      const agora = new Date().toISOString()
-      const dataInicio = ordem.data_inicio_atendimento || new Date().toISOString()
-      
+      const agora = new Date().toISOString();
+      const dataInicio =
+        ordem.data_inicio_atendimento || new Date().toISOString();
+
       // Primeiro atualiza os horários, valor e observação
-      await updateHorarioAtendimento(ordem.id, dataInicio, agora)
-      
+      await updateHorarioAtendimento(ordem.id, dataInicio, agora);
+
       // Depois atualiza valor_total e observacao via PATCH
       await apiPatch(`/ordem_servicos/${ordem.id}`, {
         ordem_servico: {
           valor_total: valorFinal,
           observacao: observacaoFinal,
         },
-      })
-      
+      });
+
       // Por último atualiza status
-      await updateOrdemServicoStatus(ordem.id, 3) // Status 3: Concluído
-      
+      await updateOrdemServicoStatus(ordem.id, 3); // Status 3: Concluído
+
       // Recarrega os dados
-      const data = await getOrdemServicoById(ordemId)
-      setOrdem(data)
-      setTarefas(data.tarefas || [])
-      
-      setModalFinalizarAberta(false)
+      const data = await getOrdemServicoById(ordemId);
+      setOrdem(data);
+
+      setModalFinalizarAberta(false);
     } catch (err) {
-      console.error("Erro ao finalizar:", err)
+      console.error('Erro ao finalizar:', err);
     } finally {
-      setFinalizandoSalvo(false)
+      setFinalizandoSalvo(false);
     }
-  }
+  };
 
   const carregarServicos = async () => {
-    setServicosLoading(true)
+    setServicosLoading(true);
     try {
-      const lista = await getServicos()
-      setServicosDisponiveis(lista)
+      const lista = await getServicos();
+      setServicosDisponiveis(lista);
     } catch (err) {
-      console.error("Erro ao carregar serviços:", err)
-      setServicosDisponiveis([])
+      console.error('Erro ao carregar serviços:', err);
+      setServicosDisponiveis([]);
     } finally {
-      setServicosLoading(false)
+      setServicosLoading(false);
     }
-  }
+  };
 
   const abrirModalAdicionarServico = () => {
-    setServicoIdInput("")
-    setQuantidadeInput("")
+    setServicoIdInput('');
+    setQuantidadeInput('');
     if (servicosDisponiveis.length === 0) {
-      void carregarServicos()
+      void carregarServicos();
     }
-    setModalServicoAberta(true)
-  }
+    setModalServicoAberta(true);
+  };
 
   const carregarTecnicos = async () => {
-    setTecnicoLoading(true)
+    setTecnicoLoading(true);
     try {
-      const lista = await getUsers()
-      setTecnicosDisponiveis(lista)
+      const lista = await getUsers();
+      setTecnicosDisponiveis(lista);
     } catch (err) {
-      console.error("Erro ao carregar técnicos:", err)
-      setTecnicosDisponiveis([])
+      console.error('Erro ao carregar técnicos:', err);
+      setTecnicosDisponiveis([]);
     } finally {
-      setTecnicoLoading(false)
+      setTecnicoLoading(false);
     }
-  }
+  };
 
   const abrirModalTecnico = () => {
-    setTecnicoIdInput("")
+    setTecnicoIdInput('');
     if (tecnicosDisponiveis.length === 0) {
-      void carregarTecnicos()
+      void carregarTecnicos();
     }
-    setModalTecnicoAberta(true)
-  }
+    setModalTecnicoAberta(true);
+  };
 
   const salvarTecnico = async () => {
-    if (!tecnicoIdInput.trim()) return
-    setTecnicoSaving(true)
-    await addTecnicoOrdem(ordem.id, tecnicoIdInput.trim())
-    const data = await getOrdemServicoById(ordemId)
-    setOrdem(data)
-    setTarefas(data.tarefas || [])
-    setTecnicoSaving(false)
-    setModalTecnicoAberta(false)
-  }
+    if (!ordem || !tecnicoIdInput.trim()) return;
+    setTecnicoSaving(true);
+    await addTecnicoOrdem(ordem.id, tecnicoIdInput.trim());
+    const data = await getOrdemServicoById(ordemId);
+    setOrdem(data);
+    setTecnicoSaving(false);
+    setModalTecnicoAberta(false);
+  };
 
   const removerTecnico = async () => {
-    setTecnicoSaving(true)
-    await removeTecnicoOrdem(ordem.id, ordem.tecnico_responsavel?.id)
-    const data = await getOrdemServicoById(ordemId)
-    setOrdem(data)
-    setTarefas(data.tarefas || [])
-    setTecnicoSaving(false)
-  }
+    if (!ordem) return;
+    setTecnicoSaving(true);
+    await removeTecnicoOrdem(ordem.id, ordem.tecnico_responsavel?.id);
+    const data = await getOrdemServicoById(ordemId);
+    setOrdem(data);
+    setTecnicoSaving(false);
+  };
 
   const salvarServico = async () => {
-    if (!servicoIdInput.trim()) return
-    setServicoSaving(true)
-    const qtd = quantidadeInput === "" ? undefined : Number(quantidadeInput)
-    await addServicoOrdem(ordem.id, servicoIdInput.trim(), qtd)
-    const data = await getOrdemServicoById(ordemId)
-    setOrdem(data)
-    setTarefas(data.tarefas || [])
-    setServicoSaving(false)
-    setModalServicoAberta(false)
-  }
+    if (!ordem || !servicoIdInput.trim()) return;
+    setServicoSaving(true);
+    const qtd = quantidadeInput === '' ? undefined : Number(quantidadeInput);
+    await addServicoOrdem(ordem.id, servicoIdInput.trim(), qtd);
+    const data = await getOrdemServicoById(ordemId);
+    setOrdem(data);
+    setServicoSaving(false);
+    setModalServicoAberta(false);
+  };
 
   const removerServico = async (servicoId: number | string) => {
-    setRemocaoLoadingId(servicoId)
-    await removeServicoOrdem(ordem.id, servicoId)
-    const data = await getOrdemServicoById(ordemId)
-    setOrdem(data)
-    setTarefas(data.tarefas || [])
-    setRemocaoLoadingId(null)
-  }
+    if (!ordem) return;
+    setRemocaoLoadingId(servicoId);
+    await removeServicoOrdem(ordem.id, servicoId);
+    const data = await getOrdemServicoById(ordemId);
+    setOrdem(data);
+    setRemocaoLoadingId(null);
+  };
 
   const contatarCliente = () => {
-    const numeroOriginal: string | undefined = ordem.cliente?.telefones.find(() => true)?.numero
-    if (!numeroOriginal) return
-    const digits = String(numeroOriginal).replace(/\D/g, "")
-    if (!digits) return
-    let phone = digits
-    if (!phone.startsWith("55")) {
+    if (!ordem) return;
+    const numeroOriginal: string | undefined = ordem.cliente?.telefones.find(
+      () => true,
+    )?.numero;
+    if (!numeroOriginal) return;
+    const digits = String(numeroOriginal).replace(/\D/g, '');
+    if (!digits) return;
+    let phone = digits;
+    if (!phone.startsWith('55')) {
       if (phone.length <= 11) {
-        phone = "55" + phone
+        phone = '55' + phone;
       }
     }
-    const url = `https://wa.me/${phone}`
-    window.open(url, "_blank")
-  }
-
-  const tecnico = ordem ? tenicosMock.find((t) => t.id === ordem.tecnicoId) : null
-  const taxaProgress = tarefas.length > 0 ? (tarefas.filter((t) => t.status === "concluida").length / tarefas.length) * 100 : 0
-
-  const getBadgeStatus = (status: string) => {
-    const cores: { [key: string]: string } = {
-      pendente: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200",
-      em_progresso: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
-      concluido: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200",
-      cancelado: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
-      nao_iniciada: "bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200",
-      em_andamento: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
-      concluida: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200",
-      bloqueada: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
-    }
-    return cores[status] || "bg-gray-100 text-gray-800"
-  }
+    const url = `https://wa.me/${phone}`;
+    window.open(url, '_blank');
+  };
 
   const getBadgePrioridade = (prioridade: string) => {
     const cores: { [key: string]: string } = {
-      critica: "bg-red-500 text-white",
-      alta: "bg-orange-500 text-white",
-      media: "bg-yellow-500 text-white",
-      baixa: "bg-blue-500 text-white",
-    }
-    return cores[prioridade] || ""
-  }
+      critica: 'bg-red-500 text-white',
+      alta: 'bg-orange-500 text-white',
+      media: 'bg-yellow-500 text-white',
+      baixa: 'bg-blue-500 text-white',
+    };
+    return cores[prioridade] || '';
+  };
 
-  const adicionarTarefa = () => {
-    if (novaDescricao.trim()) {
-      const novaTarefa: Tarefa = {
-        id: `tar-${Date.now()}`,
-        descricao: novaDescricao,
-        status: "nao_iniciada",
-      }
-      setTarefas([...tarefas, novaTarefa])
-      setNovaDescricao("")
-    }
-  }
-
-  const removerTarefa = (tarefaId: string) => {
-    setTarefas(tarefas.filter((t) => t.id !== tarefaId))
-  }
-
-  const formatarDataHora = (data: string | Date | null | undefined) => formatadores.dataHoraCurta(data)
+  const formatarDataHora = (data: string | Date | null | undefined) =>
+    formatadores.dataHoraCurta(data);
 
   if (loading) {
-    return <div className="p-6">Carregando...</div>
+    return <div className="p-6">Carregando...</div>;
   }
   if (error) {
-    return <div className="p-6 text-red-500">{error}</div>
+    return <div className="p-6 text-red-500">{error}</div>;
   }
   if (!ordem) {
-    return <div className="p-6">Ordem de serviço não encontrada.</div>
+    return <div className="p-6">Ordem de serviço não encontrada.</div>;
   }
 
   return (
@@ -397,7 +380,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
         <div className="flex-1">
           <h1 className="text-3xl font-bold">OS Número: {ordem.id}</h1>
         </div>
-        {roleUsuario === "TECNICO" && (
+        {roleUsuario === 'TECNICO' && (
           <div className="flex flex-wrap gap-3 items-center">
             {ordem.status_id === 3 ? (
               <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
@@ -451,7 +434,9 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-muted-foreground">Status</label>
+                  <label className="text-sm text-muted-foreground">
+                    Status
+                  </label>
                   <div className="mt-1">
                     <StatusSelect
                       ordemId={ordem.id}
@@ -461,25 +446,37 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground">Prioridade</label>
+                  <label className="text-sm text-muted-foreground">
+                    Prioridade
+                  </label>
                   <div className="mt-1">
-                    <Badge className={getBadgePrioridade(ordem.prioridade_descricao)}>{ordem.prioridade_descricao}</Badge>
+                    <Badge
+                      className={getBadgePrioridade(ordem.prioridade_descricao)}
+                    >
+                      {ordem.prioridade_descricao}
+                    </Badge>
                   </div>
                 </div>
-         
-                <div>
-                  <label className="text-sm text-muted-foreground">Data de Agendamento</label>
-                  <p className="font-medium mt-1">{formatarDataHora(ordem.data_agendamento)}</p>
-                </div>
-               
-              </div>
 
+                <div>
+                  <label className="text-sm text-muted-foreground">
+                    Data de Agendamento
+                  </label>
+                  <p className="font-medium mt-1">
+                    {formatarDataHora(ordem.data_agendamento)}
+                  </p>
+                </div>
+              </div>
 
               {/* Descrição */}
               {ordem.descricao && (
                 <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Descrição da Ordem:</p>
-                  <p className="text-sm bg-muted p-3 rounded-lg">{ordem.descricao}</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Descrição da Ordem:
+                  </p>
+                  <p className="text-sm bg-muted p-3 rounded-lg">
+                    {ordem.descricao}
+                  </p>
                 </div>
               )}
 
@@ -487,33 +484,50 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               {(ordem.custo_estimado || ordem.valor_total) && (
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Custo Estimado:</span>
-                    <span className="font-medium">R$ {ordem.custo_estimado || "-"}</span>
+                    <span className="text-muted-foreground">
+                      Custo Estimado:
+                    </span>
+                    <span className="font-medium">
+                      R$ {ordem.custo_estimado || '-'}
+                    </span>
                   </div>
                   {ordem.valor_total && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Custo Real:</span>
-                      <span className="font-medium">R$ {ordem.valor_total || "-"}</span>
+                      <span className="font-medium">
+                        R$ {ordem.valor_total || '-'}
+                      </span>
                     </div>
                   )}
                 </div>
               )}
 
               {/* Valor Total e Observações Finais */}
-              {(ordem.status_id === 3 || ordem.valor_total || ordem.observacao) && (
+              {(ordem.status_id === 3 ||
+                ordem.valor_total ||
+                ordem.observacao) && (
                 <div className="border-t pt-4 space-y-3">
                   {ordem.valor_total && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Valor Total Cobrado:</p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Valor Total Cobrado:
+                      </p>
                       <p className="text-lg font-bold text-green-600">
-                        R$ {Number(ordem.valor_total).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        R${' '}
+                        {Number(ordem.valor_total).toLocaleString('pt-BR', {
+                          minimumFractionDigits: 2,
+                        })}
                       </p>
                     </div>
                   )}
                   {ordem.observacao && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Observações Finais:</p>
-                      <p className="text-sm bg-muted p-3 rounded-lg">{ordem.observacao}</p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Observações Finais:
+                      </p>
+                      <p className="text-sm bg-muted p-3 rounded-lg">
+                        {ordem.observacao}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -537,20 +551,30 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               {ordem.servicos && ordem.servicos.length > 0 ? (
                 <>
                   <ul className="space-y-2">
-                    {ordem.servicos.map((servico: any) => (
-                      <li key={servico.id} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
+                    {ordem.servicos.map((servico) => (
+                      <li
+                        key={servico.id}
+                        className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0"
+                      >
                         <div>
                           <span className="font-medium">{servico.nome}</span>
                           {servico.quantidade ? (
-                            <span className="ml-2 text-xs text-muted-foreground">x{servico.quantidade}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              x{servico.quantidade}
+                            </span>
                           ) : null}
                           {servico.tempo_servico && (
-                            <div className="text-xs text-muted-foreground mt-1">Tempo: {servico.tempo_servico} min</div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Tempo: {servico.tempo_servico} min
+                            </div>
                           )}
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-sm text-muted-foreground">
-                            R$ {Number(servico.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            R${' '}
+                            {Number(servico.valor).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                            })}
                           </span>
                           {ordem.status_id !== 3 && (
                             <Button
@@ -560,38 +584,55 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                               onClick={() => removerServico(servico.id)}
                               disabled={remocaoLoadingId === servico.id}
                             >
-                              {remocaoLoadingId === servico.id ? "Removendo..." : "Remover"}
+                              {remocaoLoadingId === servico.id
+                                ? 'Removendo...'
+                                : 'Remover'}
                             </Button>
                           )}
                         </div>
                       </li>
                     ))}
                   </ul>
-                  
+
                   {/* Totais */}
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Tempo Total de Serviço:</span>
+                      <span className="text-muted-foreground">
+                        Tempo Total de Serviço:
+                      </span>
                       <span className="font-medium">
                         {(() => {
-                          const tempoTotal = ordem.servicos.reduce((sum: number, s: any) => sum + (s.tempo_servico || 0), 0)
-                          return tempoTotal > 0 ? `${tempoTotal} min` : "-"
+                          const tempoTotal = (ordem.servicos || []).reduce(
+                            (sum: number, s) => sum + (s.tempo_servico || 0),
+                            0,
+                          );
+                          return tempoTotal > 0 ? `${tempoTotal} min` : '-';
                         })()}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Valor Total dos Serviços:</span>
+                      <span className="text-muted-foreground">
+                        Valor Total dos Serviços:
+                      </span>
                       <span className="font-medium">
-                        R$ {(() => {
-                          const valorTotal = ordem.servicos.reduce((sum: number, s: any) => sum + Number(s.valor), 0)
-                          return valorTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+                        R${' '}
+                        {(() => {
+                          const valorTotal = (ordem.servicos || []).reduce(
+                            (sum: number, s) => sum + Number(s.valor),
+                            0,
+                          );
+                          return valorTotal.toLocaleString('pt-BR', {
+                            minimumFractionDigits: 2,
+                          });
                         })()}
                       </span>
                     </div>
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-muted-foreground">Nenhum serviço relacionado.</p>
+                <p className="text-sm text-muted-foreground">
+                  Nenhum serviço relacionado.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -604,12 +645,19 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             <CardContent className="space-y-4">
               {ordem.equipamentos && ordem.equipamentos.length > 0 ? (
                 <ul className="space-y-2">
-                  {ordem.equipamentos.map((equip: any) => (
-                    <li key={equip.id} className="border-b pb-2 last:border-b-0 last:pb-0">
+                  {ordem.equipamentos.map((equip) => (
+                    <li
+                      key={equip.id}
+                      className="border-b pb-2 last:border-b-0 last:pb-0"
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                          <div className="font-medium">{equip.marca} ({equip.btus} BTUs)</div>
-                          <div className="text-sm text-muted-foreground">Local: {equip.local_instalacao}</div>
+                          <div className="font-medium">
+                            {equip.marca} ({equip.btus} BTUs)
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Local: {equip.local_instalacao}
+                          </div>
                           <div className="mt-2">
                             <Button
                               variant="link"
@@ -634,7 +682,9 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">Nenhum equipamento relacionado.</p>
+                <p className="text-sm text-muted-foreground">
+                  Nenhum equipamento relacionado.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -650,20 +700,23 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             <CardContent className="space-y-3">
               <div>
                 <p className="text-sm text-muted-foreground">Nome</p>
-                <p className="font-medium">{ordem.cliente?.nome || "Não informado"}</p>
+                <p className="font-medium">
+                  {ordem.cliente?.nome || 'Não informado'}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Telefone</p>
-                <p className="font-medium">{ordem.cliente?.telefones.find(() => true)?.numero || "-"}</p>
+                <p className="font-medium">
+                  {ordem.cliente?.telefones.find(() => true)?.numero || '-'}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Endereço</p>
-               <p className="font-medium text-sm">
+                <p className="font-medium text-sm">
                   {ordem.cliente?.enderecos?.[0]
                     ? `${ordem.cliente.enderecos[0].rua}, ${ordem.cliente.enderecos[0].numero} - ${ordem.cliente.enderecos[0].bairro}`
-                    : "-"}
+                    : '-'}
                 </p>
-
               </div>
               <Button
                 className="w-full mt-4"
@@ -684,14 +737,19 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               {ordem.tecnicos?.length ? (
                 <>
                   {ordem.tecnicos.map((tecnico) => (
-                    <div key={tecnico.id} className="space-y-2 border-b pb-3 last:border-b-0">
+                    <div
+                      key={tecnico.id}
+                      className="space-y-2 border-b pb-3 last:border-b-0"
+                    >
                       <div>
                         <p className="text-sm text-muted-foreground">Nome</p>
                         <p className="font-medium">{tecnico.nome}</p>
                       </div>
 
                       <div>
-                        <p className="text-sm text-muted-foreground">Telefone</p>
+                        <p className="text-sm text-muted-foreground">
+                          Telefone
+                        </p>
                         <p className="font-medium">{tecnico.telefone}</p>
                       </div>
 
@@ -756,7 +814,9 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   <div className="flex gap-4">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium">Atendimento iniciado</p>
+                      <p className="text-sm font-medium">
+                        Atendimento iniciado
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {formatarDataHora(ordem.data_inicio_atendimento)}
                       </p>
@@ -767,7 +827,9 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   <div className="flex gap-4">
                     <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium">Atendimento finalizado</p>
+                      <p className="text-sm font-medium">
+                        Atendimento finalizado
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {formatarDataHora(ordem.data_fim_atendimento)}
                       </p>
@@ -798,15 +860,25 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
           <AlertDialogDescription>
             {equipamentoSelecionado ? (
               <div className="space-y-2">
-                <p className="text-sm font-medium">{equipamentoSelecionado.marca} ({equipamentoSelecionado.btus} BTUs)</p>
-                <p className="text-sm text-muted-foreground">Local: {equipamentoSelecionado.local_instalacao}</p>
+                <p className="text-sm font-medium">
+                  {equipamentoSelecionado.marca} ({equipamentoSelecionado.btus}{' '}
+                  BTUs)
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Local: {equipamentoSelecionado.local_instalacao}
+                </p>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Selecione um equipamento.</p>
+              <p className="text-sm text-muted-foreground">
+                Selecione um equipamento.
+              </p>
             )}
           </AlertDialogDescription>
           <div className="mt-4 space-y-2">
-            <label className="text-sm text-muted-foreground" htmlFor="laudo-textarea">
+            <label
+              className="text-sm text-muted-foreground"
+              htmlFor="laudo-textarea"
+            >
               Descreva o laudo técnico
             </label>
             <textarea
@@ -821,23 +893,35 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={salvarLaudo}
-              disabled={!equipamentoSelecionado || !textoLaudo.trim() || laudoSaving}
+              disabled={
+                !equipamentoSelecionado || !textoLaudo.trim() || laudoSaving
+              }
             >
-              {laudoSaving ? "Salvando..." : "Salvar laudo"}
+              {laudoSaving ? 'Salvando...' : 'Salvar laudo'}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Modal de adicionar serviço */}
-      <AlertDialog open={modalServicoAberta} onOpenChange={setModalServicoAberta}>
+      <AlertDialog
+        open={modalServicoAberta}
+        onOpenChange={setModalServicoAberta}
+      >
         <AlertDialogContent>
           <AlertDialogTitle>Adicionar serviço</AlertDialogTitle>
           <div className="mt-4 space-y-3">
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground" htmlFor="servico-id-input">Selecione o serviço</label>
+              <label
+                className="text-sm text-muted-foreground"
+                htmlFor="servico-id-input"
+              >
+                Selecione o serviço
+              </label>
               {servicosLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando serviços...</p>
+                <p className="text-sm text-muted-foreground">
+                  Carregando serviços...
+                </p>
               ) : servicosDisponiveis.length > 0 ? (
                 <select
                   id="servico-id-input"
@@ -848,16 +932,26 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   <option value="">Selecione um serviço</option>
                   {servicosDisponiveis.map((servico) => (
                     <option key={servico.id} value={String(servico.id)}>
-                      {servico.nome} - R$ {Number(servico.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      {servico.nome} - R${' '}
+                      {Number(servico.valor).toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                      })}
                     </option>
                   ))}
                 </select>
               ) : (
-                <p className="text-sm text-muted-foreground">Nenhum serviço disponível.</p>
+                <p className="text-sm text-muted-foreground">
+                  Nenhum serviço disponível.
+                </p>
               )}
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground" htmlFor="quantidade-input">Quantidade (opcional)</label>
+              <label
+                className="text-sm text-muted-foreground"
+                htmlFor="quantidade-input"
+              >
+                Quantidade (opcional)
+              </label>
               <Input
                 id="quantidade-input"
                 type="number"
@@ -869,24 +963,36 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <AlertDialogCancel disabled={servicoSaving}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={servicoSaving}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={salvarServico}
-              disabled={!servicoIdInput.trim() || servicoSaving || servicosLoading || servicosDisponiveis.length === 0}
+              disabled={
+                !servicoIdInput.trim() ||
+                servicoSaving ||
+                servicosLoading ||
+                servicosDisponiveis.length === 0
+              }
             >
-              {servicoSaving ? "Adicionando..." : "Adicionar"}
+              {servicoSaving ? 'Adicionando...' : 'Adicionar'}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Modal de técnico responsável */}
-      <AlertDialog open={modalTecnicoAberta} onOpenChange={setModalTecnicoAberta}>
+      <AlertDialog
+        open={modalTecnicoAberta}
+        onOpenChange={setModalTecnicoAberta}
+      >
         <AlertDialogContent>
           <AlertDialogTitle>Selecionar técnico</AlertDialogTitle>
           <div className="mt-4 space-y-3">
             {tecnicoLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando técnicos...</p>
+              <p className="text-sm text-muted-foreground">
+                Carregando técnicos...
+              </p>
             ) : tecnicosDisponiveis.length > 0 ? (
               <select
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -901,36 +1007,51 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                 ))}
               </select>
             ) : (
-              <p className="text-sm text-muted-foreground">Nenhum técnico disponível.</p>
+              <p className="text-sm text-muted-foreground">
+                Nenhum técnico disponível.
+              </p>
             )}
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <AlertDialogCancel disabled={tecnicoSaving}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={tecnicoSaving}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={salvarTecnico}
-              disabled={!tecnicoIdInput.trim() || tecnicoSaving || tecnicoLoading || tecnicosDisponiveis.length === 0}
+              disabled={
+                !tecnicoIdInput.trim() ||
+                tecnicoSaving ||
+                tecnicoLoading ||
+                tecnicosDisponiveis.length === 0
+              }
             >
-              {tecnicoSaving ? "Salvando..." : "Salvar"}
+              {tecnicoSaving ? 'Salvando...' : 'Salvar'}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Modal de histórico de laudos */}
-      <AlertDialog open={modalHistoricoAberta} onOpenChange={setModalHistoricoAberta}>
+      <AlertDialog
+        open={modalHistoricoAberta}
+        onOpenChange={setModalHistoricoAberta}
+      >
         <AlertDialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <AlertDialogTitle>Histórico de laudos</AlertDialogTitle>
           <AlertDialogDescription>
             {equipamentoSelecionado && (
               <p className="text-sm font-medium mb-4">
-                {equipamentoSelecionado.marca} ({equipamentoSelecionado.btus} BTUs) - {equipamentoSelecionado.local_instalacao}
+                {equipamentoSelecionado.marca} ({equipamentoSelecionado.btus}{' '}
+                BTUs) - {equipamentoSelecionado.local_instalacao}
               </p>
             )}
           </AlertDialogDescription>
 
           {historicoLoading ? (
             <div className="flex justify-center py-8">
-              <p className="text-sm text-muted-foreground">Carregando histórico...</p>
+              <p className="text-sm text-muted-foreground">
+                Carregando histórico...
+              </p>
             </div>
           ) : laudosHistorico.length > 0 ? (
             <div className="mt-4 overflow-x-auto">
@@ -947,14 +1068,18 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                   {laudosHistorico.map((laudo) => (
                     <tr key={laudo.id} className="border-b hover:bg-muted/50">
                       <td className="py-2 px-3 text-xs">
-                        {formatarDataHora(laudo.ordem_servico.data_fechamento ?? null)}
+                        {formatarDataHora(
+                          laudo.ordem_servico.data_fechamento ?? null,
+                        )}
                       </td>
                       <td className="py-2 px-3">
                         <p className="text-xs line-clamp-2">{laudo.laudo}</p>
                       </td>
                       <td className="py-2 px-3">
                         <div className="text-xs">
-                          <p className="font-medium">{laudo.ordem_servico.id}</p>
+                          <p className="font-medium">
+                            {laudo.ordem_servico.id}
+                          </p>
                         </div>
                       </td>
                       <td className="py-2 px-3">
@@ -969,7 +1094,9 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             </div>
           ) : (
             <div className="flex justify-center py-8">
-              <p className="text-sm text-muted-foreground">Nenhum laudo registrado para este equipamento.</p>
+              <p className="text-sm text-muted-foreground">
+                Nenhum laudo registrado para este equipamento.
+              </p>
             </div>
           )}
 
@@ -980,7 +1107,10 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
       </AlertDialog>
 
       {/* Modal de finalizar atendimento */}
-      <AlertDialog open={modalFinalizarAberta} onOpenChange={setModalFinalizarAberta}>
+      <AlertDialog
+        open={modalFinalizarAberta}
+        onOpenChange={setModalFinalizarAberta}
+      >
         <AlertDialogContent>
           <AlertDialogTitle>Finalizar Atendimento</AlertDialogTitle>
           <AlertDialogDescription>
@@ -988,7 +1118,10 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
           </AlertDialogDescription>
           <div className="mt-4 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground" htmlFor="valor-final-input">
+              <label
+                className="text-sm text-muted-foreground"
+                htmlFor="valor-final-input"
+              >
                 Valor Total Cobrado
               </label>
               <Input
@@ -1001,7 +1134,10 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground" htmlFor="observacao-final-input">
+              <label
+                className="text-sm text-muted-foreground"
+                htmlFor="observacao-final-input"
+              >
                 Observações Finais
               </label>
               <textarea
@@ -1015,16 +1151,18 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <AlertDialogCancel disabled={finalizandoSalvo}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={finalizandoSalvo}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={salvarFinalizacao}
               disabled={!valorFinal.trim() || finalizandoSalvo}
             >
-              {finalizandoSalvo ? "Finalizando..." : "Finalizar Atendimento"}
+              {finalizandoSalvo ? 'Finalizando...' : 'Finalizar Atendimento'}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

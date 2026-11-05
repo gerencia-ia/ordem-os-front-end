@@ -1,11 +1,10 @@
-import type { Status } from "@/lib/tipos"
-import { apiGet } from "./api"
+import type { Status } from '@/lib/tipos';
+import { apiGet } from './api';
 
 export type StatusPayload = {
-  nome: string
-}
+  nome: string;
+};
 
 export async function getStatus(): Promise<Status[]> {
-  return apiGet<Status[]>("/status", { cache: "no-store" })
+  return apiGet<Status[]>('/status', { cache: 'no-store' });
 }
-

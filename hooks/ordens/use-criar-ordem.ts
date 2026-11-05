@@ -1,38 +1,23 @@
-"use client"
+'use client';
 
-import {
-  useCallback,
-  useState,
-} from "react"
+import { useCallback, useState } from 'react';
 
-import {
-  createOrdemServico,
-} from "@/lib/api/ordem_servicos"
+import { createOrdemServico } from '@/lib/api/ordem_servicos';
 
-import {
-  getClientes,
-} from "@/lib/api/clientes"
+import { getClientes } from '@/lib/api/clientes';
 
-import {
-  getUsers,
-} from "@/lib/api/users"
+import { getUsers } from '@/lib/api/users';
 
-import {
-  getServicos,
-} from "@/lib/api/servicos"
+import { getServicos } from '@/lib/api/servicos';
 
-import {
-  getStatus,
-} from "@/lib/api/status"
+import { getStatus } from '@/lib/api/status';
 
-import {
-  getPrioridades,
-} from "@/lib/api/prioridades"
+import { getPrioridades } from '@/lib/api/prioridades';
 
 import {
   getEquipamentosByCliente,
   createEquipamento as apiCreateEquipamento,
-} from "@/lib/api/equipamentos"
+} from '@/lib/api/equipamentos';
 
 import type {
   Cliente,
@@ -42,7 +27,7 @@ import type {
   Status,
   OrdemServico,
   Prioridade,
-} from "@/lib/tipos"
+} from '@/lib/tipos';
 
 /*
  * ============================================================
@@ -51,29 +36,29 @@ import type {
  */
 
 export interface NovaOrdem {
-  clienteId: string
-  enderecoId: string
+  clienteId: string;
+  enderecoId: string;
 
-  tecnicoIds: string[]
-  equipamentoIds: string[]
-  servicoIds: string[]
+  tecnicoIds: string[];
+  equipamentoIds: string[];
+  servicoIds: string[];
 
-  descricao: string
+  descricao: string;
 
-  prioridade: string
-  status: string
+  prioridade: string;
+  status: string;
 
-  dataAgendamento: string
+  dataAgendamento: string;
 
-  custoEstimado: string
+  custoEstimado: string;
 }
 
 export interface NovoEquipamento {
-  marca: string
-  localInstalacao: string
-  capacidade: string
-  observacao: string
-  clienteId: string
+  marca: string;
+  localInstalacao: string;
+  capacidade: string;
+  observacao: string;
+  clienteId: string;
 }
 
 /*
@@ -83,22 +68,22 @@ export interface NovoEquipamento {
  */
 
 const estadoInicialNovaOrdem: NovaOrdem = {
-  clienteId: "",
-  enderecoId: "",
+  clienteId: '',
+  enderecoId: '',
 
   tecnicoIds: [],
   equipamentoIds: [],
   servicoIds: [],
 
-  descricao: "",
+  descricao: '',
 
-  prioridade: "",
-  status: "",
+  prioridade: '',
+  status: '',
 
-  dataAgendamento: "",
+  dataAgendamento: '',
 
-  custoEstimado: "",
-}
+  custoEstimado: '',
+};
 
 /*
  * ============================================================
@@ -107,30 +92,23 @@ const estadoInicialNovaOrdem: NovaOrdem = {
  */
 
 export function useCriarOrdem() {
-
   /*
    * ==========================================================
    * DADOS NECESSÁRIOS PARA A MODAL
    * ==========================================================
    */
 
-  const [clientes, setClientes] =
-    useState<Cliente[]>([])
+  const [clientes, setClientes] = useState<Cliente[]>([]);
 
-  const [tecnicos, setTecnicos] =
-    useState<User[]>([])
+  const [tecnicos, setTecnicos] = useState<User[]>([]);
 
-  const [equipamentos, setEquipamentos] =
-    useState<Equipamento[]>([])
+  const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
 
-  const [servicos, setServicos] =
-    useState<Servico[]>([])
+  const [servicos, setServicos] = useState<Servico[]>([]);
 
-  const [statusList, setStatusList] =
-    useState<Status[]>([])
+  const [statusList, setStatusList] = useState<Status[]>([]);
 
-  const [prioridadesList, setPrioridadesList] =
-    useState<Prioridade[]>([])
+  const [prioridadesList, setPrioridadesList] = useState<Prioridade[]>([]);
 
   /*
    * ==========================================================
@@ -138,10 +116,7 @@ export function useCriarOrdem() {
    * ==========================================================
    */
 
-  const [novaOrdem, setNovaOrdem] =
-    useState<NovaOrdem>(
-      estadoInicialNovaOrdem
-    )
+  const [novaOrdem, setNovaOrdem] = useState<NovaOrdem>(estadoInicialNovaOrdem);
 
   /*
    * ==========================================================
@@ -149,26 +124,19 @@ export function useCriarOrdem() {
    * ==========================================================
    */
 
-  const [loadingClientes, setLoadingClientes] =
-    useState(false)
+  const [loadingClientes, setLoadingClientes] = useState(false);
 
-  const [loadingTecnicos, setLoadingTecnicos] =
-    useState(false)
+  const [loadingTecnicos, setLoadingTecnicos] = useState(false);
 
-  const [loadingEquipamentos, setLoadingEquipamentos] =
-    useState(false)
+  const [loadingEquipamentos, setLoadingEquipamentos] = useState(false);
 
-  const [loadingServicos, setLoadingServicos] =
-    useState(false)
+  const [loadingServicos, setLoadingServicos] = useState(false);
 
-  const [loadingStatus, setLoadingStatus] =
-    useState(false)
+  const [loadingStatus, setLoadingStatus] = useState(false);
 
-  const [loadingPrioridades, setLoadingPrioridades] =
-    useState(false)
+  const [loadingPrioridades, setLoadingPrioridades] = useState(false);
 
-  const [saving, setSaving] =
-    useState(false)
+  const [saving, setSaving] = useState(false);
 
   /*
    * ==========================================================
@@ -176,54 +144,45 @@ export function useCriarOrdem() {
    * ==========================================================
    */
 
-  const carregarDados = useCallback(
-    async () => {
-      try {
-        setLoadingClientes(true)
-        setLoadingTecnicos(true)
-        setLoadingServicos(true)
-        setLoadingStatus(true)
-        setLoadingPrioridades(true)
+  const carregarDados = useCallback(async () => {
+    try {
+      setLoadingClientes(true);
+      setLoadingTecnicos(true);
+      setLoadingServicos(true);
+      setLoadingStatus(true);
+      setLoadingPrioridades(true);
 
-        const [
-          clientesData,
-          tecnicosData,
-          servicosData,
-          statusData,
-          prioridadesData,
-        ] = await Promise.all([
-          getClientes(),
-          getUsers(),
-          getServicos(),
-          getStatus(),
-          getPrioridades(),
-        ])
+      const [
+        clientesData,
+        tecnicosData,
+        servicosData,
+        statusData,
+        prioridadesData,
+      ] = await Promise.all([
+        getClientes(),
+        getUsers(),
+        getServicos(),
+        getStatus(),
+        getPrioridades(),
+      ]);
 
-        setClientes(clientesData)
-        setTecnicos(tecnicosData)
-        setServicos(servicosData)
-        setStatusList(statusData)
-        setPrioridadesList(
-          prioridadesData
-        )
-      } catch (error) {
-        console.error(
-          "Erro ao carregar dados da ordem:",
-          error
-        )
+      setClientes(clientesData);
+      setTecnicos(tecnicosData);
+      setServicos(servicosData);
+      setStatusList(statusData);
+      setPrioridadesList(prioridadesData);
+    } catch (error) {
+      console.error('Erro ao carregar dados da ordem:', error);
 
-        throw error
-      } finally {
-        setLoadingClientes(false)
-        setLoadingTecnicos(false)
-        setLoadingServicos(false)
-        setLoadingStatus(false)
-        setLoadingPrioridades(false)
-      }
-    },
-    []
-  )
-
+      throw error;
+    } finally {
+      setLoadingClientes(false);
+      setLoadingTecnicos(false);
+      setLoadingServicos(false);
+      setLoadingStatus(false);
+      setLoadingPrioridades(false);
+    }
+  }, []);
 
   /*
    * ==========================================================
@@ -231,32 +190,21 @@ export function useCriarOrdem() {
    * ==========================================================
    */
 
-  const carregarEquipamentos =
-    useCallback(
-      async (clienteId: number) => {
-        try {
-          setLoadingEquipamentos(true)
+  const carregarEquipamentos = useCallback(async (clienteId: number) => {
+    try {
+      setLoadingEquipamentos(true);
 
-          const data =
-            await getEquipamentosByCliente(
-              clienteId
-            )
+      const data = await getEquipamentosByCliente(clienteId);
 
-          setEquipamentos(data)
-        } catch (error) {
-          console.error(
-            "Erro ao carregar equipamentos:",
-            error
-          )
+      setEquipamentos(data);
+    } catch (error) {
+      console.error('Erro ao carregar equipamentos:', error);
 
-          setEquipamentos([])
-        } finally {
-          setLoadingEquipamentos(false)
-        }
-      },
-      []
-    )
-
+      setEquipamentos([]);
+    } finally {
+      setLoadingEquipamentos(false);
+    }
+  }, []);
 
   /*
    * ==========================================================
@@ -264,156 +212,33 @@ export function useCriarOrdem() {
    * ==========================================================
    */
 
-  const criarEquipamento =
-    useCallback(
-      async (
-        equipamento: NovoEquipamento
-      ) => {
-        try {
-          const criado =
-            await apiCreateEquipamento({
-              marca:
-                equipamento.marca,
+  const criarEquipamento = useCallback(async (equipamento: NovoEquipamento) => {
+    try {
+      const criado = await apiCreateEquipamento({
+        marca: equipamento.marca,
 
-              btus:
-                equipamento.capacidade,
+        btus: equipamento.capacidade,
 
-              local_instalacao:
-                equipamento.localInstalacao,
+        local_instalacao: equipamento.localInstalacao,
 
-              observacao:
-                equipamento.observacao,
+        observacao: equipamento.observacao,
 
-              cliente_id:
-                Number(
-                  equipamento.clienteId
-                ),
-            })
+        cliente_id: Number(equipamento.clienteId),
+      });
 
-          /*
-           * Adiciona o novo equipamento
-           * à lista atual.
-           */
-          setEquipamentos(
-            (atual) => [
-              ...atual,
-              criado,
-            ]
-          )
+      /*
+       * Adiciona o novo equipamento
+       * à lista atual.
+       */
+      setEquipamentos((atual) => [...atual, criado]);
 
-          return criado
-        } catch (error) {
-          console.error(
-            "Erro ao criar equipamento:",
-            error
-          )
+      return criado;
+    } catch (error) {
+      console.error('Erro ao criar equipamento:', error);
 
-          throw error
-        }
-      },
-      []
-    )
-
-
-  /*
-   * ==========================================================
-   * CRIAR ORDEM DE SERVIÇO
-   * ==========================================================
-   */
-
-  const criarOrdem =
-    useCallback(
-      async (): Promise<OrdemServico> => {
-        try {
-          setSaving(true)
-
-          const payload = {
-            ordem_servico: {
-              cliente_id:
-                Number(
-                  novaOrdem.clienteId
-                ),
-
-              endereco_id:
-                novaOrdem.enderecoId
-                  ? Number(
-                      novaOrdem.enderecoId
-                    )
-                  : undefined,
-
-              tecnico_ids:
-                novaOrdem.tecnicoIds.map(
-                  Number
-                ),
-
-              equipamento_ids:
-                novaOrdem.equipamentoIds.map(
-                  Number
-                ),
-
-              servico_ids:
-                novaOrdem.servicoIds.map(
-                  Number
-                ),
-
-              descricao:
-                novaOrdem.descricao,
-
-              status_id:
-                Number(
-                  novaOrdem.status
-                ),
-
-              prioridade_id:
-                Number(
-                  novaOrdem.prioridade
-                ),
-
-              data_agendamento:
-                converterData(
-                  novaOrdem.dataAgendamento
-                ),
-
-              custo_estimado:
-                novaOrdem.custoEstimado
-                  ? Number(
-                      novaOrdem.custoEstimado
-                    )
-                  : undefined,
-            },
-          }
-
-          const ordem =
-            await createOrdemServico(
-              payload
-            )
-
-          /*
-           * Limpa o formulário depois
-           * de criar com sucesso.
-           */
-          resetarFormulario()
-
-          return ordem
-
-        } catch (error) {
-          console.error(
-            "Erro ao criar ordem:",
-            error
-          )
-
-          /*
-           * O erro continua sendo lançado
-           * para a modal decidir como exibi-lo.
-           */
-          throw error
-
-        } finally {
-          setSaving(false)
-        }
-      },
-      [novaOrdem]
-    )
+      throw error;
+    }
+  }, []);
 
   /*
    * ==========================================================
@@ -421,14 +246,71 @@ export function useCriarOrdem() {
    * ==========================================================
    */
 
-  const resetarFormulario =
-    useCallback(() => {
-      setNovaOrdem(
-        estadoInicialNovaOrdem
-      )
+  const resetarFormulario = useCallback(() => {
+    setNovaOrdem(estadoInicialNovaOrdem);
 
-      setEquipamentos([])
-    }, [])
+    setEquipamentos([]);
+  }, []);
+
+  /*
+   * ==========================================================
+   * CRIAR ORDEM DE SERVIÇO
+   * ==========================================================
+   */
+
+  const criarOrdem = useCallback(async (): Promise<OrdemServico> => {
+    try {
+      setSaving(true);
+
+      const payload = {
+        ordem_servico: {
+          cliente_id: Number(novaOrdem.clienteId),
+
+          endereco_id: novaOrdem.enderecoId
+            ? Number(novaOrdem.enderecoId)
+            : undefined,
+
+          tecnico_ids: novaOrdem.tecnicoIds.map(Number),
+
+          equipamento_ids: novaOrdem.equipamentoIds.map(Number),
+
+          servico_ids: novaOrdem.servicoIds.map(Number),
+
+          descricao: novaOrdem.descricao,
+
+          status_id: Number(novaOrdem.status),
+
+          prioridade_id: Number(novaOrdem.prioridade),
+
+          data_agendamento: converterData(novaOrdem.dataAgendamento),
+
+          custo_estimado: novaOrdem.custoEstimado
+            ? Number(novaOrdem.custoEstimado)
+            : undefined,
+        },
+      };
+
+      const ordem = await createOrdemServico(payload);
+
+      /*
+       * Limpa o formulário depois
+       * de criar com sucesso.
+       */
+      resetarFormulario();
+
+      return ordem;
+    } catch (error) {
+      console.error('Erro ao criar ordem:', error);
+
+      /*
+       * O erro continua sendo lançado
+       * para a modal decidir como exibi-lo.
+       */
+      throw error;
+    } finally {
+      setSaving(false);
+    }
+  }, [novaOrdem, resetarFormulario]);
 
   /*
    * ==========================================================
@@ -437,7 +319,6 @@ export function useCriarOrdem() {
    */
 
   return {
-
     /*
      * Dados
      */
@@ -460,12 +341,10 @@ export function useCriarOrdem() {
     loading: {
       clientes: loadingClientes,
       tecnicos: loadingTecnicos,
-      equipamentos:
-        loadingEquipamentos,
+      equipamentos: loadingEquipamentos,
       servicos: loadingServicos,
       status: loadingStatus,
-      prioridades:
-        loadingPrioridades,
+      prioridades: loadingPrioridades,
     },
 
     saving,
@@ -478,9 +357,8 @@ export function useCriarOrdem() {
     criarEquipamento,
     criarOrdem,
     resetarFormulario,
-  }
+  };
 }
-
 
 /*
  * ============================================================
@@ -488,18 +366,16 @@ export function useCriarOrdem() {
  * ============================================================
  */
 
-function converterData(
-  valor: string
-) {
+function converterData(valor: string) {
   if (!valor) {
-    return undefined
+    return undefined;
   }
 
-  const data = new Date(valor)
+  const data = new Date(valor);
 
   if (Number.isNaN(data.getTime())) {
-    return undefined
+    return undefined;
   }
 
-  return data.toISOString()
+  return data.toISOString();
 }

@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import Painel from "@/components/painel"
+import Painel from '@/components/painel';
 
 export default function PaginaPainel() {
-  return <Painel />
+  return <Painel />;
 }

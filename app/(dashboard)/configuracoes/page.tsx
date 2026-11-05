@@ -1,45 +1,56 @@
-"use client"
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Settings, Bell, Lock, Palette } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Settings, Bell, Lock, Palette } from 'lucide-react';
 
 export default function PaginaConfiguracoes() {
   const opcoes = [
     {
-      titulo: "Notificações",
-      descricao: "Gerencie suas preferências de notificações",
+      titulo: 'Notificações',
+      descricao: 'Gerencie suas preferências de notificações',
       icon: Bell,
     },
     {
-      titulo: "Segurança",
-      descricao: "Senhas, autenticação e permissões",
+      titulo: 'Segurança',
+      descricao: 'Senhas, autenticação e permissões',
       icon: Lock,
     },
     {
-      titulo: "Aparência",
-      descricao: "Tema, cores e modo escuro",
+      titulo: 'Aparência',
+      descricao: 'Tema, cores e modo escuro',
       icon: Palette,
     },
     {
-      titulo: "Sistema",
-      descricao: "Configurações gerais do sistema",
+      titulo: 'Sistema',
+      descricao: 'Configurações gerais do sistema',
       icon: Settings,
     },
-  ]
+  ];
 
   return (
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground mt-2">Personalize sua experiência no OSControl</p>
+        <p className="text-muted-foreground mt-2">
+          Personalize sua experiência no OSControl
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {opcoes.map((opcao) => {
-          const Icon = opcao.icon
+          const Icon = opcao.icon;
           return (
-            <Card key={opcao.titulo} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={opcao.titulo}
+              className="hover:shadow-lg transition-shadow"
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
@@ -57,9 +68,9 @@ export default function PaginaConfiguracoes() {
                 </Button>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

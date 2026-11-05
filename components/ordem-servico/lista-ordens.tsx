@@ -1,17 +1,16 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react';
 
-import { useOrdens } from "@/hooks/ordens/use-ordens"
-import { useCriarOrdem } from "@/hooks/ordens/use-criar-ordem"
+import { useOrdens } from '@/hooks/ordens/use-ordens';
+import { useCriarOrdem } from '@/hooks/ordens/use-criar-ordem';
 
-import { FiltrosOrdens } from "./filtros-ordens"
-import { TabelaOrdens } from "./tabela-ordens"
-import { ModalCriarOrdem } from "./modal-criar-ordem"
+import { FiltrosOrdens } from './filtros-ordens';
+import { TabelaOrdens } from './tabela-ordens';
+import { ModalCriarOrdem } from './modal-criar-ordem';
 
 export default function ListaOrdens() {
-  const [modalAberta, setModalAberta] =
-    useState(false)
+  const [modalAberta, setModalAberta] = useState(false);
 
   /*
    * ============================================================
@@ -32,7 +31,7 @@ export default function ListaOrdens() {
     limparFiltros,
 
     loading: loadingOrdens,
-  } = useOrdens()
+  } = useOrdens();
 
   /*
    * ============================================================
@@ -58,7 +57,7 @@ export default function ListaOrdens() {
     criarEquipamento,
 
     carregarDados,
-  } = useCriarOrdem()
+  } = useCriarOrdem();
 
   /*
    * ============================================================
@@ -68,28 +67,21 @@ export default function ListaOrdens() {
 
   useEffect(() => {
     if (!modalAberta) {
-      return
+      return;
     }
 
-    carregarDados()
-  }, [
-    modalAberta,
-    carregarDados,
-  ])
+    carregarDados();
+  }, [modalAberta, carregarDados]);
 
   return (
     <div className="space-y-6 p-6">
-
       {/* ======================================================
           CABEÇALHO
           ====================================================== */}
 
       <div className="flex items-center justify-between">
-
         <div>
-          <h1 className="text-3xl font-bold">
-            Ordens de Serviço
-          </h1>
+          <h1 className="text-3xl font-bold">Ordens de Serviço</h1>
 
           <p className="text-muted-foreground">
             Visualize e gerencie todas as suas ordens
@@ -114,40 +106,26 @@ export default function ListaOrdens() {
           statusList={statusList}
           prioridadesList={prioridadesList}
 
-          loadingClientes={
-            loading.clientes
-          }
+          loadingClientes={loading.clientes}
 
-          loadingTecnicos={
-            loading.tecnicos
-          }
+          loadingTecnicos={loading.tecnicos}
 
-          loadingEquipamentos={
-            loading.equipamentos
-          }
+          loadingEquipamentos={loading.equipamentos}
 
-          loadingServicos={
-            loading.servicos
-          }
+          loadingServicos={loading.servicos}
 
-          loadingStatus={
-            loading.status
-          }
+          loadingStatus={loading.status}
 
-          loadingPrioridades={
-            loading.prioridades
-          }
+          loadingPrioridades={loading.prioridades}
 
           saving={saving}
 
           onCriarOrdem={async () => {
-            await criarOrdem()
-            setModalAberta(false)
+            await criarOrdem();
+            setModalAberta(false);
           }}
 
-          onCriarEquipamento={
-            criarEquipamento
-          }
+          onCriarEquipamento={criarEquipamento}
         />
       </div>
 
@@ -158,35 +136,21 @@ export default function ListaOrdens() {
       <FiltrosOrdens
         busca={filtros.busca}
 
-        filtroStatus={
-          filtros.status
-        }
+        filtroStatus={filtros.status}
 
-        filtroDataAgendamento={
-          filtros.data
-        }
+        filtroDataAgendamento={filtros.data}
 
-        filtroTecnico={
-          filtros.tecnico
-        }
+        filtroTecnico={filtros.tecnico}
 
         tecnicos={tecnicos}
 
-        onBuscaChange={
-          setBusca
-        }
+        onBuscaChange={setBusca}
 
-        onStatusChange={
-          setFiltroStatus
-        }
+        onStatusChange={setFiltroStatus}
 
-        onDataChange={
-          setFiltroData
-        }
+        onDataChange={setFiltroData}
 
-        onTecnicoChange={
-          setFiltroTecnico
-        }
+        onTecnicoChange={setFiltroTecnico}
       />
 
       {/* ======================================================
@@ -196,11 +160,8 @@ export default function ListaOrdens() {
       <TabelaOrdens
         ordens={ordensFiltradas}
         loading={loadingOrdens}
-        onLimparFiltros={
-          limparFiltros
-        }
+        onLimparFiltros={limparFiltros}
       />
-
     </div>
-  )
+  );
 }

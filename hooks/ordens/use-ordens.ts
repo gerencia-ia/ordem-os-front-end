@@ -1,141 +1,122 @@
-"use client"
+'use client';
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  getOrdensServico,
-} from "@/lib/api/ordem_servicos"
+import { getOrdensServico } from '@/lib/api/ordem_servicos';
 
-import type { OrdemServico } from "@/lib/tipos"
+import type { OrdemServico } from '@/lib/tipos';
 
 export function useOrdens() {
-  const [ordens, setOrdens] = useState<OrdemServico[]>([])
-  const [loading, setLoading] = useState(false)
+  const [ordens, setOrdens] = useState<OrdemServico[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Filtros
-  const [busca, setBusca] = useState("")
-  const [filtroStatus, setFiltroStatus] = useState("todos")
-  const [filtroData, setFiltroData] = useState("")
-  const [filtroTecnico, setFiltroTecnico] = useState("todos")
+  const [busca, setBusca] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('todos');
+  const [filtroData, setFiltroData] = useState('');
+  const [filtroTecnico, setFiltroTecnico] = useState('todos');
 
   /*
    * Buscar ordens
    */
   const carregarOrdens = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const data = await getOrdensServico()
+      const data = await getOrdensServico();
 
-      setOrdens(data)
+      setOrdens(data);
     } catch (error) {
-      console.error(
-        "Erro ao buscar ordens:",
-        error
-      )
+      console.error('Erro ao buscar ordens:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
   /*
    * Buscar automaticamente ao montar
    */
   useEffect(() => {
-    carregarOrdens()
-  }, [carregarOrdens])
+    let cancelado = false;
+
+    const buscarInicial = async () => {
+      try {
+        const data = await getOrdensServico();
+        if (!cancelado) {
+          setOrdens(data);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar ordens:', error);
+      } finally {
+        if (!cancelado) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void buscarInicial();
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   /*
    * Filtrar ordens
    */
   const ordensFiltradas = useMemo(() => {
-    const termo = normalizarTexto(busca)
+    const termo = normalizarTexto(busca);
 
     return ordens.filter((ordem) => {
       /*
        * Busca por cliente
        */
-      const nomeCliente = normalizarTexto(
-        ordem.cliente?.nome
-      )
+      const nomeCliente = normalizarTexto(ordem.cliente?.nome);
 
-      const matchBusca =
-        !termo ||
-        nomeCliente.includes(termo)
+      const matchBusca = !termo || nomeCliente.includes(termo);
 
       /*
        * Status
        */
       const matchStatus =
-        filtroStatus === "todos" ||
-        ordem.status?.nome === filtroStatus
+        filtroStatus === 'todos' || ordem.status?.nome === filtroStatus;
 
       /*
        * Data
        */
-      const dataOrdem =
-        ordem.data_agendamento
-          ?.split("T")[0] ?? ""
+      const dataOrdem = ordem.data_agendamento?.split('T')[0] ?? '';
 
-      const matchData =
-        !filtroData ||
-        dataOrdem === filtroData
+      const matchData = !filtroData || dataOrdem === filtroData;
 
       /*
        * Técnico
        */
       const matchTecnico =
-        filtroTecnico === "todos" ||
-        ordem.tecnicos?.some(
-          (tecnico) =>
-            String(tecnico.id) ===
-            filtroTecnico
-        )
+        filtroTecnico === 'todos' ||
+        ordem.tecnicos?.some((tecnico) => String(tecnico.id) === filtroTecnico);
 
-      return (
-        matchBusca &&
-        matchStatus &&
-        matchData &&
-        matchTecnico
-      )
-    })
-  }, [
-    ordens,
-    busca,
-    filtroStatus,
-    filtroData,
-    filtroTecnico,
-  ])
+      return matchBusca && matchStatus && matchData && matchTecnico;
+    });
+  }, [ordens, busca, filtroStatus, filtroData, filtroTecnico]);
 
   /*
    * Limpar filtros
    */
   const limparFiltros = useCallback(() => {
-    setBusca("")
-    setFiltroStatus("todos")
-    setFiltroData("")
-    setFiltroTecnico("todos")
-  }, [])
+    setBusca('');
+    setFiltroStatus('todos');
+    setFiltroData('');
+    setFiltroTecnico('todos');
+  }, []);
 
   /*
    * Adicionar uma OS na lista
    *
    * Útil depois de criar uma nova OS.
    */
-  const adicionarOrdem = useCallback(
-    (ordem: OrdemServico) => {
-      setOrdens((atual) => [
-        ordem,
-        ...atual,
-      ])
-    },
-    []
-  )
+  const adicionarOrdem = useCallback((ordem: OrdemServico) => {
+    setOrdens((atual) => [ordem, ...atual]);
+  }, []);
 
   return {
     /*
@@ -171,17 +152,12 @@ export function useOrdens() {
      */
     carregarOrdens,
     adicionarOrdem,
-  }
+  };
 }
 
-function normalizarTexto(
-  valor?: string | null
-) {
-  return (valor ?? "")
-    .normalize("NFD")
-    .replace(
-      /[\u0300-\u036f]/g,
-      ""
-    )
-    .toLowerCase()
+function normalizarTexto(valor?: string | null) {
+  return (valor ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }

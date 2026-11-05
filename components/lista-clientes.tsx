@@ -1,11 +1,18 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -13,224 +20,277 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import type { Cliente, Telefone, Endereco } from "@/lib/tipos"
-import { getClientes } from "@/lib/api/clientes"
-import { createCliente } from "@/lib/api/clientes"
-import { updateCliente } from "@/lib/api/clientes"
-import type { AtualizarClientePayload } from "@/lib/api/clientes"
-import { Plus, Edit, Trash2, Phone, Mail, MapPin, PlusCircle, MessageCircle } from "lucide-react"
-import { CadastrarEquipamento } from "@/components/cadastrar-equipamento"
+} from '@/components/ui/dialog';
+import type { Cliente } from '@/lib/tipos';
+import { getClientes } from '@/lib/api/clientes';
+import { createCliente } from '@/lib/api/clientes';
+import { updateCliente } from '@/lib/api/clientes';
+import type { AtualizarClientePayload } from '@/lib/api/clientes';
+import { Plus, Edit, Trash2, PlusCircle, MessageCircle } from 'lucide-react';
+import {
+  CadastrarEquipamento,
+  type NovoEquipamentoData,
+} from '@/components/cadastrar-equipamento';
 
 type EnderecoForm = {
-  id?: number
-  cep?: string
-  rua: string
-  numero: string
-  bairro: string
-  complemento?: string
-  cidade: string
-}
+  id?: number;
+  cep?: string;
+  rua: string;
+  numero: string;
+  bairro: string;
+  complemento?: string;
+  cidade: string;
+};
 
 type ViaCepResponse = {
-  cep?: string
-  logradouro?: string
-  complemento?: string
-  bairro?: string
-  localidade?: string
-  uf?: string
-  erro?: boolean
-}
+  cep?: string;
+  logradouro?: string;
+  complemento?: string;
+  bairro?: string;
+  localidade?: string;
+  uf?: string;
+  erro?: boolean;
+};
 
 export default function ListaClientes() {
   // Estado para modal de equipamento
-  const [openEquipModal, setOpenEquipModal] = useState(false)
+  const [openEquipModal, setOpenEquipModal] = useState(false);
   // Estado para equipamentos cadastrados em memória
-  const [equipamentos, setEquipamentos] = useState<any[]>([])
-  const [clientes, setClientes] = useState<Cliente[]>([])
-  const [busca, setBusca] = useState("")
-  const [filtroMarcador, setFiltroMarcador] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [equipamentos, setEquipamentos] = useState<NovoEquipamentoData[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [busca, setBusca] = useState('');
+  const [filtroMarcador, setFiltroMarcador] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // estado do novo cliente
   const [novoCliente, setNovoCliente] = useState<{
-    nome: string
-    email?: string
-    data_ultima_visita?: string
-    telefones: { numero: string }[]
-    enderecos: EnderecoForm[]
+    nome: string;
+    email?: string;
+    data_ultima_visita?: string;
+    telefones: { numero: string }[];
+    enderecos: EnderecoForm[];
   }>({
-    nome: "",
-    email: "",
-    data_ultima_visita: "",
-    telefones: [{ numero: "" }],
-    enderecos: [{ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
-  })
+    nome: '',
+    email: '',
+    data_ultima_visita: '',
+    telefones: [{ numero: '' }],
+    enderecos: [
+      { cep: '', rua: '', numero: '', bairro: '', complemento: '', cidade: '' },
+    ],
+  });
 
-  const [open, setOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // edição de cliente
-  const [editOpen, setEditOpen] = useState(false)
-  const [editSaving, setEditSaving] = useState(false)
-  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
-  const [editForm, setEditForm] = useState<{ nome: string; email: string; data_ultima_visita?: string }>({ nome: "", email: "", data_ultima_visita: "" })
-  const [editTelefones, setEditTelefones] = useState<Array<{ id?: number; numero: string }>>([])
-  const [editEnderecos, setEditEnderecos] = useState<EnderecoForm[]>([])
-  const [editEquipOpen, setEditEquipOpen] = useState(false)
-  const [editEquipamentos, setEditEquipamentos] = useState<any[]>([])
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(
+    null,
+  );
+  const [editForm, setEditForm] = useState<{
+    nome: string;
+    email: string;
+    data_ultima_visita?: string;
+  }>({ nome: '', email: '', data_ultima_visita: '' });
+  const [editTelefones, setEditTelefones] = useState<
+    Array<{ id?: number; numero: string }>
+  >([]);
+  const [editEnderecos, setEditEnderecos] = useState<EnderecoForm[]>([]);
+  const [editEquipOpen, setEditEquipOpen] = useState(false);
+  const [editEquipamentos, setEditEquipamentos] = useState<
+    NovoEquipamentoData[]
+  >([]);
 
   // Estados para modal de WhatsApp
-  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false)
-  const [clienteWhatsapp, setClienteWhatsapp] = useState<Cliente | null>(null)
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [clienteWhatsapp, setClienteWhatsapp] = useState<Cliente | null>(null);
 
-  const onlyDigits = (value: string) => value.replace(/\D/g, "")
+  const onlyDigits = (value: string) => value.replace(/\D/g, '');
 
   const formatCep = (value: string) => {
-    const digits = onlyDigits(value).slice(0, 8)
-    if (digits.length <= 5) return digits
-    return `${digits.slice(0, 5)}-${digits.slice(5)}`
-  }
+    const digits = onlyDigits(value).slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
 
   const fetchViaCep = async (cep: string): Promise<ViaCepResponse | null> => {
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
-      if (!response.ok) return null
-      const data = (await response.json()) as ViaCepResponse
-      if (data.erro) return null
-      return data
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      if (!response.ok) return null;
+      const data = (await response.json()) as ViaCepResponse;
+      if (data.erro) return null;
+      return data;
     } catch (err) {
-      console.error("Erro ao consultar ViaCEP", err)
-      return null
+      console.error('Erro ao consultar ViaCEP', err);
+      return null;
     }
-  }
+  };
 
   const preencherNovoEnderecoPorCep = async (idx: number, cep: string) => {
-    const data = await fetchViaCep(cep)
-    if (!data) return
+    const data = await fetchViaCep(cep);
+    if (!data) return;
 
     setNovoCliente((s) => {
-      const arr = [...s.enderecos]
-      const atual = arr[idx]
-      if (!atual || onlyDigits(atual.cep ?? "") !== cep) return s
+      const arr = [...s.enderecos];
+      const atual = arr[idx];
+      if (!atual || onlyDigits(atual.cep ?? '') !== cep) return s;
 
       arr[idx] = {
         ...atual,
         rua: data.logradouro ?? atual.rua,
         bairro: data.bairro ?? atual.bairro,
         cidade: data.localidade ?? atual.cidade,
-        complemento: atual.complemento?.trim() ? atual.complemento : data.complemento ?? atual.complemento,
-      }
+        complemento: atual.complemento?.trim()
+          ? atual.complemento
+          : (data.complemento ?? atual.complemento),
+      };
 
-      return { ...s, enderecos: arr }
-    })
-  }
+      return { ...s, enderecos: arr };
+    });
+  };
 
   const preencherEditEnderecoPorCep = async (idx: number, cep: string) => {
-    const data = await fetchViaCep(cep)
-    if (!data) return
+    const data = await fetchViaCep(cep);
+    if (!data) return;
 
     setEditEnderecos((arr) => {
-      const next = [...arr]
-      const atual = next[idx]
-      if (!atual || onlyDigits(atual.cep ?? "") !== cep) return arr
+      const next = [...arr];
+      const atual = next[idx];
+      if (!atual || onlyDigits(atual.cep ?? '') !== cep) return arr;
 
       next[idx] = {
         ...atual,
         rua: data.logradouro ?? atual.rua,
         bairro: data.bairro ?? atual.bairro,
         cidade: data.localidade ?? atual.cidade,
-        complemento: atual.complemento?.trim() ? atual.complemento : data.complemento ?? atual.complemento,
-      }
+        complemento: atual.complemento?.trim()
+          ? atual.complemento
+          : (data.complemento ?? atual.complemento),
+      };
 
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
-  const addEditTelefone = () => setEditTelefones((arr) => [...arr, { numero: "" }])
+  const addEditTelefone = () =>
+    setEditTelefones((arr) => [...arr, { numero: '' }]);
   const removeEditTelefone = (idx: number) =>
-    setEditTelefones((arr) => arr.filter((_, i) => i !== idx))
+    setEditTelefones((arr) => arr.filter((_, i) => i !== idx));
   const updateEditTelefone = (idx: number, numero: string) =>
     setEditTelefones((arr) => {
-      const next = [...arr]
-      next[idx] = { ...next[idx], numero }
-      return next
-    })
+      const next = [...arr];
+      next[idx] = { ...next[idx], numero };
+      return next;
+    });
 
   const addEditEndereco = () =>
-    setEditEnderecos((arr) => [...arr, { cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }])
+    setEditEnderecos((arr) => [
+      ...arr,
+      { cep: '', rua: '', numero: '', bairro: '', complemento: '', cidade: '' },
+    ]);
   const removeEditEndereco = (idx: number) =>
-    setEditEnderecos((arr) => arr.filter((_, i) => i !== idx))
+    setEditEnderecos((arr) => arr.filter((_, i) => i !== idx));
   const updateEditEndereco = (
     idx: number,
-    field: "cep" | "rua" | "numero" | "bairro" | "complemento" | "cidade",
+    field: 'cep' | 'rua' | 'numero' | 'bairro' | 'complemento' | 'cidade',
     value: string,
   ) =>
     setEditEnderecos((arr) => {
-      const next = [...arr]
-      next[idx] = { ...next[idx], [field]: value }
-      return next as typeof arr
-    })
+      const next = [...arr];
+      next[idx] = { ...next[idx], [field]: value };
+      return next as typeof arr;
+    });
 
   // helpers para telefone/endereço
   const addTelefone = () =>
-    setNovoCliente((s) => ({ ...s, telefones: [...s.telefones, { numero: "" }] }))
+    setNovoCliente((s) => ({
+      ...s,
+      telefones: [...s.telefones, { numero: '' }],
+    }));
   const removeTelefone = (idx: number) =>
-    setNovoCliente((s) => ({ ...s, telefones: s.telefones.filter((_, i) => i !== idx) }))
+    setNovoCliente((s) => ({
+      ...s,
+      telefones: s.telefones.filter((_, i) => i !== idx),
+    }));
   const updateTelefone = (idx: number, numero: string) =>
     setNovoCliente((s) => {
-      const arr = [...s.telefones]
-      arr[idx] = { numero }
-      return { ...s, telefones: arr }
-    })
+      const arr = [...s.telefones];
+      arr[idx] = { numero };
+      return { ...s, telefones: arr };
+    });
 
   const addEndereco = () =>
     setNovoCliente((s) => ({
       ...s,
-      enderecos: [...s.enderecos, { cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
-    }))
+      enderecos: [
+        ...s.enderecos,
+        {
+          cep: '',
+          rua: '',
+          numero: '',
+          bairro: '',
+          complemento: '',
+          cidade: '',
+        },
+      ],
+    }));
   const removeEndereco = (idx: number) =>
-    setNovoCliente((s) => ({ ...s, enderecos: s.enderecos.filter((_, i) => i !== idx) }))
+    setNovoCliente((s) => ({
+      ...s,
+      enderecos: s.enderecos.filter((_, i) => i !== idx),
+    }));
   const updateEndereco = (
     idx: number,
-    field: "cep" | "rua" | "numero" | "bairro" | "complemento" | "cidade",
+    field: 'cep' | 'rua' | 'numero' | 'bairro' | 'complemento' | 'cidade',
     value: string,
   ) =>
     setNovoCliente((s) => {
-      const arr = [...s.enderecos]
-      arr[idx] = { ...arr[idx], [field]: value }
-      return { ...s, enderecos: arr }
-    })
+      const arr = [...s.enderecos];
+      arr[idx] = { ...arr[idx], [field]: value };
+      return { ...s, enderecos: arr };
+    });
 
   const resetNovoCliente = () => {
     setNovoCliente({
-      nome: "",
-      email: "",
-      data_ultima_visita: "",
-      telefones: [{ numero: "" }],
-      enderecos: [{ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "" }],
-    })
-  }
+      nome: '',
+      email: '',
+      data_ultima_visita: '',
+      telefones: [{ numero: '' }],
+      enderecos: [
+        {
+          cep: '',
+          rua: '',
+          numero: '',
+          bairro: '',
+          complemento: '',
+          cidade: '',
+        },
+      ],
+    });
+  };
 
   // Função para resetar cliente e equipamentos juntos
   const resetNovoClienteEEquipamentos = () => {
-    resetNovoCliente()
-    setEquipamentos([])
-  }
+    resetNovoCliente();
+    setEquipamentos([]);
+  };
 
   const handleAddCliente = async () => {
     try {
-      setSaving(true)
+      setSaving(true);
       const criado = await createCliente({
         nome: novoCliente.nome.trim(),
         email: novoCliente.email?.trim() || null,
         data_ultima_visita: novoCliente.data_ultima_visita?.trim() || null,
-        telefones_attributes: novoCliente.telefones.filter(t => t.numero.trim()).map(t => ({ numero: t.numero.trim() })),
+        telefones_attributes: novoCliente.telefones
+          .filter((t) => t.numero.trim())
+          .map((t) => ({ numero: t.numero.trim() })),
         enderecos_attributes: novoCliente.enderecos
-          .filter(e => e.rua.trim())
-          .map(e => ({
-            cep: onlyDigits(e.cep ?? "") || undefined,
+          .filter((e) => e.rua.trim())
+          .map((e) => ({
+            cep: onlyDigits(e.cep ?? '') || undefined,
             rua: e.rua.trim(),
             numero: e.numero.trim(),
             bairro: e.bairro.trim(),
@@ -238,88 +298,114 @@ export default function ListaClientes() {
             cidade: e.cidade.trim(),
           })),
         equipamentos_attributes: equipamentos, // Envia equipamentos junto
-      })
-      setClientes(prev => [criado, ...prev])
-      resetNovoClienteEEquipamentos()
-      setOpen(false)
+      });
+      setClientes((prev) => [criado, ...prev]);
+      resetNovoClienteEEquipamentos();
+      setOpen(false);
     } catch (e) {
-      console.error(e)
-      setError("Erro ao criar cliente")
+      console.error(e);
+      setError('Erro ao criar cliente');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   useEffect(() => {
     async function fetchClientes() {
       try {
-        setLoading(true)
-        const data = await getClientes()
-        setClientes(data)
+        setLoading(true);
+        const data = await getClientes();
+        setClientes(data);
       } catch (err) {
-        setError("Erro ao carregar clientes")
-        console.error(err)
+        setError('Erro ao carregar clientes');
+        console.error(err);
       } finally {
-      // ...existing code...
-        setLoading(false)
+        // ...existing code...
+        setLoading(false);
       }
     }
-    fetchClientes()
-  }, [])
+    fetchClientes();
+  }, []);
 
-  if (loading) return <div className="p-6">Carregando...</div>
-  if (error) return <div className="p-6 text-destructive">{error}</div>
+  if (loading) return <div className="p-6">Carregando...</div>;
+  if (error) return <div className="p-6 text-destructive">{error}</div>;
 
   // Função para calcular e retornar o marcador baseado na última visita
   const getMarcadorVisita = (dataUltimaVisita?: string | null) => {
     if (!dataUltimaVisita) {
-      return { id: "nunca-visitado", texto: "Nunca visitado", variant: "secondary" as const }
+      return {
+        id: 'nunca-visitado',
+        texto: 'Nunca visitado',
+        variant: 'secondary' as const,
+      };
     }
 
-    const ultVisita = new Date(dataUltimaVisita)
-    const hoje = new Date()
-    const diasDecorridos = Math.floor((hoje.getTime() - ultVisita.getTime()) / (1000 * 60 * 60 * 24))
+    const ultVisita = new Date(dataUltimaVisita);
+    const hoje = new Date();
+    const diasDecorridos = Math.floor(
+      (hoje.getTime() - ultVisita.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     if (diasDecorridos < 60) {
-      return { id: "menos-60", texto: `${diasDecorridos} dias`, variant: "default" as const }
+      return {
+        id: 'menos-60',
+        texto: `${diasDecorridos} dias`,
+        variant: 'default' as const,
+      };
     } else if (diasDecorridos < 90) {
-      return { id: "60-90", texto: `${diasDecorridos} dias`, variant: "secondary" as const }
+      return {
+        id: '60-90',
+        texto: `${diasDecorridos} dias`,
+        variant: 'secondary' as const,
+      };
     } else if (diasDecorridos < 180) {
-      return { id: "90-180", texto: `${diasDecorridos} dias`, variant: "outline" as const }
+      return {
+        id: '90-180',
+        texto: `${diasDecorridos} dias`,
+        variant: 'outline' as const,
+      };
     } else {
-      return { id: "acima-180", texto: `Acima de 180 dias`, variant: "destructive" as const }
+      return {
+        id: 'acima-180',
+        texto: `Acima de 180 dias`,
+        variant: 'destructive' as const,
+      };
     }
-  }
+  };
 
-  const clientesFiltrados = clientes.filter(
-    (c) => {
-      // Filtro de texto
-      const buscaNormalizada = busca.trim()
-      const buscaNumerica = buscaNormalizada.replace(/\D/g, "")
-      const textoBuscado = 
-        c.nome.toLowerCase().includes(buscaNormalizada.toLowerCase()) || 
-        (buscaNumerica.length > 0 && (c.telefones?.some(t => t.numero.replace(/\D/g, "").includes(buscaNumerica)) || false))
-      
-      // Filtro de marcador
-      if (filtroMarcador) {
-        const marcador = getMarcadorVisita(c.data_ultima_visita)
-        return textoBuscado && marcador.id === filtroMarcador
-      }
-      
-      return textoBuscado
+  const clientesFiltrados = clientes.filter((c) => {
+    // Filtro de texto
+    const buscaNormalizada = busca.trim();
+    const buscaNumerica = buscaNormalizada.replace(/\D/g, '');
+    const textoBuscado =
+      c.nome.toLowerCase().includes(buscaNormalizada.toLowerCase()) ||
+      (buscaNumerica.length > 0 &&
+        (c.telefones?.some((t) =>
+          t.numero.replace(/\D/g, '').includes(buscaNumerica),
+        ) ||
+          false));
+
+    // Filtro de marcador
+    if (filtroMarcador) {
+      const marcador = getMarcadorVisita(c.data_ultima_visita);
+      return textoBuscado && marcador.id === filtroMarcador;
     }
-  )
+
+    return textoBuscado;
+  });
 
   // Função para abrir WhatsApp
   const abrirWhatsapp = (numero: string, nomeCliente: string) => {
     // Remove caracteres não numéricos
-    const numeroLimpo = numero.replace(/\D/g, "")
+    const numeroLimpo = numero.replace(/\D/g, '');
     // Se não começar com 55, adiciona código do Brasil
-    const numeroWhatsapp = numeroLimpo.startsWith("55") ? numeroLimpo : "55" + numeroLimpo
-    const mensagem = `Olá ${nomeCliente}, tudo bem?`
-    const urlWhatsapp = `https://wa.me/${numeroWhatsapp}?text=${encodeURIComponent(mensagem)}`
-    window.open(urlWhatsapp, "_blank")
-  }
+    const numeroWhatsapp = numeroLimpo.startsWith('55')
+      ? numeroLimpo
+      : '55' + numeroLimpo;
+    const mensagem = `Olá ${nomeCliente}, tudo bem?`;
+    const urlWhatsapp = `https://wa.me/${numeroWhatsapp}?text=${encodeURIComponent(mensagem)}`;
+    window.open(urlWhatsapp, '_blank');
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -335,54 +421,76 @@ export default function ListaClientes() {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-3xl">
-
             <DialogHeader>
               <DialogTitle>Adicionar Novo Cliente</DialogTitle>
-              <DialogDescription>Preencha os dados do novo cliente</DialogDescription>
+              <DialogDescription>
+                Preencha os dados do novo cliente
+              </DialogDescription>
             </DialogHeader>
 
             <div className="flex justify-end mb-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => setOpenEquipModal(true)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setOpenEquipModal(true)}
+              >
                 <PlusCircle className="h-4 w-4 mr-1" /> Cadastrar Equipamento
               </Button>
             </div>
-          {/* Modal de cadastro de equipamento */}
-          <CadastrarEquipamento
-            open={openEquipModal}
-            setOpen={setOpenEquipModal}
-            onSalvarEquipamento={(equip) => setEquipamentos((prev) => [...prev, equip])}
-          />
-          {/* Lista de equipamentos cadastrados em memória */}
-          {equipamentos.length > 0 && (
-            <div className="mb-4">
-              <div className="font-medium mb-1">Equipamentos cadastrados:</div>
-              <ul className="list-disc pl-5">
-                {equipamentos.map((eq, i) => (
-                  <li key={i} className="text-sm">
-                    {eq.marca} - {eq.btus} BTUs - {eq.local_instalacao} {eq.observacao && `- ${eq.observacao}`}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {/* Modal de cadastro de equipamento */}
+            <CadastrarEquipamento
+              open={openEquipModal}
+              setOpen={setOpenEquipModal}
+              onSalvarEquipamento={(equip) =>
+                setEquipamentos((prev) => [...prev, equip])
+              }
+            />
+            {/* Lista de equipamentos cadastrados em memória */}
+            {equipamentos.length > 0 && (
+              <div className="mb-4">
+                <div className="font-medium mb-1">
+                  Equipamentos cadastrados:
+                </div>
+                <ul className="list-disc pl-5">
+                  {equipamentos.map((eq, i) => (
+                    <li key={i} className="text-sm">
+                      {eq.marca} - {eq.btus} BTUs - {eq.local_instalacao}{' '}
+                      {eq.observacao && `- ${eq.observacao}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="space-y-4">
               <Input
                 placeholder="Nome do cliente"
                 value={novoCliente.nome}
-                onChange={(e) => setNovoCliente((s) => ({ ...s, nome: e.target.value }))}
+                onChange={(e) =>
+                  setNovoCliente((s) => ({ ...s, nome: e.target.value }))
+                }
               />
               <Input
                 placeholder="E-mail (opcional)"
-                value={novoCliente.email ?? ""}
-                onChange={(e) => setNovoCliente((s) => ({ ...s, email: e.target.value }))}
+                value={novoCliente.email ?? ''}
+                onChange={(e) =>
+                  setNovoCliente((s) => ({ ...s, email: e.target.value }))
+                }
               />
               <div>
-                <label className="text-sm font-medium mb-1 block">Data da Última Visita (opcional)</label>
+                <label className="text-sm font-medium mb-1 block">
+                  Data da Última Visita (opcional)
+                </label>
                 <Input
                   type="date"
-                  value={novoCliente.data_ultima_visita ?? ""}
-                  onChange={(e) => setNovoCliente((s) => ({ ...s, data_ultima_visita: e.target.value }))}
+                  value={novoCliente.data_ultima_visita ?? ''}
+                  onChange={(e) =>
+                    setNovoCliente((s) => ({
+                      ...s,
+                      data_ultima_visita: e.target.value,
+                    }))
+                  }
                 />
               </div>
 
@@ -390,7 +498,12 @@ export default function ListaClientes() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Telefones</span>
-                  <Button type="button" variant="secondary" size="sm" onClick={addTelefone}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={addTelefone}
+                  >
                     + Telefone
                   </Button>
                 </div>
@@ -418,7 +531,12 @@ export default function ListaClientes() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Endereços</span>
-                  <Button type="button" variant="secondary" size="sm" onClick={addEndereco}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={addEndereco}
+                  >
                     + Endereço
                   </Button>
                 </div>
@@ -427,47 +545,56 @@ export default function ListaClientes() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <Input
                         placeholder="CEP"
-                        value={e.cep ?? ""}
+                        value={e.cep ?? ''}
                         maxLength={9}
                         onChange={(ev) => {
-                          const cepFormatado = formatCep(ev.target.value)
-                          updateEndereco(idx, "cep", cepFormatado)
+                          const cepFormatado = formatCep(ev.target.value);
+                          updateEndereco(idx, 'cep', cepFormatado);
 
-                          const cepLimpo = onlyDigits(cepFormatado)
+                          const cepLimpo = onlyDigits(cepFormatado);
                           if (cepLimpo.length === 8) {
-                            void preencherNovoEnderecoPorCep(idx, cepLimpo)
+                            void preencherNovoEnderecoPorCep(idx, cepLimpo);
                           }
                         }}
                       />
                       <Input
                         placeholder="Rua"
                         value={e.rua}
-                        onChange={(ev) => updateEndereco(idx, "rua", ev.target.value)}
+                        onChange={(ev) =>
+                          updateEndereco(idx, 'rua', ev.target.value)
+                        }
                       />
                       <Input
                         placeholder="Número"
                         value={e.numero}
-                        onChange={(ev) => updateEndereco(idx, "numero", ev.target.value)}
+                        onChange={(ev) =>
+                          updateEndereco(idx, 'numero', ev.target.value)
+                        }
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <Input
                         placeholder="Bairro"
                         value={e.bairro}
-                        onChange={(ev) => updateEndereco(idx, "bairro", ev.target.value)}
+                        onChange={(ev) =>
+                          updateEndereco(idx, 'bairro', ev.target.value)
+                        }
                       />
-                        <Input
-                          placeholder="Cidade"
-                          value={e.cidade}
-                          onChange={(ev) => updateEndereco(idx, "cidade", ev.target.value)}
-                        />
+                      <Input
+                        placeholder="Cidade"
+                        value={e.cidade}
+                        onChange={(ev) =>
+                          updateEndereco(idx, 'cidade', ev.target.value)
+                        }
+                      />
                       <Input
                         placeholder="Complemento"
-                        value={e.complemento ?? ""}
-                        onChange={(ev) => updateEndereco(idx, "complemento", ev.target.value)}
+                        value={e.complemento ?? ''}
+                        onChange={(ev) =>
+                          updateEndereco(idx, 'complemento', ev.target.value)
+                        }
                       />
-                    <div>
-                    </div>
+                      <div></div>
                       <Button
                         type="button"
                         variant="ghost"
@@ -487,30 +614,40 @@ export default function ListaClientes() {
                 onClick={handleAddCliente}
                 disabled={saving || !novoCliente.nome.trim()}
               >
-                {saving ? "Salvando..." : "Adicionar"}
+                {saving ? 'Salvando...' : 'Adicionar'}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
 
         {/* Dialog de edição de cliente */}
-        <Dialog open={editOpen} onOpenChange={(o) => {
-          setEditOpen(o)
-          if (!o) {
-            setClienteSelecionado(null)
-            setEditTelefones([])
-            setEditEnderecos([])
-            setEditEquipamentos([])
-            setEditEquipOpen(false)
-          }
-        }}>
+        <Dialog
+          open={editOpen}
+          onOpenChange={(o) => {
+            setEditOpen(o);
+            if (!o) {
+              setClienteSelecionado(null);
+              setEditTelefones([]);
+              setEditEnderecos([]);
+              setEditEquipamentos([]);
+              setEditEquipOpen(false);
+            }
+          }}
+        >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Editar Cliente</DialogTitle>
-              <DialogDescription>Atualize os dados do cliente</DialogDescription>
+              <DialogDescription>
+                Atualize os dados do cliente
+              </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end mb-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => setEditEquipOpen(true)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditEquipOpen(true)}
+              >
                 <PlusCircle className="h-4 w-4 mr-1" /> Cadastrar Equipamento
               </Button>
             </div>
@@ -518,16 +655,21 @@ export default function ListaClientes() {
             <CadastrarEquipamento
               open={editEquipOpen}
               setOpen={setEditEquipOpen}
-              onSalvarEquipamento={(equip) => setEditEquipamentos((prev) => [...prev, equip])}
+              onSalvarEquipamento={(equip) =>
+                setEditEquipamentos((prev) => [...prev, equip])
+              }
             />
             {/* Lista de equipamentos adicionados nesta edição */}
             {editEquipamentos.length > 0 && (
               <div className="mb-4">
-                <div className="font-medium mb-1">Equipamentos adicionados:</div>
+                <div className="font-medium mb-1">
+                  Equipamentos adicionados:
+                </div>
                 <ul className="list-disc pl-5">
                   {editEquipamentos.map((eq, i) => (
                     <li key={i} className="text-sm">
-                      {eq.marca} - {eq.btus} BTUs - {eq.local_instalacao} {eq.observacao && `- ${eq.observacao}`}
+                      {eq.marca} - {eq.btus} BTUs - {eq.local_instalacao}{' '}
+                      {eq.observacao && `- ${eq.observacao}`}
                     </li>
                   ))}
                 </ul>
@@ -537,19 +679,30 @@ export default function ListaClientes() {
               <Input
                 placeholder="Nome do cliente"
                 value={editForm.nome}
-                onChange={(e) => setEditForm((s) => ({ ...s, nome: e.target.value }))}
+                onChange={(e) =>
+                  setEditForm((s) => ({ ...s, nome: e.target.value }))
+                }
               />
               <Input
                 placeholder="E-mail (opcional)"
                 value={editForm.email}
-                onChange={(e) => setEditForm((s) => ({ ...s, email: e.target.value }))}
+                onChange={(e) =>
+                  setEditForm((s) => ({ ...s, email: e.target.value }))
+                }
               />
               <div>
-                <label className="text-sm font-medium mb-1 block">Data da Última Visita (opcional)</label>
+                <label className="text-sm font-medium mb-1 block">
+                  Data da Última Visita (opcional)
+                </label>
                 <Input
                   type="date"
-                  value={editForm.data_ultima_visita ?? ""}
-                  onChange={(e) => setEditForm((s) => ({ ...s, data_ultima_visita: e.target.value }))}
+                  value={editForm.data_ultima_visita ?? ''}
+                  onChange={(e) =>
+                    setEditForm((s) => ({
+                      ...s,
+                      data_ultima_visita: e.target.value,
+                    }))
+                  }
                 />
               </div>
 
@@ -557,7 +710,12 @@ export default function ListaClientes() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Telefones</span>
-                  <Button type="button" variant="secondary" size="sm" onClick={addEditTelefone}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={addEditTelefone}
+                  >
                     + Telefone
                   </Button>
                 </div>
@@ -585,7 +743,12 @@ export default function ListaClientes() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Endereços</span>
-                  <Button type="button" variant="secondary" size="sm" onClick={addEditEndereco}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={addEditEndereco}
+                  >
                     + Endereço
                   </Button>
                 </div>
@@ -594,44 +757,58 @@ export default function ListaClientes() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <Input
                         placeholder="CEP"
-                        value={e.cep ?? ""}
+                        value={e.cep ?? ''}
                         maxLength={9}
                         onChange={(ev) => {
-                          const cepFormatado = formatCep(ev.target.value)
-                          updateEditEndereco(idx, "cep", cepFormatado)
+                          const cepFormatado = formatCep(ev.target.value);
+                          updateEditEndereco(idx, 'cep', cepFormatado);
 
-                          const cepLimpo = onlyDigits(cepFormatado)
+                          const cepLimpo = onlyDigits(cepFormatado);
                           if (cepLimpo.length === 8) {
-                            void preencherEditEnderecoPorCep(idx, cepLimpo)
+                            void preencherEditEnderecoPorCep(idx, cepLimpo);
                           }
                         }}
                       />
                       <Input
                         placeholder="Rua"
                         value={e.rua}
-                        onChange={(ev) => updateEditEndereco(idx, "rua", ev.target.value)}
+                        onChange={(ev) =>
+                          updateEditEndereco(idx, 'rua', ev.target.value)
+                        }
                       />
                       <Input
                         placeholder="Número"
                         value={e.numero}
-                        onChange={(ev) => updateEditEndereco(idx, "numero", ev.target.value)}
+                        onChange={(ev) =>
+                          updateEditEndereco(idx, 'numero', ev.target.value)
+                        }
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <Input
                         placeholder="Bairro"
                         value={e.bairro}
-                        onChange={(ev) => updateEditEndereco(idx, "bairro", ev.target.value)}
+                        onChange={(ev) =>
+                          updateEditEndereco(idx, 'bairro', ev.target.value)
+                        }
                       />
                       <Input
                         placeholder="Cidade"
                         value={e.cidade}
-                        onChange={(ev) => updateEditEndereco(idx, "cidade", ev.target.value)}
+                        onChange={(ev) =>
+                          updateEditEndereco(idx, 'cidade', ev.target.value)
+                        }
                       />
                       <Input
                         placeholder="Complemento"
-                        value={e.complemento ?? ""}
-                        onChange={(ev) => updateEditEndereco(idx, "complemento", ev.target.value)}
+                        value={e.complemento ?? ''}
+                        onChange={(ev) =>
+                          updateEditEndereco(
+                            idx,
+                            'complemento',
+                            ev.target.value,
+                          )
+                        }
                       />
                       <div />
                       <Button
@@ -651,64 +828,86 @@ export default function ListaClientes() {
                 className="w-full"
                 type="button"
                 onClick={async () => {
-                  if (!clienteSelecionado) return
+                  if (!clienteSelecionado) return;
                   try {
-                    setEditSaving(true)
+                    setEditSaving(true);
                     // Monta payload de atualização com nested attributes
-                    const originalTels = clienteSelecionado.telefones || []
-                    const originalEnds = clienteSelecionado.enderecos || []
+                    const originalTels = clienteSelecionado.telefones || [];
+                    const originalEnds = clienteSelecionado.enderecos || [];
 
-                    const currentTels = editTelefones.filter(t => t.numero.trim())
-                    const currentEnds = editEnderecos.filter(e => e.rua.trim())
+                    const currentTels = editTelefones.filter((t) =>
+                      t.numero.trim(),
+                    );
+                    const currentEnds = editEnderecos.filter((e) =>
+                      e.rua.trim(),
+                    );
 
                     const removedTels = originalTels
-                      .filter(ot => !currentTels.some(ct => ct.id === ot.id))
-                      .map(ot => ({ id: ot.id, _destroy: true }))
+                      .filter(
+                        (ot) => !currentTels.some((ct) => ct.id === ot.id),
+                      )
+                      .map((ot) => ({ id: ot.id, _destroy: true }));
                     const removedEnds = originalEnds
-                      .filter(oe => !currentEnds.some(ce => ce.id === oe.id))
-                      .map(oe => ({ id: oe.id, _destroy: true }))
+                      .filter(
+                        (oe) => !currentEnds.some((ce) => ce.id === oe.id),
+                      )
+                      .map((oe) => ({ id: oe.id, _destroy: true }));
 
                     const telsAttributes = [
-                      ...currentTels.map(t => ({ id: t.id, numero: t.numero.trim() })),
+                      ...currentTels.map((t) => ({
+                        id: t.id,
+                        numero: t.numero.trim(),
+                      })),
                       ...removedTels,
-                    ]
+                    ];
                     const endsAttributes = [
-                      ...currentEnds.map(e => ({
+                      ...currentEnds.map((e) => ({
                         id: e.id,
-                        cep: onlyDigits(e.cep ?? "") || undefined,
+                        cep: onlyDigits(e.cep ?? '') || undefined,
                         rua: e.rua.trim(),
                         numero: e.numero.trim(),
                         bairro: e.bairro.trim(),
-                        complemento: e.complemento?.toString().trim() || undefined,
+                        complemento:
+                          e.complemento?.toString().trim() || undefined,
                         cidade: e.cidade.trim(),
                       })),
                       ...removedEnds,
-                    ]
+                    ];
 
                     const payload: AtualizarClientePayload = {
                       nome: editForm.nome.trim(),
-                      email: editForm.email.trim() ? editForm.email.trim() : null,
-                      data_ultima_visita: editForm.data_ultima_visita?.trim() || null,
+                      email: editForm.email.trim()
+                        ? editForm.email.trim()
+                        : null,
+                      data_ultima_visita:
+                        editForm.data_ultima_visita?.trim() || null,
                       telefones_attributes: telsAttributes,
                       enderecos_attributes: endsAttributes,
                       equipamentos_attributes: editEquipamentos,
-                    }
+                    };
 
-                    const atualizado = await updateCliente(String(clienteSelecionado.id), payload)
-                    setClientes((lista) => lista.map((c) => (c.id === atualizado.id ? { ...c, ...atualizado } : c)))
-                    setEditOpen(false)
-                    setClienteSelecionado(null)
-                    setEditEquipamentos([])
+                    const atualizado = await updateCliente(
+                      String(clienteSelecionado.id),
+                      payload,
+                    );
+                    setClientes((lista) =>
+                      lista.map((c) =>
+                        c.id === atualizado.id ? { ...c, ...atualizado } : c,
+                      ),
+                    );
+                    setEditOpen(false);
+                    setClienteSelecionado(null);
+                    setEditEquipamentos([]);
                   } catch (e) {
-                    console.error(e)
-                    setError("Erro ao atualizar cliente")
+                    console.error(e);
+                    setError('Erro ao atualizar cliente');
                   } finally {
-                    setEditSaving(false)
+                    setEditSaving(false);
                   }
                 }}
                 disabled={editSaving || !editForm.nome.trim()}
               >
-                {editSaving ? "Salvando..." : "Salvar alterações"}
+                {editSaving ? 'Salvando...' : 'Salvar alterações'}
               </Button>
             </div>
           </DialogContent>
@@ -719,7 +918,9 @@ export default function ListaClientes() {
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Selecione o telefone</DialogTitle>
-              <DialogDescription>Escolha qual número usar para enviar mensagem no WhatsApp</DialogDescription>
+              <DialogDescription>
+                Escolha qual número usar para enviar mensagem no WhatsApp
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               {clienteWhatsapp?.telefones.map((telefone) => (
@@ -728,8 +929,8 @@ export default function ListaClientes() {
                   className="w-full justify-between"
                   variant="outline"
                   onClick={() => {
-                    abrirWhatsapp(telefone.numero, clienteWhatsapp.nome)
-                    setWhatsappModalOpen(false)
+                    abrirWhatsapp(telefone.numero, clienteWhatsapp.nome);
+                    setWhatsappModalOpen(false);
                   }}
                 >
                   <MessageCircle className="h-4 w-4 text-green-500 mr-2" />
@@ -748,50 +949,58 @@ export default function ListaClientes() {
         <CardContent className="space-y-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Buscar</label>
-            <Input placeholder="Por nome ou telefone..." value={busca} onChange={(e) => setBusca(e.target.value)} />
+            <Input
+              placeholder="Por nome ou telefone..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
           </div>
           <div>
-            <label className="text-sm font-medium mb-2 block">Por Marcador</label>
+            <label className="text-sm font-medium mb-2 block">
+              Por Marcador
+            </label>
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={filtroMarcador === null ? "default" : "outline"}
+                variant={filtroMarcador === null ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFiltroMarcador(null)}
               >
                 Todos
               </Button>
               <Button
-                variant={filtroMarcador === "menos-60" ? "default" : "outline"}
+                variant={filtroMarcador === 'menos-60' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFiltroMarcador("menos-60")}
+                onClick={() => setFiltroMarcador('menos-60')}
               >
                 &lt; 60 dias
               </Button>
               <Button
-                variant={filtroMarcador === "60-90" ? "default" : "outline"}
+                variant={filtroMarcador === '60-90' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFiltroMarcador("60-90")}
+                onClick={() => setFiltroMarcador('60-90')}
               >
                 60-90 dias
               </Button>
               <Button
-                variant={filtroMarcador === "90-180" ? "default" : "outline"}
+                variant={filtroMarcador === '90-180' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFiltroMarcador("90-180")}
+                onClick={() => setFiltroMarcador('90-180')}
               >
                 90-180 dias
               </Button>
               <Button
-                variant={filtroMarcador === "acima-180" ? "default" : "outline"}
+                variant={filtroMarcador === 'acima-180' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setFiltroMarcador("acima-180")}
+                onClick={() => setFiltroMarcador('acima-180')}
               >
                 &gt; 180 dias
               </Button>
               <Button
-                variant={filtroMarcador === "nunca-visitado" ? "default" : "outline"}
+                variant={
+                  filtroMarcador === 'nunca-visitado' ? 'default' : 'outline'
+                }
                 size="sm"
-                onClick={() => setFiltroMarcador("nunca-visitado")}
+                onClick={() => setFiltroMarcador('nunca-visitado')}
               >
                 Nunca visitado
               </Button>
@@ -820,10 +1029,14 @@ export default function ListaClientes() {
               <TableBody>
                 {clientesFiltrados.map((cliente) => (
                   <TableRow key={cliente.id}>
-                    <TableCell className="font-medium">{cliente.nome}</TableCell>
+                    <TableCell className="font-medium">
+                      {cliente.nome}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span>{cliente.telefones.map(t => t.numero).join(", ")}</span>
+                        <span>
+                          {cliente.telefones.map((t) => t.numero).join(', ')}
+                        </span>
                         {cliente.telefones.length > 0 && (
                           <Button
                             variant="ghost"
@@ -831,10 +1044,13 @@ export default function ListaClientes() {
                             className="p-1 h-auto"
                             onClick={() => {
                               if (cliente.telefones.length === 1) {
-                                abrirWhatsapp(cliente.telefones[0].numero, cliente.nome)
+                                abrirWhatsapp(
+                                  cliente.telefones[0].numero,
+                                  cliente.nome,
+                                );
                               } else {
-                                setClienteWhatsapp(cliente)
-                                setWhatsappModalOpen(true)
+                                setClienteWhatsapp(cliente);
+                                setWhatsappModalOpen(true);
                               }
                             }}
                           >
@@ -845,14 +1061,33 @@ export default function ListaClientes() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm max-w-xs truncate">{cliente.enderecos.map(e => `${e.rua}, ${e.numero} - ${e.bairro}${e.complemento ? `, ${e.complemento}` : ""} - ${e.cidade}`).join(" | ")}</span>
+                        <span className="text-sm max-w-xs truncate">
+                          {cliente.enderecos
+                            .map(
+                              (e) =>
+                                `${e.rua}, ${e.numero} - ${e.bairro}${e.complemento ? `, ${e.complemento}` : ''} - ${e.cidade}`,
+                            )
+                            .join(' | ')}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell>{cliente.data_ultima_visita ? new Date(cliente.data_ultima_visita).toLocaleDateString("pt-BR") : "-"}</TableCell>
+                    <TableCell>
+                      {cliente.data_ultima_visita
+                        ? new Date(
+                            cliente.data_ultima_visita,
+                          ).toLocaleDateString('pt-BR')
+                        : '-'}
+                    </TableCell>
                     <TableCell>
                       {(() => {
-                        const marcador = getMarcadorVisita(cliente.data_ultima_visita)
-                        return <Badge variant={marcador.variant}>{marcador.texto}</Badge>
+                        const marcador = getMarcadorVisita(
+                          cliente.data_ultima_visita,
+                        );
+                        return (
+                          <Badge variant={marcador.variant}>
+                            {marcador.texto}
+                          </Badge>
+                        );
                       })()}
                     </TableCell>
                     <TableCell>
@@ -861,19 +1096,31 @@ export default function ListaClientes() {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            setClienteSelecionado(cliente)
-                            setEditForm({ nome: cliente.nome, email: cliente.email ?? "", data_ultima_visita: cliente.data_ultima_visita ?? "" })
-                            setEditTelefones((cliente.telefones || []).map(t => ({ id: t.id, numero: t.numero })))
-                            setEditEnderecos((cliente.enderecos || []).map(e => ({
-                              id: e.id,
-                              cep: e.cep ?? "",
-                              rua: e.rua,
-                              numero: e.numero,
-                              bairro: e.bairro,
-                              complemento: e.complemento ?? "",
-                              cidade: e.cidade,
-                            })))
-                            setEditOpen(true)
+                            setClienteSelecionado(cliente);
+                            setEditForm({
+                              nome: cliente.nome,
+                              email: cliente.email ?? '',
+                              data_ultima_visita:
+                                cliente.data_ultima_visita ?? '',
+                            });
+                            setEditTelefones(
+                              (cliente.telefones || []).map((t) => ({
+                                id: t.id,
+                                numero: t.numero,
+                              })),
+                            );
+                            setEditEnderecos(
+                              (cliente.enderecos || []).map((e) => ({
+                                id: e.id,
+                                cep: e.cep ?? '',
+                                rua: e.rua,
+                                numero: e.numero,
+                                bairro: e.bairro,
+                                complemento: e.complemento ?? '',
+                                cidade: e.cidade,
+                              })),
+                            );
+                            setEditOpen(true);
                           }}
                         >
                           <Edit className="h-4 w-4" />
@@ -891,5 +1138,5 @@ export default function ListaClientes() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
