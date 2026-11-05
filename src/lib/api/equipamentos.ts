@@ -1,4 +1,4 @@
-import type { Equipamento } from '@/lib/tipos';
+import type { Equipamento } from '@/src/lib/tipos';
 import { apiGet, apiPost } from './api';
 
 export type NovoEquipamentoPayload = {

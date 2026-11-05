@@ -1,4 +1,4 @@
-import type { Status } from '@/lib/tipos';
+import type { Status } from '@/src/lib/tipos';
 import { apiGet } from './api';
 
 export type StatusPayload = {

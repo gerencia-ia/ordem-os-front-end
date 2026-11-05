@@ -11,8 +11,8 @@ import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Role } from '@/lib/tipos';
-import { getRoles } from '@/lib/api/roles';
+import { Role } from '@/src/lib/tipos';
+import { getRoles } from '@/src/lib/api/roles';
 
 interface UserForm {
   nome: string;

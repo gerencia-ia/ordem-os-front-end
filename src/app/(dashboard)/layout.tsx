@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { BarraNavegacao } from '@/src/components/layout/barra-navegacao';
 import { BarraLateral } from '@/src/components/layout/barra-lateral';
 import { ProveedorTema } from '@/src/components/provedor-tema';
-import { estaAutenticado } from '@/lib/api/autenticacao';
+import { estaAutenticado } from '@/src/lib/api/autenticacao';
 
 const subscribe = () => () => {};
 

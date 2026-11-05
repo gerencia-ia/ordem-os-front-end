@@ -12,8 +12,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
-import { cn } from '@/lib/utils';
-import { getUsuario } from '@/lib/api/autenticacao';
+import { cn } from '@/src/lib/utils';
+import { getUsuario } from '@/src/lib/api/autenticacao';
 
 interface BarraLateralProps {
   estaAberta: boolean;

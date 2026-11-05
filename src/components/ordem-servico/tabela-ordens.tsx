@@ -18,7 +18,7 @@ import { Button } from '@/src/components/ui/button';
 
 import { Eye } from 'lucide-react';
 
-import type { OrdemServico, User } from '@/lib/tipos';
+import type { OrdemServico, User } from '@/src/lib/tipos';
 
 interface TabelaOrdensProps {
   ordens: OrdemServico[];

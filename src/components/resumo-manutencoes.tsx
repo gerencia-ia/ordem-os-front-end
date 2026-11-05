@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { getClientes } from '@/lib/api/clientes';
+import { getClientes } from '@/src/lib/api/clientes';
 
 interface EstatisticasManutencao {
   total: number;

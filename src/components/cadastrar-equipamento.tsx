@@ -8,7 +8,7 @@ import {
 } from '@/src/components/ui/dialog';
 import { Input } from '@/src/components/ui/input';
 import { Button } from '@/src/components/ui/button';
-import { createEquipamento } from '@/lib/api/equipamentos';
+import { createEquipamento } from '@/src/lib/api/equipamentos';
 
 export interface NovoEquipamentoData {
   marca: string;

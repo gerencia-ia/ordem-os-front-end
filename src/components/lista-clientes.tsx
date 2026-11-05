@@ -21,11 +21,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/src/components/ui/dialog';
-import type { Cliente } from '@/lib/tipos';
-import { getClientes } from '@/lib/api/clientes';
-import { createCliente } from '@/lib/api/clientes';
-import { updateCliente } from '@/lib/api/clientes';
-import type { AtualizarClientePayload } from '@/lib/api/clientes';
+import type { Cliente } from '@/src/lib/tipos';
+import { getClientes } from '@/src/lib/api/clientes';
+import { createCliente } from '@/src/lib/api/clientes';
+import { updateCliente } from '@/src/lib/api/clientes';
+import type { AtualizarClientePayload } from '@/src/lib/api/clientes';
 import { Plus, Edit, Trash2, PlusCircle, MessageCircle } from 'lucide-react';
 import {
   CadastrarEquipamento,

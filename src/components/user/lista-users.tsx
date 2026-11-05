@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getUsers, createUser, updateUser, deleteUser } from '@/lib/api/users';
-import type { User } from '@/lib/tipos';
+import { getUsers, createUser, updateUser, deleteUser } from '@/src/lib/api/users';
+import type { User } from '@/src/lib/tipos';
 
 import FiltrosUsers from './filtros-users';
 import TabelaUsers from './tabela-users';

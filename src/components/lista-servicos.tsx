@@ -26,9 +26,9 @@ import {
   createServico,
   updateServico,
   deleteServico,
-} from '@/lib/api/servicos';
-import { getCategorias } from '@/lib/api/categorias-servicos';
-import type { Servico, CategoriaServico } from '@/lib/tipos';
+} from '@/src/lib/api/servicos';
+import { getCategorias } from '@/src/lib/api/categorias-servicos';
+import type { Servico, CategoriaServico } from '@/src/lib/tipos';
 
 export default function ListaServicos() {
   const [servicos, setServicos] = useState<Servico[]>([]);

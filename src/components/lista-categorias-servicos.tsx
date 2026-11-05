@@ -26,8 +26,8 @@ import {
   createCategoria,
   updateCategoria,
   deleteCategoria,
-} from '@/lib/api/categorias-servicos';
-import type { CategoriaServico } from '@/lib/tipos';
+} from '@/src/lib/api/categorias-servicos';
+import type { CategoriaServico } from '@/src/lib/tipos';
 
 export default function ListaCategoriesServicos() {
   const [categorias, setCategorias] = useState<CategoriaServico[]>([]);

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 
-import type { User } from '@/lib/tipos';
+import type { User } from '@/src/lib/tipos';
 
 interface FiltrosOrdensProps {
   busca: string;

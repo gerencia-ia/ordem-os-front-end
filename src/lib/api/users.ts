@@ -1,4 +1,4 @@
-import type { User } from '@/lib/tipos';
+import type { User } from '@/src/lib/tipos';
 import { apiDelete, apiGet, apiPatch, apiPost } from './api';
 
 export async function getUsers(): Promise<User[]> {

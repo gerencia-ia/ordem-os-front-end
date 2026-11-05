@@ -22,8 +22,8 @@ import {
 } from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';
 import { TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { getOrdensServico } from '@/lib/api/ordem_servicos';
-import type { OrdemServico } from '@/lib/tipos';
+import { getOrdensServico } from '@/src/lib/api/ordem_servicos';
+import type { OrdemServico } from '@/src/lib/tipos';
 
 export default function Painel() {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);

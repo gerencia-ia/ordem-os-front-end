@@ -41,7 +41,7 @@ import {
 
 import { Check, ChevronsUpDown, ExternalLink, Plus } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/src/lib/utils';
 
 import type {
   Cliente,
@@ -50,7 +50,7 @@ import type {
   Servico,
   Status,
   User,
-} from '@/lib/tipos';
+} from '@/src/lib/tipos';
 
 interface OpcaoLookup {
   id: string | number;

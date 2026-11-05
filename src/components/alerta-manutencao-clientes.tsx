@@ -12,8 +12,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { getClientes } from '@/lib/api/clientes';
-import type { Cliente } from '@/lib/tipos';
+import { getClientes } from '@/src/lib/api/clientes';
+import type { Cliente } from '@/src/lib/tipos';
 import Link from 'next/link';
 
 interface ClienteSemManutencao extends Cliente {

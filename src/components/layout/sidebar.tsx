@@ -10,7 +10,7 @@ import {
   HelpCircle,
   ChevronRight,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/src/lib/utils';
 
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },

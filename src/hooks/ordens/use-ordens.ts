@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getOrdensServico } from '@/lib/api/ordem_servicos';
+import { getOrdensServico } from '@/src/lib/api/ordem_servicos';
 
-import type { OrdemServico } from '@/lib/tipos';
+import type { OrdemServico } from '@/src/lib/tipos';
 
 export function useOrdens() {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);

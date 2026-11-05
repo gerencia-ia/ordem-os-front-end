@@ -1,4 +1,4 @@
-import type { CategoriaServico } from '@/lib/tipos';
+import type { CategoriaServico } from '@/src/lib/tipos';
 import { apiGet, apiPost, apiPut, apiDelete } from './api';
 
 export type NovaCategoriaPayload = {

@@ -11,7 +11,7 @@ import {
 } from '@/src/components/ui/dropdown-menu';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
-import { removerToken, getUsuario } from '@/lib/api/autenticacao';
+import { removerToken, getUsuario } from '@/src/lib/api/autenticacao';
 
 interface BarraNavegacaoProps {
   onMenuToggle: () => void;

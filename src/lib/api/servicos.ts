@@ -1,4 +1,4 @@
-import type { Servico } from '@/lib/tipos';
+import type { Servico } from '@/src/lib/tipos';
 import { apiGet, apiPost, apiPut, apiDelete } from './api';
 
 export type NovoServicoPayload = {

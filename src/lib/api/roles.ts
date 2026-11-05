@@ -1,4 +1,4 @@
-import type { Role } from '@/lib/tipos';
+import type { Role } from '@/src/lib/tipos';
 import { apiGet } from './api';
 
 export type RolePayload = {

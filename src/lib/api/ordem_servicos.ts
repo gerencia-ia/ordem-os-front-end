@@ -1,4 +1,4 @@
-import { OrdemServico } from '@/lib/tipos';
+import { OrdemServico } from '@/src/lib/tipos';
 import { apiDelete, apiGet, apiPatch, apiPost } from './api';
 
 // Buscar detalhes de uma ordem de serviço por ID

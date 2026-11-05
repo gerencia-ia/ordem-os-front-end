@@ -2,22 +2,22 @@
 
 import { useCallback, useState } from 'react';
 
-import { createOrdemServico } from '@/lib/api/ordem_servicos';
+import { createOrdemServico } from '@/src/lib/api/ordem_servicos';
 
-import { getClientes } from '@/lib/api/clientes';
+import { getClientes } from '@/src/lib/api/clientes';
 
-import { getUsers } from '@/lib/api/users';
+import { getUsers } from '@/src/lib/api/users';
 
-import { getServicos } from '@/lib/api/servicos';
+import { getServicos } from '@/src/lib/api/servicos';
 
-import { getStatus } from '@/lib/api/status';
+import { getStatus } from '@/src/lib/api/status';
 
-import { getPrioridades } from '@/lib/api/prioridades';
+import { getPrioridades } from '@/src/lib/api/prioridades';
 
 import {
   getEquipamentosByCliente,
   createEquipamento as apiCreateEquipamento,
-} from '@/lib/api/equipamentos';
+} from '@/src/lib/api/equipamentos';
 
 import type {
   Cliente,
@@ -27,7 +27,7 @@ import type {
   Status,
   OrdemServico,
   Prioridade,
-} from '@/lib/tipos';
+} from '@/src/lib/tipos';
 
 /*
  * ============================================================

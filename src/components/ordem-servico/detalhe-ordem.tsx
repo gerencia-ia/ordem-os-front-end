@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from '@/src/components/ui/alert-dialog';
 import { ArrowLeft, Clock, CheckCircle, PlayCircle } from 'lucide-react';
-import type { Servico, User, OrdemServico, Equipamento } from '@/lib/tipos';
+import type { Servico, User, OrdemServico, Equipamento } from '@/src/lib/tipos';
 import {
   getOrdemServicoById,
   updateOrdemServicoStatus,
@@ -25,15 +25,15 @@ import {
   removeServicoOrdem,
   addTecnicoOrdem,
   removeTecnicoOrdem,
-} from '@/lib/api/ordem_servicos';
+} from '@/src/lib/api/ordem_servicos';
 import {
   getHistoricoLaudosEquipamento,
   type Laudo,
-} from '@/lib/api/equipamentos';
-import { getServicos } from '@/lib/api/servicos';
-import { getUsers } from '@/lib/api/users';
-import { apiPatch } from '@/lib/api/api';
-import { formatadores } from '@/lib/utilitarios';
+} from '@/src/lib/api/equipamentos';
+import { getServicos } from '@/src/lib/api/servicos';
+import { getUsers } from '@/src/lib/api/users';
+import { apiPatch } from '@/src/lib/api/api';
+import { formatadores } from '@/src/lib/utilitarios';
 
 // Opções de status disponíveis
 const statusOptions = [

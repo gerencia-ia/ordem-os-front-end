@@ -6,11 +6,11 @@ import { Card, CardContent } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import type { OrdemServico, StatusOrdem } from '@/lib/tipos';
+import type { OrdemServico, StatusOrdem } from '@/src/lib/tipos';
 import {
   getOrdensServico,
   updateOrdemServicoStatus,
-} from '@/lib/api/ordem_servicos';
+} from '@/src/lib/api/ordem_servicos';
 import { Plus } from 'lucide-react';
 
 const colunas: { titulo: string; status: StatusOrdem; cor: string }[] = [

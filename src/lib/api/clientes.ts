@@ -1,4 +1,4 @@
-import type { Cliente } from '@/lib/tipos';
+import type { Cliente } from '@/src/lib/tipos';
 import { apiGet, apiPost, apiPut, apiDelete } from './api';
 
 export type NovoClientePayload = {

@@ -15,7 +15,7 @@ import { Label } from '@/src/components/ui/label';
 import { Alert, AlertDescription } from '@/src/components/ui/alert';
 import { Checkbox } from '@/src/components/ui/checkbox';
 import { LogIn, AlertCircle } from 'lucide-react';
-import { loginUsuario, salvarToken } from '@/lib/api/autenticacao';
+import { loginUsuario, salvarToken } from '@/src/lib/api/autenticacao';
 
 export default function LoginPage() {
   const router = useRouter();

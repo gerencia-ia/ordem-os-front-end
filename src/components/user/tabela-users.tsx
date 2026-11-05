@@ -13,7 +13,7 @@ import { Button } from '@/src/components/ui/button';
 
 import { Edit, Trash2, Phone, MessageCircle } from 'lucide-react';
 
-import type { User } from '@/lib/tipos';
+import type { User } from '@/src/lib/tipos';
 
 interface TabelaUsersProps {
   users: User[];
