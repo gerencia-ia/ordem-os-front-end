@@ -1,7 +1,7 @@
 'use client';
 
-import ListaClientes from '@/src/components/lista-clientes';
+import ClienteLista from '@/src/components/Clientes/ClienteLista';
 
 export default function PaginaClientes() {
-  return <ListaClientes />;
+  return <ClienteLista />;
 }

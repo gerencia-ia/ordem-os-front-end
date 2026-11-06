@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { ProveedorTema } from '@/src/components/provedor-tema';
+import { Toaster } from '@/src/components/ui/sonner';
 import './globals.css';
 import type React from 'react';
 
@@ -21,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${geist.className} antialiased`}>
-        <ProveedorTema>{children}</ProveedorTema>
+        <ProveedorTema>
+          {children}
+          <Toaster richColors position="top-right" />
+        </ProveedorTema>
         <Analytics />
       </body>
     </html>

@@ -17,18 +17,14 @@ export interface Role {
   nome: string;
 }
 
+import type { Cliente, Telefone, Endereco } from '@/src/types/cliente';
+
+export type { Cliente, Telefone, Endereco };
+
 export interface CategoriaServico {
   id: number;
   descricao: string;
 }
-
-export type Telefone = {
-  id: number;
-  numero: string;
-  cliente_id: number;
-  created_at: string;
-  updated_at: string;
-};
 
 export type Servico = {
   id: number;
@@ -37,28 +33,6 @@ export type Servico = {
   tempo_servico: number;
   categorias_servico?: CategoriaServico | null;
 };
-
-export type Endereco = {
-  id: number;
-  cep?: string;
-  rua: string;
-  numero: string;
-  bairro: string;
-  complemento?: string;
-  cidade: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export interface Cliente {
-  id: number;
-  nome: string;
-  email?: string | null;
-  dataRegistro: string;
-  data_ultima_visita?: string | null;
-  telefones: Telefone[];
-  enderecos: Endereco[];
-}
 
 export interface User {
   id: string;
