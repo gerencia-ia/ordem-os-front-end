@@ -12,14 +12,10 @@ export interface Prioridade {
   nome: string;
 }
 
-export interface Role {
-  id: string;
-  nome: string;
-}
-
 import type { Cliente, Telefone, Endereco } from '@/src/types/cliente';
+import type { User, Role } from '@/src/types/user';
 
-export type { Cliente, Telefone, Endereco };
+export type { Cliente, Telefone, Endereco, User, Role };
 
 export interface CategoriaServico {
   id: number;
@@ -33,15 +29,6 @@ export type Servico = {
   tempo_servico: number;
   categorias_servico?: CategoriaServico | null;
 };
-
-export interface User {
-  id: string;
-  nome: string;
-  cpf: string;
-  email: string;
-  telefone: string;
-  role: Role | null;
-}
 
 export interface Equipamento {
   id: string | number;

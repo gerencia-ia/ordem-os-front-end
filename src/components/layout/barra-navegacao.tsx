@@ -12,24 +12,11 @@ import {
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { removerToken, getUsuario } from '@/src/lib/api/autenticacao';
+import { formatarCpf } from '@/src/utils/cpf';
 
 interface BarraNavegacaoProps {
   onMenuToggle: () => void;
 }
-
-const formatCPF = (cpf?: string) => {
-  if (!cpf) return '-';
-
-  const numbers = cpf.replace(/\D/g, '').slice(0, 11);
-
-  if (numbers.length <= 3) return numbers;
-  if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
-  if (numbers.length <= 9) {
-    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
-  }
-
-  return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9)}`;
-};
 
 export function BarraNavegacao({ onMenuToggle }: BarraNavegacaoProps) {
   const { theme, setTheme } = useTheme();
@@ -90,7 +77,7 @@ export function BarraNavegacao({ onMenuToggle }: BarraNavegacaoProps) {
               </p>
 
               <p className="text-xs text-muted-foreground">
-                CPF: {formatCPF(usuario?.cpf)}
+                CPF: {formatarCpf(usuario?.cpf)}
               </p>
 
               <p className="text-xs text-muted-foreground">

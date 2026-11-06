@@ -1,7 +1,14 @@
 'use client';
 
-import ListaTecnicos from '@/src/components/user/lista-users';
+import UsuarioLista from '@/src/components/Usuarios/UsuarioLista';
 
 export default function PaginaTecnicos() {
-  return <ListaTecnicos />;
+  return (
+    <UsuarioLista
+      roleFiltroPadrao="técnico"
+      titulo="Técnicos"
+      descricao="Gerencie os técnicos do sistema"
+      botaoNovoTexto="Novo Técnico"
+    />
+  );
 }
