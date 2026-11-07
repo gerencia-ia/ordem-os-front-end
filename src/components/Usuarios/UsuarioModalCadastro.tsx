@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import {
 } from '@/src/components/ui/select';
 import { useUsuarioForm } from '@/src/hooks/useUsuarioForm';
 import { useRoles } from '@/src/hooks/useRoles';
+import { usePermissions } from '@/src/hooks/usePermissions';
 import { formatarCpf } from '@/src/utils/cpf';
 import { formatarTelefone } from '@/src/utils/phone';
 import { Controller } from 'react-hook-form';
@@ -40,15 +42,34 @@ export function UsuarioModalCadastro({
   titulo = 'Cadastrar Novo Usuário',
 }: UsuarioModalCadastroProps) {
   const { roles, loading: loadingRoles } = useRoles();
+  const { filtrarRolesPermitidas, isSecretaria } = usePermissions();
+
+  const rolesPermitidas = filtrarRolesPermitidas(roles);
+  const roleIdInicial =
+    roleIdPadrao || (rolesPermitidas.length === 1 ? Number(rolesPermitidas[0].id) : undefined);
 
   const { form, salvando, onSubmit } = useUsuarioForm({
     userParaEdicao: null,
-    roleIdPadrao,
+    roleIdPadrao: roleIdInicial,
     onSuccess: () => {
       onOpenChange(false);
       onSucesso();
     },
   });
+
+  useEffect(() => {
+    if (aberto) {
+      form.reset({
+        nome: '',
+        cpf: '',
+        email: '',
+        telefone: '',
+        senha: '',
+        role_id: roleIdInicial || ('' as unknown as number),
+        isEdicao: false,
+      });
+    }
+  }, [aberto, roleIdInicial, form]);
 
   const {
     register,
@@ -190,7 +211,7 @@ export function UsuarioModalCadastro({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
+                    {rolesPermitidas.map((role) => (
                       <SelectItem key={role.id} value={String(role.id)}>
                         {role.nome}
                       </SelectItem>
@@ -199,6 +220,11 @@ export function UsuarioModalCadastro({
                 </Select>
               )}
             />
+            {isSecretaria && (
+              <p className="text-[11px] text-muted-foreground">
+                Perfil Secretaria: permissão restrita para cadastrar apenas Técnicos.
+              </p>
+            )}
             {errors.role_id && (
               <p className="text-xs text-destructive">
                 {errors.role_id.message}

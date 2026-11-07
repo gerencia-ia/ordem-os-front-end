@@ -7,6 +7,8 @@ import { BarraNavegacao } from '@/src/components/layout/barra-navegacao';
 import { BarraLateral } from '@/src/components/layout/barra-lateral';
 import { ProveedorTema } from '@/src/components/provedor-tema';
 import { estaAutenticado } from '@/src/lib/api/autenticacao';
+import { usePermissions } from '@/src/hooks/usePermissions';
+import { toast } from 'sonner';
 
 const subscribe = () => () => {};
 
@@ -24,6 +26,7 @@ export default function LayoutPainel({
   const [autenticado, setAutenticado] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { podeAcessar, perfil } = usePermissions();
 
   useEffect(() => {
     // Só verificar autenticação no cliente após montar
@@ -35,13 +38,21 @@ export default function LayoutPainel({
 
       if (!isAuth) {
         router.push('/login');
-      } else {
-        setAutenticado(true);
+        return;
       }
+
+      // Verificação de permissão de rota
+      if (pathname && perfil && !podeAcessar(pathname)) {
+        toast.error('Você não possui permissão para acessar esta área.');
+        router.push('/ordens');
+        return;
+      }
+
+      setAutenticado(true);
     }, 50);
 
     return () => clearTimeout(timer);
-  }, [montado, pathname, router]);
+  }, [montado, pathname, router, podeAcessar, perfil]);
 
   // Não mostrar nada até verificar autenticação
   if (!montado || !autenticado) {

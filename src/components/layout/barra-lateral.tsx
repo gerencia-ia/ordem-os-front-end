@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { cn } from '@/src/lib/utils';
-import { getUsuario } from '@/src/lib/api/autenticacao';
+import { usePermissions } from '@/src/hooks/usePermissions';
 
 interface BarraLateralProps {
   estaAberta: boolean;
@@ -23,79 +23,70 @@ interface BarraLateralProps {
 type SubmenuItem = {
   href: string;
   label: string;
-  roles: string[];
 };
 
 type MenuItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  roles: string[];
   children?: SubmenuItem[];
 };
 
 export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
   const pathname = usePathname();
-  const usuario = getUsuario();
+  const { podeAcessar } = usePermissions();
 
   const todosMenus: MenuItem[] = [
     {
       href: '/painel',
       label: 'Painel',
       icon: Home,
-      roles: ['Secretaria', 'Técnico'],
     },
     {
       href: '/kanban',
       label: 'Quadro Kanban',
       icon: Kanban,
-      roles: ['Secretaria', 'Técnico'],
     },
     {
       href: '/ordens',
       label: 'Ordens de Serviço',
       icon: List,
-      roles: ['Secretaria', 'Técnico'],
     },
     {
       href: '/clientes',
       label: 'Clientes',
       icon: Users,
-      roles: ['Secretaria', 'Técnico'],
     },
     {
       href: '/configuracoes',
       label: 'Configurações',
       icon: Settings,
-      roles: ['Secretaria'],
       children: [
-        { href: '/tecnicos', label: 'Técnicos', roles: ['Secretaria'] },
-        { href: '/servicos', label: 'Serviços', roles: ['Secretaria'] },
+        { href: '/usuarios', label: 'Usuários' },
+        { href: '/servicos', label: 'Serviços' },
         {
           href: '/categorias-servicos',
           label: 'Categorias de Serviço',
-          roles: ['Secretaria'],
         },
       ],
     },
   ];
 
-  // Filtrar menus baseado na role do usuário
+  // Filtrar menus baseado nas permissões centrais
   const menus = todosMenus
-    .filter((menu) => {
-      if (!usuario?.role) return false;
-      return menu.roles.includes(usuario.role);
-    })
+    .filter((menu) => podeAcessar(menu.href))
     .map((menu) => {
       if (!menu.children) return menu;
 
-      const childrenFilhos = menu.children.filter((child) => {
-        if (!usuario?.role) return false;
-        return child.roles.includes(usuario.role);
-      });
+      const childrenFilhos = menu.children.filter((child) =>
+        podeAcessar(child.href),
+      );
 
       return { ...menu, children: childrenFilhos };
-    });
+    })
+    .filter(
+      (menu) => !menu.children || menu.children.length > 0 || menu.href !== '/configuracoes',
+    );
 
   const isAtivo = (href: string) => {
     if (href === '/') return pathname === '/';

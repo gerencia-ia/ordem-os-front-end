@@ -19,14 +19,15 @@ import {
 } from '@/src/components/ui/select';
 import { useUsuarioForm } from '@/src/hooks/useUsuarioForm';
 import { useRoles } from '@/src/hooks/useRoles';
+import { usePermissions } from '@/src/hooks/usePermissions';
 import { formatarCpf } from '@/src/utils/cpf';
 import { formatarTelefone } from '@/src/utils/phone';
-import type { User } from '@/src/types/user';
+import type { Usuario } from '@/src/types/usuario';
 import { Controller } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 
 interface UsuarioModalEdicaoProps {
-  user: User | null;
+  user: Usuario | null;
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
   onSucesso: () => void;
@@ -38,11 +39,20 @@ function UsuarioModalEdicaoForm({
   onOpenChange,
   onSucesso,
 }: {
-  user: User;
+  user: Usuario;
   onOpenChange: (aberto: boolean) => void;
   onSucesso: () => void;
 }) {
   const { roles, loading: loadingRoles } = useRoles();
+  const {
+    usuario,
+    podeAlterarFuncaoDeUsuario,
+    filtrarRolesPermitidas,
+  } = usePermissions();
+
+  const podeAlterarFuncao = podeAlterarFuncaoDeUsuario(user.id);
+  const rolesPermitidas = filtrarRolesPermitidas(roles);
+  const isAutoEdicao = String(user.id) === String(usuario?.user_id);
 
   const { form, salvando, onSubmit } = useUsuarioForm({
     userParaEdicao: user,
@@ -159,7 +169,7 @@ function UsuarioModalEdicaoForm({
             <Select
               value={field.value ? String(field.value) : ''}
               onValueChange={(val) => field.onChange(Number(val))}
-              disabled={loadingRoles}
+              disabled={loadingRoles || !podeAlterarFuncao}
             >
               <SelectTrigger className="w-full">
                 <SelectValue
@@ -171,7 +181,7 @@ function UsuarioModalEdicaoForm({
                 />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((role) => (
+                {rolesPermitidas.map((role) => (
                   <SelectItem key={role.id} value={String(role.id)}>
                     {role.nome}
                   </SelectItem>
@@ -180,6 +190,13 @@ function UsuarioModalEdicaoForm({
             </Select>
           )}
         />
+        {!podeAlterarFuncao && (
+          <p className="text-[11px] text-muted-foreground italic">
+            {isAutoEdicao
+              ? 'Você não pode alterar sua própria função no sistema.'
+              : 'Você não possui permissão para alterar a função deste usuário.'}
+          </p>
+        )}
       </div>
 
       {/* Botões */}

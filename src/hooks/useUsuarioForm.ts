@@ -5,14 +5,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@/src/lib/zod-resolver';
 import {
   usuarioFormSchema,
-  type User,
+  type Usuario,
   type UsuarioFormData,
-} from '@/src/types/user';
-import { createUser, updateUser } from '@/src/services/users.service';
+} from '@/src/types/usuario';
+import { createUsuario, updateUsuario } from '@/src/services/usuarios.service';
 import { toast } from 'sonner';
 
 interface UseUsuarioFormProps {
-  userParaEdicao?: User | null;
+  userParaEdicao?: Usuario | null;
   roleIdPadrao?: number;
   onSuccess?: () => void;
 }
@@ -61,28 +61,32 @@ export function useUsuarioForm({
           email: string;
           telefone: string;
           senha?: string;
+          password?: string;
           role_id?: number;
         } = {
           nome: data.nome.trim(),
-          cpf: data.cpf.trim(),
+          cpf: data.cpf.replace(/\D/g, ''),
           email: data.email.trim(),
-          telefone: data.telefone.trim(),
+          telefone: data.telefone.replace(/\D/g, ''),
           role_id: Number(data.role_id),
         };
 
         if (data.senha && data.senha.trim().length >= 6) {
           payload.senha = data.senha.trim();
+          payload.password = data.senha.trim();
         }
 
-        await updateUser(userParaEdicao.id, payload);
+        await updateUsuario(userParaEdicao.id, payload);
         toast.success('Usuário atualizado com sucesso!');
       } else {
-        await createUser({
+        const senhaLimpa = (data.senha || '').trim();
+        await createUsuario({
           nome: data.nome.trim(),
-          cpf: data.cpf.trim(),
+          cpf: data.cpf.replace(/\D/g, ''),
           email: data.email.trim(),
-          telefone: data.telefone.trim(),
-          senha: (data.senha || '').trim(),
+          telefone: data.telefone.replace(/\D/g, ''),
+          senha: senhaLimpa,
+          password: senhaLimpa,
           role_id: Number(data.role_id),
         });
         toast.success('Usuário cadastrado com sucesso!');

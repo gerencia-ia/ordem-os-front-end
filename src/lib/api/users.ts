@@ -1,6 +1,9 @@
-export * from '@/src/services/users.service';
+export * from '@/src/services/usuarios.service';
 export type {
+  Usuario,
   User,
+  CriarUsuarioPayload,
   CreateUserPayload,
+  AtualizarUsuarioPayload,
   UpdateUserPayload,
-} from '@/src/types/user';
+} from '@/src/types/usuario';

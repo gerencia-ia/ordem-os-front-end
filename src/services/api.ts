@@ -32,7 +32,13 @@ async function handleResponse<T>(response: Response): Promise<T> {
     let mensagemErro = 'Erro na requisição';
     try {
       const data = await response.json();
-      mensagemErro = data.message || data.error || mensagemErro;
+      if (Array.isArray(data.errors)) {
+        mensagemErro = data.errors.join(', ');
+      } else if (data.errors && typeof data.errors === 'object') {
+        mensagemErro = Object.values(data.errors).flat().join(', ');
+      } else {
+        mensagemErro = data.message || data.error || mensagemErro;
+      }
     } catch {
       const text = await response.text().catch(() => '');
       if (text) mensagemErro = text;
@@ -46,7 +52,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
   ) {
     return undefined as T;
   }
-
   return response.json();
 }
 

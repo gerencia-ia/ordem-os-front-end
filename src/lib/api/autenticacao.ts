@@ -13,15 +13,28 @@ export type TokenPayload = {
   role: string;
 };
 
+let cachedToken: string | null = null;
+let cachedUsuario: TokenPayload | null = null;
+
 export function getUsuario(): TokenPayload | null {
   const token = obterToken();
   if (!token) {
+    cachedToken = null;
+    cachedUsuario = null;
     return null;
   }
 
+  if (token === cachedToken && cachedUsuario !== null) {
+    return cachedUsuario;
+  }
+
   try {
-    return jwtDecode<TokenPayload>(token);
+    cachedToken = token;
+    cachedUsuario = jwtDecode<TokenPayload>(token);
+    return cachedUsuario;
   } catch {
+    cachedToken = null;
+    cachedUsuario = null;
     return null;
   }
 }
@@ -49,7 +62,11 @@ export async function loginUsuario(
 
 // Armazenar token no localStorage
 export function salvarToken(token: string): void {
+  cachedToken = null;
+  cachedUsuario = null;
+  if (typeof window === 'undefined') return;
   localStorage.setItem('token', token);
+  window.dispatchEvent(new Event('auth:login'));
 }
 
 // Recuperar token do localStorage
@@ -72,8 +89,11 @@ export function obterHeadersAutenticados(): HeadersInit {
 
 // Remover token (logout)
 export function removerToken(): void {
+  cachedToken = null;
+  cachedUsuario = null;
   if (typeof window === 'undefined') return;
   localStorage.removeItem('token');
+  window.dispatchEvent(new Event('auth:logout'));
 }
 
 // Verificar se usuário está autenticado

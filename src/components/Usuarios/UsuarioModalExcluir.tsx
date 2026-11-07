@@ -10,10 +10,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/src/components/ui/alert-dialog';
-import type { User } from '@/src/types/user';
+import type { Usuario } from '@/src/types/usuario';
 
 interface UsuarioModalExcluirProps {
-  user: User | null;
+  user: Usuario | null;
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
   onConfirmar: (id: string | number) => Promise<void>;

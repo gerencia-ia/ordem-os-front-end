@@ -3,14 +3,15 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
-import { useUsers } from '@/src/hooks/useUsers';
+import { useUsuarios } from '@/src/hooks/useUsuarios';
+import { usePermissions } from '@/src/hooks/usePermissions';
 import { UsuarioFiltros } from './UsuarioFiltros';
 import { UsuarioTabela } from './UsuarioTabela';
 import { UsuarioModalCadastro } from './UsuarioModalCadastro';
 import { UsuarioModalEdicao } from './UsuarioModalEdicao';
 import { UsuarioModalExcluir } from './UsuarioModalExcluir';
-import type { User } from '@/src/types/user';
-import { Plus, Wrench } from 'lucide-react';
+import type { Usuario } from '@/src/types/usuario';
+import { Plus, Users } from 'lucide-react';
 
 interface UsuarioListaProps {
   roleFiltroPadrao?: string;
@@ -22,31 +23,35 @@ interface UsuarioListaProps {
 export function UsuarioLista({
   roleFiltroPadrao,
   titulo = 'Usuários',
-  descricao = 'Gerencie os usuários do sistema',
+  descricao = 'Gerencie os usuários e permissões do sistema',
   botaoNovoTexto,
 }: UsuarioListaProps) {
+  const { isSecretaria } = usePermissions();
   const {
-    users,
-    usersFiltrados,
+    usuarios,
+    usuariosFiltrados,
     loading,
     busca,
     setBusca,
+    filtroPerfil,
+    setFiltroPerfil,
     recarregar,
-    excluirUser,
-  } = useUsers({ roleFiltroPadrao });
+    excluirUsuario,
+  } = useUsuarios({ roleFiltroPadrao });
 
   const [modalCadastroAberta, setModalCadastroAberta] = useState(false);
-  const [userParaEdicao, setUserParaEdicao] = useState<User | null>(null);
-  const [userParaExclusao, setUserParaExclusao] = useState<User | null>(null);
+  const [userParaEdicao, setUserParaEdicao] = useState<Usuario | null>(null);
+  const [userParaExclusao, setUserParaExclusao] = useState<Usuario | null>(null);
   const [excluindo, setExcluindo] = useState(false);
 
   const textoBotao =
-    botaoNovoTexto || (roleFiltroPadrao ? `Novo ${roleFiltroPadrao}` : 'Novo Usuário');
+    botaoNovoTexto ||
+    (isSecretaria ? 'Novo Técnico' : 'Novo Usuário');
 
   const handleConfirmarExclusao = async (id: string | number) => {
     try {
       setExcluindo(true);
-      await excluirUser(id);
+      await excluirUsuario(id);
     } finally {
       setExcluindo(false);
       setUserParaExclusao(null);
@@ -59,7 +64,7 @@ export function UsuarioLista({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Wrench className="h-6 w-6 text-primary" />
+            <Users className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold tracking-tight">{titulo}</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">{descricao}</p>
@@ -79,13 +84,16 @@ export function UsuarioLista({
           <UsuarioFiltros
             busca={busca}
             onBuscaChange={setBusca}
-            totalUsuarios={users.length}
-            totalFiltrados={usersFiltrados.length}
+            totalUsuarios={usuarios.length}
+            totalFiltrados={usuariosFiltrados.length}
+            filtroPerfil={filtroPerfil}
+            onFiltroPerfilChange={setFiltroPerfil}
+            exibirFiltrosPerfil={!isSecretaria && !roleFiltroPadrao}
           />
         </CardHeader>
         <CardContent>
           <UsuarioTabela
-            users={usersFiltrados}
+            users={usuariosFiltrados}
             loading={loading}
             onEditar={(user) => setUserParaEdicao(user)}
             onExcluir={(user) => setUserParaExclusao(user)}
@@ -108,7 +116,7 @@ export function UsuarioLista({
           if (!aberto) setUserParaEdicao(null);
         }}
         onSucesso={recarregar}
-        titulo={roleFiltroPadrao ? `Editar ${roleFiltroPadrao}` : 'Editar Usuário'}
+        titulo="Editar Usuário"
       />
 
       <UsuarioModalExcluir
