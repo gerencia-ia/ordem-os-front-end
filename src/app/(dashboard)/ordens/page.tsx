@@ -1,7 +1,7 @@
 'use client';
 
-import ListaOrdens from '@/src/components/ordem-servico/lista-ordens';
+import OrdemLista from '@/src/components/Ordens/OrdemLista';
 
 export default function PaginaOrdens() {
-  return <ListaOrdens />;
+  return <OrdemLista />;
 }

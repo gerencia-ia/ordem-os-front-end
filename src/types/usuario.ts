@@ -11,6 +11,7 @@ export interface Usuario {
   email: string;
   telefone: string;
   role: Role | null;
+  role_id?: number;
 }
 
 // Alias de retrocompatibilidade
