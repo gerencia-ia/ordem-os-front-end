@@ -29,9 +29,8 @@ export function ClienteLista() {
   const [clienteParaEdicao, setClienteParaEdicao] = useState<Cliente | null>(
     null,
   );
-  const [clienteParaExclusao, setClienteParaExclusao] = useState<Cliente | null>(
-    null,
-  );
+  const [clienteParaExclusao, setClienteParaExclusao] =
+    useState<Cliente | null>(null);
   const [excluindo, setExcluindo] = useState(false);
 
   const handleConfirmarExclusao = async (id: number) => {

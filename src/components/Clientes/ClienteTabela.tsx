@@ -105,7 +105,10 @@ export function ClienteTabela({
                   <div className="flex flex-col gap-1">
                     {telefonesAtivos && telefonesAtivos.length > 0 ? (
                       telefonesAtivos.map((tel, idx) => (
-                        <div key={tel.id || idx} className="flex items-center gap-1.5 text-xs">
+                        <div
+                          key={tel.id || idx}
+                          className="flex items-center gap-1.5 text-xs"
+                        >
                           <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
                           <span>{formatarTelefone(tel.numero)}</span>
                           <a
@@ -137,11 +140,15 @@ export function ClienteTabela({
                         </span>
                         {enderecoPrincipal.bairro && (
                           <span className="block text-[11px] text-muted-foreground/80">
-                            {enderecoPrincipal.bairro} - {enderecoPrincipal.cidade}
+                            {enderecoPrincipal.bairro} -{' '}
+                            {enderecoPrincipal.cidade}
                           </span>
                         )}
                         {enderecosAtivos.length > 1 && (
-                          <Badge variant="outline" className="text-[10px] mt-0.5 h-4 px-1">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] mt-0.5 h-4 px-1"
+                          >
                             +{enderecosAtivos.length - 1} endereço(s)
                           </Badge>
                         )}
@@ -159,13 +166,16 @@ export function ClienteTabela({
                     <div className="flex items-center gap-1.5 text-xs">
                       <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       <span>
-                        {new Date(cliente.data_ultima_visita).toLocaleDateString(
-                          'pt-BR',
-                        )}
+                        {new Date(
+                          cliente.data_ultima_visita,
+                        ).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                   ) : (
-                    <Badge variant="secondary" className="text-[10px] font-normal">
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] font-normal"
+                    >
                       Nunca visitado
                     </Badge>
                   )}

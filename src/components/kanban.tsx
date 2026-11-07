@@ -122,7 +122,9 @@ export default function Kanban() {
       media: 'bg-yellow-500 text-white',
       baixa: 'bg-blue-500 text-white',
     };
-    return (prioridade ? cores[prioridade] : undefined) || 'bg-gray-500 text-white';
+    return (
+      (prioridade ? cores[prioridade] : undefined) || 'bg-gray-500 text-white'
+    );
   };
 
   return (

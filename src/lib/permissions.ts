@@ -52,10 +52,7 @@ export const ROTAS_PERMITIDAS: Record<Perfil, string[]> = {
   tecnico: ['/painel', '/kanban', '/ordens'],
 };
 
-export function podeAcessarRota(
-  rota: string,
-  perfil?: Perfil | null,
-): boolean {
+export function podeAcessarRota(rota: string, perfil?: Perfil | null): boolean {
   if (!perfil) return false;
   if (perfil === 'admin') return true;
 

@@ -131,7 +131,10 @@ function ChartTooltipContent({
   active?: boolean;
   payload?: ChartPayloadItem[];
   label?: React.ReactNode;
-  labelFormatter?: (label: unknown, payload: ChartPayloadItem[]) => React.ReactNode;
+  labelFormatter?: (
+    label: unknown,
+    payload: ChartPayloadItem[],
+  ) => React.ReactNode;
   labelClassName?: string;
   formatter?: (
     value: unknown,
@@ -303,7 +306,11 @@ function ChartLegendContent({
 
         return (
           <div
-            key={typeof item.value === 'string' || typeof item.value === 'number' ? item.value : index}
+            key={
+              typeof item.value === 'string' || typeof item.value === 'number'
+                ? item.value
+                : index
+            }
             className={
               '[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3'
             }

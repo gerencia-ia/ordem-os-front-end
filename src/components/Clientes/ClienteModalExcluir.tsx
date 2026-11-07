@@ -42,8 +42,9 @@ export function ClienteModalExcluir({
           <AlertDialogTitle>Excluir Cliente</AlertDialogTitle>
           <AlertDialogDescription>
             Tem certeza que deseja remover o cliente{' '}
-            <strong className="text-foreground">{cliente.nome}</strong>?
-            Esta ação não pode ser desfeita e removerá os telefones e endereços vinculados.
+            <strong className="text-foreground">{cliente.nome}</strong>? Esta
+            ação não pode ser desfeita e removerá os telefones e endereços
+            vinculados.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

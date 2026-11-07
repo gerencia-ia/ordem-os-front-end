@@ -99,7 +99,9 @@ export function ClienteModalCadastro({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="data_ultima_visita">Data da Última Visita</Label>
+                <Label htmlFor="data_ultima_visita">
+                  Data da Última Visita
+                </Label>
                 <Input
                   id="data_ultima_visita"
                   type="date"

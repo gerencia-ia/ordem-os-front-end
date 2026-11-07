@@ -43,7 +43,9 @@ export function usePermissions() {
     return [];
   };
 
-  const podeAlterarFuncaoDeUsuario = (alvoUserId?: string | number): boolean => {
+  const podeAlterarFuncaoDeUsuario = (
+    alvoUserId?: string | number,
+  ): boolean => {
     if (!alvoUserId || !usuario) return false;
     // O usuário logado não pode alterar o próprio perfil
     if (String(alvoUserId) === String(usuario.user_id)) {

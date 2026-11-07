@@ -15,7 +15,13 @@ import { usePermissions } from '@/src/hooks/usePermissions';
 import { formatarCpf } from '@/src/utils/cpf';
 import { formatarTelefone } from '@/src/utils/phone';
 import { gerarLinkWhatsApp } from '@/src/utils/whatsapp';
-import { Edit, MessageCircle, Phone, Trash2, User as UserIcon } from 'lucide-react';
+import {
+  Edit,
+  MessageCircle,
+  Phone,
+  Trash2,
+  User as UserIcon,
+} from 'lucide-react';
 
 interface UsuarioTabelaProps {
   users: Usuario[];
@@ -49,7 +55,8 @@ export function UsuarioTabela({
           Nenhum usuário encontrado
         </h3>
         <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-          Nenhum resultado corresponde à sua busca ou não há usuários cadastrados.
+          Nenhum resultado corresponde à sua busca ou não há usuários
+          cadastrados.
         </p>
       </div>
     );
@@ -77,7 +84,9 @@ export function UsuarioTabela({
               <TableRow key={user.id} className="hover:bg-muted/30">
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-medium text-foreground">{user.nome}</span>
+                    <span className="font-medium text-foreground">
+                      {user.nome}
+                    </span>
                     {user.email ? (
                       <span className="text-xs text-muted-foreground truncate max-w-[220px]">
                         {user.email}
@@ -118,7 +127,10 @@ export function UsuarioTabela({
 
                 <TableCell>
                   {user.role?.nome ? (
-                    <Badge variant="secondary" className="capitalize text-xs font-normal">
+                    <Badge
+                      variant="secondary"
+                      className="capitalize text-xs font-normal"
+                    >
                       {user.role.nome}
                     </Badge>
                   ) : (

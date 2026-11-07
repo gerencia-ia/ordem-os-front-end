@@ -85,7 +85,10 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
       return { ...menu, children: childrenFilhos };
     })
     .filter(
-      (menu) => !menu.children || menu.children.length > 0 || menu.href !== '/configuracoes',
+      (menu) =>
+        !menu.children ||
+        menu.children.length > 0 ||
+        menu.href !== '/configuracoes',
     );
 
   const isAtivo = (href: string) => {

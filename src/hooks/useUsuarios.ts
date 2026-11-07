@@ -45,14 +45,10 @@ export function useUsuarios({ roleFiltroPadrao }: UseUsuariosOptions = {}) {
           // Regra de segurança/visibilidade: Secretaria só visualiza Técnicos
           let lista = dados;
           if (isSecretaria) {
-            lista = lista.filter(
-              (u) => normalizar(u.role?.nome) === 'tecnico',
-            );
+            lista = lista.filter((u) => normalizar(u.role?.nome) === 'tecnico');
           } else if (roleFiltroPadrao) {
             const alvo = normalizar(roleFiltroPadrao);
-            lista = lista.filter(
-              (u) => normalizar(u.role?.nome) === alvo,
-            );
+            lista = lista.filter((u) => normalizar(u.role?.nome) === alvo);
           }
 
           setUsuarios(lista);

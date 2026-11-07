@@ -11,7 +11,12 @@ import {
   TableRow,
 } from '@/src/components/ui/table';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
 
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';

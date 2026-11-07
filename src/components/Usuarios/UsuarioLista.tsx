@@ -41,12 +41,13 @@ export function UsuarioLista({
 
   const [modalCadastroAberta, setModalCadastroAberta] = useState(false);
   const [userParaEdicao, setUserParaEdicao] = useState<Usuario | null>(null);
-  const [userParaExclusao, setUserParaExclusao] = useState<Usuario | null>(null);
+  const [userParaExclusao, setUserParaExclusao] = useState<Usuario | null>(
+    null,
+  );
   const [excluindo, setExcluindo] = useState(false);
 
   const textoBotao =
-    botaoNovoTexto ||
-    (isSecretaria ? 'Novo Técnico' : 'Novo Usuário');
+    botaoNovoTexto || (isSecretaria ? 'Novo Técnico' : 'Novo Usuário');
 
   const handleConfirmarExclusao = async (id: string | number) => {
     try {

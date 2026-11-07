@@ -48,11 +48,9 @@ export const usuarioFormSchema = z
       .min(11, 'CPF incompleto')
       .refine((val) => validarCpf(val), { message: 'CPF inválido' }),
     email: z.string().email('E-mail inválido'),
-    telefone: z
-      .string()
-      .refine((val) => val.replace(/\D/g, '').length >= 10, {
-        message: 'Telefone deve ter ao menos 10 dígitos com DDD',
-      }),
+    telefone: z.string().refine((val) => val.replace(/\D/g, '').length >= 10, {
+      message: 'Telefone deve ter ao menos 10 dígitos com DDD',
+    }),
     senha: z.string().optional().default(''),
     role_id: z.coerce.number().min(1, 'A função do usuário é obrigatória'),
     isEdicao: z.boolean().optional(),

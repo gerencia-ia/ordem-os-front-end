@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -403,7 +408,8 @@ export default function ListaServicos() {
                               tempo_servico:
                                 servico.tempo_servico?.toString() || '',
                               categorias_servico_id:
-                                servico.categorias_servico?.id?.toString() || '',
+                                servico.categorias_servico?.id?.toString() ||
+                                '',
                             });
                             setEditOpen(true);
                           }}

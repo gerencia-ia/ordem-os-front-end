@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
@@ -103,7 +108,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
       if (roleSalva === '0') return 'SECRETARIA';
       if (roleSalva) return roleSalva;
     }
-    return 'SECRETARIA';
+    return 'SEECRTARIA';
   });
   const [acaoLoading, setAcaoLoading] = useState(false);
   const [modalLaudoAberta, setModalLaudoAberta] = useState(false);

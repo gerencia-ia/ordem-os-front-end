@@ -44,11 +44,8 @@ function UsuarioModalEdicaoForm({
   onSucesso: () => void;
 }) {
   const { roles, loading: loadingRoles } = useRoles();
-  const {
-    usuario,
-    podeAlterarFuncaoDeUsuario,
-    filtrarRolesPermitidas,
-  } = usePermissions();
+  const { usuario, podeAlterarFuncaoDeUsuario, filtrarRolesPermitidas } =
+    usePermissions();
 
   const podeAlterarFuncao = podeAlterarFuncaoDeUsuario(user.id);
   const rolesPermitidas = filtrarRolesPermitidas(roles);
@@ -133,9 +130,7 @@ function UsuarioModalEdicaoForm({
               id="edit-telefone"
               placeholder="(11) 98765-4321"
               value={field.value || ''}
-              onChange={(e) =>
-                field.onChange(formatarTelefone(e.target.value))
-              }
+              onChange={(e) => field.onChange(formatarTelefone(e.target.value))}
               maxLength={15}
             />
           )}
@@ -237,7 +232,9 @@ export function UsuarioModalEdicao({
     <Dialog open={aberto} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{titulo}: {user.nome}</DialogTitle>
+          <DialogTitle>
+            {titulo}: {user.nome}
+          </DialogTitle>
           <DialogDescription>
             Atualize as informações cadastrais e permissões do usuário.
           </DialogDescription>

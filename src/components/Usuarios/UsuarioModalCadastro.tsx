@@ -46,7 +46,8 @@ export function UsuarioModalCadastro({
 
   const rolesPermitidas = filtrarRolesPermitidas(roles);
   const roleIdInicial =
-    roleIdPadrao || (rolesPermitidas.length === 1 ? Number(rolesPermitidas[0].id) : undefined);
+    roleIdPadrao ||
+    (rolesPermitidas.length === 1 ? Number(rolesPermitidas[0].id) : undefined);
 
   const { form, salvando, onSubmit } = useUsuarioForm({
     userParaEdicao: null,
@@ -116,9 +117,7 @@ export function UsuarioModalCadastro({
                   id="cpf"
                   placeholder="000.000.000-00"
                   value={field.value || ''}
-                  onChange={(e) =>
-                    field.onChange(formatarCpf(e.target.value))
-                  }
+                  onChange={(e) => field.onChange(formatarCpf(e.target.value))}
                   maxLength={14}
                 />
               )}
@@ -222,7 +221,8 @@ export function UsuarioModalCadastro({
             />
             {isSecretaria && (
               <p className="text-[11px] text-muted-foreground">
-                Perfil Secretaria: permissão restrita para cadastrar apenas Técnicos.
+                Perfil Secretaria: permissão restrita para cadastrar apenas
+                Técnicos.
               </p>
             )}
             {errors.role_id && (
