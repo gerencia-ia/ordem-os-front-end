@@ -12,7 +12,7 @@ import { Button } from '@/src/components/Ui/button';
 import { Input } from '@/src/components/Ui/input';
 import { Label } from '@/src/components/Ui/label';
 import { Loader2 } from 'lucide-react';
-import type { Servico } from '@/src/types/ordem';
+import type { Servico } from '@/src/types/servico';
 
 interface OrdemModalAdicionarServicoProps {
   open: boolean;

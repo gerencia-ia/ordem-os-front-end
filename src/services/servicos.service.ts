@@ -29,6 +29,3 @@ export async function updateServico(
 export async function deleteServico(id: string | number): Promise<void> {
   return apiDelete(`/servicos/${id}`);
 }
-
-// Retrocompatibilidade
-export type { NovoServicoPayload } from '@/src/types/servico';

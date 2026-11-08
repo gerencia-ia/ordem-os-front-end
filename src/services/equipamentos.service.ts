@@ -26,6 +26,3 @@ export async function getHistoricoLaudos(
     `/equipamentos/${equipamentoId}/historico_laudos`,
   );
 }
-
-// Aliases de compatibilidade
-export const getHistoricoLaudosEquipamento = getHistoricoLaudos;

@@ -150,10 +150,3 @@ export async function finalizarOrdem(
   await updateOrdem(ordemId, payload);
   return updateOrdemStatus(ordemId, 3); // Status 3: Concluído
 }
-
-// Aliases de compatibilidade
-export const getOrdensServico = getOrdens;
-export const getOrdemServicoById = getOrdemById;
-export const createOrdemServico = createOrdem;
-export const updateOrdemServicoStatus = updateOrdemStatus;
-export const finalizarOrdemServico = finalizarOrdem;

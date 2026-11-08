@@ -2,14 +2,10 @@ import { z } from 'zod';
 import { Telefone, telefoneSchema } from './telefone';
 import { Endereco, enderecoSchema } from './endereco';
 
-export type { Telefone, TelefoneFormData } from './telefone';
-export type { Endereco, EnderecoFormData } from './endereco';
-
 export interface Cliente {
   id: number;
   nome: string;
   email?: string | null;
-  dataRegistro?: string;
   data_ultima_visita?: string | null;
   telefones: Telefone[];
   enderecos: Endereco[];

@@ -40,10 +40,11 @@ export function UsuarioLista({
   } = useUsuarios({ roleFiltroPadrao });
 
   const [modalCadastroAberta, setModalCadastroAberta] = useState(false);
-  const [userParaEdicao, setUserParaEdicao] = useState<Usuario | null>(null);
-  const [userParaExclusao, setUserParaExclusao] = useState<Usuario | null>(
+  const [usuarioParaEdicao, setUsuarioParaEdicao] = useState<Usuario | null>(
     null,
   );
+  const [usuarioParaExclusao, setUsuarioParaExclusao] =
+    useState<Usuario | null>(null);
   const [excluindo, setExcluindo] = useState(false);
 
   const textoBotao =
@@ -55,7 +56,7 @@ export function UsuarioLista({
       await excluirUsuario(id);
     } finally {
       setExcluindo(false);
-      setUserParaExclusao(null);
+      setUsuarioParaExclusao(null);
     }
   };
 
@@ -94,10 +95,10 @@ export function UsuarioLista({
         </CardHeader>
         <CardContent>
           <UsuarioTabela
-            users={usuariosFiltrados}
+            usuarios={usuariosFiltrados}
             loading={loading}
-            onEditar={(user) => setUserParaEdicao(user)}
-            onExcluir={(user) => setUserParaExclusao(user)}
+            onEditar={(user) => setUsuarioParaEdicao(user)}
+            onExcluir={(user) => setUsuarioParaExclusao(user)}
           />
         </CardContent>
       </Card>
@@ -111,20 +112,20 @@ export function UsuarioLista({
       />
 
       <UsuarioModalEdicao
-        user={userParaEdicao}
-        aberto={userParaEdicao !== null}
+        usuario={usuarioParaEdicao}
+        aberto={usuarioParaEdicao !== null}
         onOpenChange={(aberto) => {
-          if (!aberto) setUserParaEdicao(null);
+          if (!aberto) setUsuarioParaEdicao(null);
         }}
         onSucesso={recarregar}
         titulo="Editar Usuário"
       />
 
       <UsuarioModalExcluir
-        user={userParaExclusao}
-        aberto={userParaExclusao !== null}
+        usuario={usuarioParaExclusao}
+        aberto={usuarioParaExclusao !== null}
         onOpenChange={(aberto) => {
-          if (!aberto) setUserParaExclusao(null);
+          if (!aberto) setUsuarioParaExclusao(null);
         }}
         onConfirmar={handleConfirmarExclusao}
         excluindo={excluindo}
@@ -132,5 +133,3 @@ export function UsuarioLista({
     </div>
   );
 }
-
-export default UsuarioLista;

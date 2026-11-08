@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/src/components/Ui/badge';
-import type { Servico } from '@/src/types/ordem';
+import type { Servico } from '@/src/types/servico';
 import { Wrench, Check } from 'lucide-react';
 
 interface SecaoServicosProps {

@@ -62,4 +62,3 @@ export function OrdemModalExcluir({
     </AlertDialog>
   );
 }
-export default OrdemModalExcluir;

@@ -1,6 +1,6 @@
 'use client';
 
-import UsuarioLista from '@/src/components/Usuarios/UsuarioLista';
+import { UsuarioLista } from '@/src/components/Usuarios/UsuarioLista';
 
 export default function PaginaUsuarios() {
   return (

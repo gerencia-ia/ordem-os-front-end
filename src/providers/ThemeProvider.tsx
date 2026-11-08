@@ -14,7 +14,3 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     </NextThemesProvider>
   );
 }
-
-// Aliases em português para retrocompatibilidade
-export const ProvedorTema = ThemeProvider;
-export const ProveedorTema = ThemeProvider;

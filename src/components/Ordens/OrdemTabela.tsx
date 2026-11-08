@@ -251,4 +251,3 @@ export function OrdemTabela({
     </div>
   );
 }
-export default OrdemTabela;

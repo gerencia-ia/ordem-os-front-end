@@ -5,8 +5,6 @@ import type { Usuario } from './usuario';
 import type { Equipamento } from './equipamento';
 import type { Servico } from './servico';
 
-export type { Servico, CategoriaServico } from './servico';
-
 export interface Status {
   id: string | number;
   nome: string;

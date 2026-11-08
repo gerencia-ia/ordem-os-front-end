@@ -2,8 +2,6 @@ import { z } from 'zod';
 import type { Role } from './role';
 import { validarCpf } from '@/src/utils/cpf';
 
-export type { Role } from './role';
-
 export interface Usuario {
   id: string;
   nome: string;
@@ -13,9 +11,6 @@ export interface Usuario {
   role: Role | null;
   role_id?: number;
 }
-
-// Alias de retrocompatibilidade
-export type User = Usuario;
 
 export interface CriarUsuarioPayload {
   nome: string;

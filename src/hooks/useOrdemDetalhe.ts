@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import type { OrdemServico, Servico, Status } from '@/src/types/ordem';
+import type { OrdemServico, Status } from '@/src/types/ordem';
+import type { Servico } from '@/src/types/servico';
 import type { Usuario } from '@/src/types/usuario';
 import type { Equipamento, HistoricoLaudo } from '@/src/types/equipamento';
 import {

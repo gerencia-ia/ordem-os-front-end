@@ -15,8 +15,6 @@ export interface EditarCategoriaPayload {
   descricao?: string;
 }
 
-export type NovaCategoriaPayload = CriarCategoriaPayload;
-
 export const categoriaFormSchema = z.object({
   descricao: z
     .string()

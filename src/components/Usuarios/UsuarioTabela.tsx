@@ -24,14 +24,14 @@ import {
 } from 'lucide-react';
 
 interface UsuarioTabelaProps {
-  users: Usuario[];
+  usuarios: Usuario[];
   loading: boolean;
-  onEditar: (user: Usuario) => void;
-  onExcluir: (user: Usuario) => void;
+  onEditar: (usuario: Usuario) => void;
+  onExcluir: (usuario: Usuario) => void;
 }
 
 export function UsuarioTabela({
-  users,
+  usuarios,
   loading,
   onEditar,
   onExcluir,
@@ -47,7 +47,7 @@ export function UsuarioTabela({
     );
   }
 
-  if (users.length === 0) {
+  if (usuarios.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-card/50">
         <UserIcon className="h-10 w-10 text-muted-foreground mb-3" />
@@ -75,7 +75,7 @@ export function UsuarioTabela({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => {
+          {usuarios.map((user) => {
             const roleNome = (user.role?.nome || '').toLowerCase();
             const podeGerenciarLinha =
               !isSecretaria || roleNome === 'técnico' || roleNome === 'tecnico';
@@ -176,4 +176,3 @@ export function UsuarioTabela({
     </div>
   );
 }
-export default UsuarioTabela;

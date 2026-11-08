@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import type { CategoriaServico } from './categoria';
 
-export type { CategoriaServico } from './categoria';
-
 export interface Servico {
   id: number;
   nome: string;
@@ -28,8 +26,6 @@ export interface EditarServicoPayload {
   tempo_servico?: number | null;
   categorias_servico_id?: number | null;
 }
-
-export type NovoServicoPayload = CriarServicoPayload;
 
 export const servicoFormSchema = z.object({
   nome: z.string().min(2, 'O nome deve ter no mínimo 2 caracteres'),

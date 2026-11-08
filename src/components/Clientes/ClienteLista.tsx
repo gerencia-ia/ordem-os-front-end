@@ -115,5 +115,3 @@ export function ClienteLista() {
     </div>
   );
 }
-
-export default ClienteLista;

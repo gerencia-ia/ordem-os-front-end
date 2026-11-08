@@ -125,9 +125,6 @@ export function useUsuarios({ roleFiltroPadrao }: UseUsuariosOptions = {}) {
   return {
     usuarios,
     usuariosFiltrados,
-    // Aliases para manter compatibilidade
-    users: usuarios,
-    usersFiltrados: usuariosFiltrados,
     loading,
     erro,
     busca,
@@ -136,6 +133,5 @@ export function useUsuarios({ roleFiltroPadrao }: UseUsuariosOptions = {}) {
     setFiltroPerfil,
     recarregar,
     excluirUsuario,
-    excluirUser: excluirUsuario,
   };
 }

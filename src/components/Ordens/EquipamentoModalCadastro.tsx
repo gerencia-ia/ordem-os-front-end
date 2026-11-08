@@ -169,4 +169,3 @@ export function EquipamentoModalCadastro({
     </Dialog>
   );
 }
-export default EquipamentoModalCadastro;

@@ -152,5 +152,3 @@ export function OrdemLista() {
     </div>
   );
 }
-
-export default OrdemLista;

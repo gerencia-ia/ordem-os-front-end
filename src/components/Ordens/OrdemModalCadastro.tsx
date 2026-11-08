@@ -134,5 +134,3 @@ export function OrdemModalCadastro({
     </Dialog>
   );
 }
-
-export default OrdemModalCadastro;

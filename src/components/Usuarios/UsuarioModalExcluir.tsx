@@ -13,7 +13,7 @@ import {
 import type { Usuario } from '@/src/types/usuario';
 
 interface UsuarioModalExcluirProps {
-  user: Usuario | null;
+  usuario: Usuario | null;
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
   onConfirmar: (id: string | number) => Promise<void>;
@@ -21,17 +21,17 @@ interface UsuarioModalExcluirProps {
 }
 
 export function UsuarioModalExcluir({
-  user,
+  usuario,
   aberto,
   onOpenChange,
   onConfirmar,
   excluindo,
 }: UsuarioModalExcluirProps) {
-  if (!user) return null;
+  if (!usuario) return null;
 
   const handleConfirmar = async (e: React.MouseEvent) => {
     e.preventDefault();
-    await onConfirmar(user.id);
+    await onConfirmar(usuario.id);
     onOpenChange(false);
   };
 
@@ -42,8 +42,9 @@ export function UsuarioModalExcluir({
           <AlertDialogTitle>Excluir Usuário</AlertDialogTitle>
           <AlertDialogDescription>
             Tem certeza que deseja remover o usuário{' '}
-            <strong className="text-foreground">{user.nome}</strong> (Função:{' '}
-            {user.role?.nome || 'Sem função'})? Esta ação não pode ser desfeita.
+            <strong className="text-foreground">{usuario.nome}</strong> (Função:{' '}
+            {usuario.role?.nome || 'Sem função'})? Esta ação não pode ser
+            desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -6,10 +6,10 @@ import { zodResolver } from '@/src/lib/zod-resolver';
 import {
   criarOrdemFormSchema,
   type CriarOrdemFormData,
-  type Servico,
   type Status,
   type Prioridade,
 } from '@/src/types/ordem';
+import type { Servico } from '@/src/types/servico';
 import type { Cliente } from '@/src/types/cliente';
 import type { Usuario } from '@/src/types/usuario';
 import type { Equipamento } from '@/src/types/equipamento';

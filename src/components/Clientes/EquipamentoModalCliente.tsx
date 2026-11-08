@@ -162,6 +162,3 @@ export function EquipamentoModalCliente({
     </Dialog>
   );
 }
-
-// Retrocompatibilidade
-export const CadastrarEquipamento = EquipamentoModalCliente;

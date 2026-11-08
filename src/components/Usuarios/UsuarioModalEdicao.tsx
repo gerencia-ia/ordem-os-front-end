@@ -27,7 +27,7 @@ import { Controller } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 
 interface UsuarioModalEdicaoProps {
-  user: Usuario | null;
+  usuario: Usuario | null;
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
   onSucesso: () => void;
@@ -35,11 +35,11 @@ interface UsuarioModalEdicaoProps {
 }
 
 function UsuarioModalEdicaoForm({
-  user,
+  usuario: user,
   onOpenChange,
   onSucesso,
 }: {
-  user: Usuario;
+  usuario: Usuario;
   onOpenChange: (aberto: boolean) => void;
   onSucesso: () => void;
 }) {
@@ -220,20 +220,20 @@ function UsuarioModalEdicaoForm({
 }
 
 export function UsuarioModalEdicao({
-  user,
+  usuario,
   aberto,
   onOpenChange,
   onSucesso,
   titulo = 'Editar Usuário',
 }: UsuarioModalEdicaoProps) {
-  if (!user) return null;
+  if (!usuario) return null;
 
   return (
     <Dialog open={aberto} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {titulo}: {user.nome}
+            {titulo}: {usuario.nome}
           </DialogTitle>
           <DialogDescription>
             Atualize as informações cadastrais e permissões do usuário.
@@ -241,8 +241,8 @@ export function UsuarioModalEdicao({
         </DialogHeader>
 
         <UsuarioModalEdicaoForm
-          key={user.id}
-          user={user}
+          key={usuario.id}
+          usuario={usuario}
           onOpenChange={onOpenChange}
           onSucesso={onSucesso}
         />

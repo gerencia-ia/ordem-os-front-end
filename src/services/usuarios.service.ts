@@ -29,10 +29,3 @@ export async function updateUsuario(
 export async function deleteUsuario(id: string | number): Promise<void> {
   return apiDelete(`/users/${id}`);
 }
-
-// Aliases de retrocompatibilidade
-export const getUsers = getUsuarios;
-export const getUserById = getUsuarioById;
-export const createUser = createUsuario;
-export const updateUser = updateUsuario;
-export const deleteUser = deleteUsuario;

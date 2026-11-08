@@ -21,9 +21,6 @@ export interface CriarEquipamentoPayload {
   cliente_id: number;
 }
 
-// Alias de retrocompatibilidade
-export type NovoEquipamentoPayload = CriarEquipamentoPayload;
-
 export interface OrdemServicoResumida {
   id: number;
   numero_ordem: string;
@@ -41,9 +38,6 @@ export interface HistoricoLaudo {
   updated_at: string;
   ordem_servico: OrdemServicoResumida;
 }
-
-// Alias de retrocompatibilidade
-export type Laudo = HistoricoLaudo;
 
 export const equipamentoFormSchema = z.object({
   marca: z.string().min(1, 'A marca do equipamento é obrigatória'),
