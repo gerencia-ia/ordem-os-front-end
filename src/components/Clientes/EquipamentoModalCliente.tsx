@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import {
   Dialog,
@@ -8,7 +10,8 @@ import {
 } from '@/src/components/ui/dialog';
 import { Input } from '@/src/components/ui/input';
 import { Button } from '@/src/components/ui/button';
-import { createEquipamento } from '@/src/lib/api/equipamentos';
+import { toast } from 'sonner';
+import { createEquipamento } from '@/src/services/equipamentos.service';
 
 export interface NovoEquipamentoData {
   marca: string;
@@ -18,21 +21,21 @@ export interface NovoEquipamentoData {
   cliente_id?: number;
 }
 
-interface CadastrarEquipamentoProps {
+interface EquipamentoModalClienteProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   clienteId?: number;
-  onSalvarEquipamento?: (equip: NovoEquipamentoData) => void; // Novo: callback para salvar em memória
+  onSalvarEquipamento?: (equip: NovoEquipamentoData) => void;
 }
 
-export function CadastrarEquipamento({
+export function EquipamentoModalCliente({
   open,
   setOpen,
   clienteId,
   onSalvarEquipamento,
-}: CadastrarEquipamentoProps) {
+}: EquipamentoModalClienteProps) {
   const [savingEquip, setSavingEquip] = useState(false);
-  const [novoEquipamento, setNovoEquipamento] = useState({
+  const [novoEquipamento, setNovoEquipamento] = useState<NovoEquipamentoData>({
     marca: '',
     btus: '',
     local_instalacao: '',
@@ -51,24 +54,30 @@ export function CadastrarEquipamento({
 
   const handleAddEquipamento = async () => {
     if (onSalvarEquipamento) {
-      // Salva em memória, não envia ao backend
       onSalvarEquipamento({ ...novoEquipamento });
       resetNovoEquipamento();
       setOpen(false);
       return;
     }
-    // Fluxo antigo: salvar direto no backend
+
     if (!novoEquipamento.cliente_id) return;
+
     try {
       setSavingEquip(true);
       await createEquipamento({
-        ...novoEquipamento,
+        marca: novoEquipamento.marca,
+        btus: novoEquipamento.btus,
+        local_instalacao: novoEquipamento.local_instalacao,
+        observacao: novoEquipamento.observacao,
         cliente_id: novoEquipamento.cliente_id,
       });
+      toast.success('Equipamento cadastrado com sucesso!');
       resetNovoEquipamento();
       setOpen(false);
-    } catch {
-      alert('Erro ao cadastrar equipamento');
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao cadastrar equipamento';
+      toast.error(msg);
     } finally {
       setSavingEquip(false);
     }
@@ -76,37 +85,37 @@ export function CadastrarEquipamento({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Cadastrar Equipamento</DialogTitle>
           <DialogDescription>
             Preencha os dados do equipamento para o cliente
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <div className="space-y-4 pt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Marca</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Marca</label>
               <Input
                 value={novoEquipamento.marca}
                 onChange={(e) =>
                   setNovoEquipamento((s) => ({ ...s, marca: e.target.value }))
                 }
-                placeholder="Ex: LG"
+                placeholder="Ex: LG, Daikin, Midea"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">BTUs</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">BTUs</label>
               <Input
                 value={novoEquipamento.btus}
                 onChange={(e) =>
                   setNovoEquipamento((s) => ({ ...s, btus: e.target.value }))
                 }
-                placeholder="Ex: 9000"
+                placeholder="Ex: 9000, 12000"
               />
             </div>
-            <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium">Local de Instalação</label>
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-medium text-muted-foreground">Local de Instalação</label>
               <Input
                 value={novoEquipamento.local_instalacao}
                 onChange={(e) =>
@@ -115,12 +124,12 @@ export function CadastrarEquipamento({
                     local_instalacao: e.target.value,
                   }))
                 }
-                placeholder="Ex: Sala 101"
+                placeholder="Ex: Sala de Reunião 101"
               />
             </div>
           </div>
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Observação</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Observação</label>
             <Input
               value={novoEquipamento.observacao}
               onChange={(e) =>
@@ -129,11 +138,11 @@ export function CadastrarEquipamento({
                   observacao: e.target.value,
                 }))
               }
-              placeholder="Observações do equipamento"
+              placeholder="Ex: Condensadora na fachada externa"
             />
           </div>
           <Button
-            className="w-full"
+            className="w-full mt-2"
             type="button"
             onClick={handleAddEquipamento}
             disabled={savingEquip}
@@ -145,3 +154,6 @@ export function CadastrarEquipamento({
     </Dialog>
   );
 }
+
+// Retrocompatibilidade
+export const CadastrarEquipamento = EquipamentoModalCliente;

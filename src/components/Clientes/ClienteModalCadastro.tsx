@@ -13,7 +13,7 @@ import { Button } from '@/src/components/ui/button';
 import { Label } from '@/src/components/ui/label';
 import { Badge } from '@/src/components/ui/badge';
 import { useClienteForm } from '@/src/hooks/useClienteForm';
-import { CadastrarEquipamento } from '@/src/components/cadastrar-equipamento';
+import { EquipamentoModalCliente } from '@/src/components/Clientes/EquipamentoModalCliente';
 import { Plus, Trash2, Search, Loader2 } from 'lucide-react';
 
 interface ClienteModalCadastroProps {
@@ -364,7 +364,7 @@ export function ClienteModalCadastro({
         </DialogContent>
       </Dialog>
 
-      <CadastrarEquipamento
+      <EquipamentoModalCliente
         open={modalEquipAberto}
         setOpen={setModalEquipAberto}
         onSalvarEquipamento={adicionarEquipamento}

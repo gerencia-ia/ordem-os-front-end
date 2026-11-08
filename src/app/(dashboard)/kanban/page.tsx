@@ -1,7 +1,7 @@
 'use client';
 
-import Kanban from '@/src/components/kanban';
+import { KanbanQuadro } from '@/src/components/Kanban/KanbanQuadro';
 
 export default function PaginaKanban() {
-  return <Kanban />;
+  return <KanbanQuadro />;
 }
