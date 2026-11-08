@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
 import { useOrdens } from '@/src/hooks/useOrdens';
 import { usePermissions } from '@/src/hooks/usePermissions';
 import { getUsuarios } from '@/src/services/usuarios.service';

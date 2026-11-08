@@ -1,7 +1,7 @@
 'use client';
 
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
 import { Calendar, RefreshCw } from 'lucide-react';
 
 interface PainelFiltrosProps {

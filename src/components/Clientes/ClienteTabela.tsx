@@ -7,9 +7,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/src/components/ui/table';
-import { Button } from '@/src/components/ui/button';
-import { Badge } from '@/src/components/ui/badge';
+} from '@/src/components/Ui/table';
+import { Button } from '@/src/components/Ui/button';
+import { Badge } from '@/src/components/Ui/badge';
 import type { Cliente } from '@/src/types/cliente';
 import { formatarTelefone } from '@/src/utils/phone';
 import { gerarLinkWhatsApp } from '@/src/utils/whatsapp';

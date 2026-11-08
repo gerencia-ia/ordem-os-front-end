@@ -1,15 +1,15 @@
 'use client';
 
 import { Search, X, RotateCcw } from 'lucide-react';
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
+} from '@/src/components/Ui/select';
 import type { Usuario } from '@/src/types/usuario';
 
 interface OrdemFiltrosProps {

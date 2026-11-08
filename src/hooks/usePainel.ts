@@ -35,7 +35,9 @@ export function usePainel() {
       setOrdens(data);
     } catch (err) {
       const msg =
-        err instanceof Error ? err.message : 'Erro ao carregar dados do painel.';
+        err instanceof Error
+          ? err.message
+          : 'Erro ao carregar dados do painel.';
       setErro(msg);
       toast.error(msg);
     } finally {
@@ -60,7 +62,9 @@ export function usePainel() {
       } catch (err) {
         if (ativo) {
           const msg =
-            err instanceof Error ? err.message : 'Erro ao carregar dados do painel.';
+            err instanceof Error
+              ? err.message
+              : 'Erro ao carregar dados do painel.';
           setErro(msg);
           toast.error(msg);
         }

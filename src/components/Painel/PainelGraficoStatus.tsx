@@ -6,14 +6,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+} from '@/src/components/Ui/card';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { PieChart as PieIcon } from 'lucide-react';
 
 interface DadoStatusPie {
@@ -78,7 +72,10 @@ export function PainelGraficoStatus({ dados }: PainelGraficoStatusProps) {
             {/* Legenda Customizada */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-border/40">
               {dados.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div
+                  key={idx}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                >
                   <span
                     className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: item.color }}

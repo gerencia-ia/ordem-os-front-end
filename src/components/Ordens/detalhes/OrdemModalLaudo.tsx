@@ -7,9 +7,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/Ui/dialog';
+import { Button } from '@/src/components/Ui/button';
+import { Label } from '@/src/components/Ui/label';
 import { Loader2 } from 'lucide-react';
 import type { Equipamento } from '@/src/types/equipamento';
 

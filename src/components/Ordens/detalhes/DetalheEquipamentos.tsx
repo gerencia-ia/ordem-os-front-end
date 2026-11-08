@@ -5,9 +5,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
-import { Badge } from '@/src/components/ui/badge';
+} from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
+import { Badge } from '@/src/components/Ui/badge';
 import { AirVent, History, FileEdit, CheckCircle2 } from 'lucide-react';
 import type { Equipamento } from '@/src/types/equipamento';
 

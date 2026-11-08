@@ -1,7 +1,7 @@
 'use client';
 
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
+import { Label } from '@/src/components/Ui/label';
+import { Textarea } from '@/src/components/Ui/textarea';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CriarOrdemFormData } from '@/src/types/ordem';
 import { FileText } from 'lucide-react';

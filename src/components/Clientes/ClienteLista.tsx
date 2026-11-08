@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
 import { useClientes } from '@/src/hooks/useClientes';
 import { ClienteFiltros } from './ClienteFiltros';
 import { ClienteTabela } from './ClienteTabela';

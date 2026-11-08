@@ -1,9 +1,9 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
-import { Badge } from '@/src/components/ui/badge';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
+import { Badge } from '@/src/components/Ui/badge';
 import type { FiltroPerfilTipo } from '@/src/hooks/useUsuarios';
 
 interface UsuarioFiltrosProps {

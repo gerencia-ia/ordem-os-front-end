@@ -6,10 +6,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Badge } from '@/src/components/ui/badge';
+} from '@/src/components/Ui/select';
+import { Input } from '@/src/components/Ui/input';
+import { Label } from '@/src/components/Ui/label';
+import { Badge } from '@/src/components/Ui/badge';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CriarOrdemFormData, Status, Prioridade } from '@/src/types/ordem';
 import type { Usuario } from '@/src/types/usuario';

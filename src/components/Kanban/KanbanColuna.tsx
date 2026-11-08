@@ -1,7 +1,7 @@
 'use client';
 
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { Badge } from '@/src/components/Ui/badge';
+import { Button } from '@/src/components/Ui/button';
 import { Plus } from 'lucide-react';
 import type { OrdemServico, Status } from '@/src/types/ordem';
 import { KanbanCartao } from './KanbanCartao';
@@ -30,7 +30,8 @@ function getCoresColuna(nome: string) {
   if (norm.includes('agendad') || norm.includes('abert')) {
     return {
       header: 'text-amber-800 dark:text-amber-300',
-      badge: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+      badge:
+        'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
       container: 'border-amber-200/60 bg-amber-50/20 dark:bg-amber-950/10',
     };
   }
@@ -44,8 +45,10 @@ function getCoresColuna(nome: string) {
   if (norm.includes('conclui')) {
     return {
       header: 'text-emerald-800 dark:text-emerald-300',
-      badge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-      container: 'border-emerald-200/60 bg-emerald-50/20 dark:bg-emerald-950/10',
+      badge:
+        'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+      container:
+        'border-emerald-200/60 bg-emerald-50/20 dark:bg-emerald-950/10',
     };
   }
   if (norm.includes('cancelad')) {
@@ -84,7 +87,10 @@ export function KanbanColuna({
         <h2 className={`font-semibold text-sm ${cores.header}`}>
           {status.nome}
         </h2>
-        <Badge variant="outline" className={`text-xs font-mono font-medium ${cores.badge}`}>
+        <Badge
+          variant="outline"
+          className={`text-xs font-mono font-medium ${cores.badge}`}
+        >
           {ordens.length}
         </Badge>
       </div>

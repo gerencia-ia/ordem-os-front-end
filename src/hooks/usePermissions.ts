@@ -1,7 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import { getUsuario } from '@/src/lib/api/autenticacao';
+import { getUsuario } from '@/src/services/auth.service';
 import {
   normalizarPerfil,
   podeAcessarRota,

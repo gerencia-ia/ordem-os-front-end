@@ -7,9 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/dialog';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
 import { toast } from 'sonner';
 import { createEquipamento } from '@/src/services/equipamentos.service';
 
@@ -95,7 +95,9 @@ export function EquipamentoModalCliente({
         <div className="space-y-4 pt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Marca</label>
+              <label className="text-xs font-medium text-muted-foreground">
+                Marca
+              </label>
               <Input
                 value={novoEquipamento.marca}
                 onChange={(e) =>
@@ -105,7 +107,9 @@ export function EquipamentoModalCliente({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">BTUs</label>
+              <label className="text-xs font-medium text-muted-foreground">
+                BTUs
+              </label>
               <Input
                 value={novoEquipamento.btus}
                 onChange={(e) =>
@@ -115,7 +119,9 @@ export function EquipamentoModalCliente({
               />
             </div>
             <div className="space-y-1.5 md:col-span-2">
-              <label className="text-xs font-medium text-muted-foreground">Local de Instalação</label>
+              <label className="text-xs font-medium text-muted-foreground">
+                Local de Instalação
+              </label>
               <Input
                 value={novoEquipamento.local_instalacao}
                 onChange={(e) =>
@@ -129,7 +135,9 @@ export function EquipamentoModalCliente({
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Observação</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Observação
+            </label>
             <Input
               value={novoEquipamento.observacao}
               onChange={(e) =>

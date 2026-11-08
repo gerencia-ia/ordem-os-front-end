@@ -2,7 +2,7 @@
 
 import { useOrdemDetalhe } from '@/src/hooks/useOrdemDetalhe';
 import { usePermissions } from '@/src/hooks/usePermissions';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/Ui/button';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 
 import { DetalheCabecalho } from './detalhes/DetalheCabecalho';

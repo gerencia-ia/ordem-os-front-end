@@ -9,7 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/src/components/ui/alert-dialog';
+} from '@/src/components/Ui/alert-dialog';
 import type { Cliente } from '@/src/types/cliente';
 
 interface ClienteModalExcluirProps {

@@ -5,10 +5,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/Ui/card';
 import { Activity } from 'lucide-react';
 import type { OrdemServico } from '@/src/types/ordem';
-import { formatadores } from '@/src/lib/utilitarios';
+import { formatarDataHoraCurta } from '@/src/utils/date';
 
 interface DetalheHistoricoAtividadesProps {
   ordem: OrdemServico;
@@ -34,7 +34,7 @@ export function DetalheHistoricoAtividades({
             <div>
               <p className="text-sm font-medium">Ordem de Serviço Aberta</p>
               <p className="text-xs text-muted-foreground">
-                {formatadores.dataHoraCurta(ordem.created_at)}
+                {formatarDataHoraCurta(ordem.created_at)}
               </p>
             </div>
           </div>
@@ -46,7 +46,7 @@ export function DetalheHistoricoAtividades({
               <div>
                 <p className="text-sm font-medium">Atendimento Iniciado</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatadores.dataHoraCurta(ordem.data_inicio_atendimento)}
+                  {formatarDataHoraCurta(ordem.data_inicio_atendimento)}
                 </p>
               </div>
             </div>
@@ -59,7 +59,7 @@ export function DetalheHistoricoAtividades({
               <div>
                 <p className="text-sm font-medium">Atendimento Finalizado</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatadores.dataHoraCurta(ordem.data_fim_atendimento)}
+                  {formatarDataHoraCurta(ordem.data_fim_atendimento)}
                 </p>
               </div>
             </div>
@@ -72,7 +72,7 @@ export function DetalheHistoricoAtividades({
               <div>
                 <p className="text-sm font-medium">Ordem Concluída</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatadores.dataHoraCurta(ordem.data_fechamento)}
+                  {formatarDataHoraCurta(ordem.data_fechamento)}
                 </p>
               </div>
             </div>

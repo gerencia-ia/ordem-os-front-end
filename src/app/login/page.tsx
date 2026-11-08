@@ -8,14 +8,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Alert, AlertDescription } from '@/src/components/ui/alert';
-import { Checkbox } from '@/src/components/ui/checkbox';
+} from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
+import { Input } from '@/src/components/Ui/input';
+import { Label } from '@/src/components/Ui/label';
+import { Alert, AlertDescription } from '@/src/components/Ui/alert';
+import { Checkbox } from '@/src/components/Ui/checkbox';
 import { LogIn, AlertCircle } from 'lucide-react';
-import { loginUsuario, salvarToken } from '@/src/lib/api/autenticacao';
+import { loginUsuario, salvarToken } from '@/src/services/auth.service';
 
 export default function LoginPage() {
   const router = useRouter();

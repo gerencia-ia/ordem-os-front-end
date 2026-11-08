@@ -6,8 +6,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/Ui/select';
+import { Label } from '@/src/components/Ui/label';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CriarOrdemFormData } from '@/src/types/ordem';
 import type { Cliente } from '@/src/types/cliente';

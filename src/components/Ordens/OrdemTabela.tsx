@@ -8,9 +8,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/src/components/ui/table';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/table';
+import { Badge } from '@/src/components/Ui/badge';
+import { Button } from '@/src/components/Ui/button';
 import type { OrdemServico } from '@/src/types/ordem';
 import type { Usuario } from '@/src/types/usuario';
 import { usePermissions } from '@/src/hooks/usePermissions';

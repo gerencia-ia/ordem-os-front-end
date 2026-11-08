@@ -5,9 +5,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/Ui/card';
 import type { OrdemServico } from '@/src/types/ordem';
-import { formatadores } from '@/src/lib/utilitarios';
+import { formatarDataHoraCurta } from '@/src/utils/date';
 import { Calendar, FileText, DollarSign, MessageSquare } from 'lucide-react';
 
 interface DetalheInfoGeralProps {
@@ -35,7 +35,7 @@ export function DetalheInfoGeral({
               Data de Agendamento
             </span>
             <p className="font-medium text-sm">
-              {formatadores.dataHoraCurta(ordem.data_agendamento)}
+              {formatarDataHoraCurta(ordem.data_agendamento)}
             </p>
           </div>
 
@@ -46,7 +46,7 @@ export function DetalheInfoGeral({
                 Data de Fechamento
               </span>
               <p className="font-medium text-sm text-emerald-700 dark:text-emerald-400">
-                {formatadores.dataHoraCurta(ordem.data_fechamento)}
+                {formatarDataHoraCurta(ordem.data_fechamento)}
               </p>
             </div>
           )}

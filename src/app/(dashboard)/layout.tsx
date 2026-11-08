@@ -3,10 +3,9 @@
 import type React from 'react';
 import { useState, useEffect, useSyncExternalStore } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { BarraNavegacao } from '@/src/components/layout/barra-navegacao';
-import { BarraLateral } from '@/src/components/layout/barra-lateral';
-import { ProveedorTema } from '@/src/components/provedor-tema';
-import { estaAutenticado } from '@/src/lib/api/autenticacao';
+import { BarraNavegacao } from '@/src/components/Layout/BarraNavegacao';
+import { BarraLateral } from '@/src/components/Layout/BarraLateral';
+import { estaAutenticado } from '@/src/services/auth.service';
 import { usePermissions } from '@/src/hooks/usePermissions';
 import { toast } from 'sonner';
 
@@ -67,20 +66,18 @@ export default function LayoutPainel({
   }
 
   return (
-    <ProveedorTema>
-      <div className="flex h-screen bg-background">
-        <BarraLateral
-          estaAberta={barraLateralAberta}
-          aoFechar={() => setBarraLateralAberta(false)}
-        />
+    <div className="flex h-screen bg-background">
+      <BarraLateral
+        estaAberta={barraLateralAberta}
+        aoFechar={() => setBarraLateralAberta(false)}
+      />
 
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <BarraNavegacao
-            onMenuToggle={() => setBarraLateralAberta(!barraLateralAberta)}
-          />
-          <main className="flex-1 overflow-y-auto">{children}</main>
-        </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <BarraNavegacao
+          onMenuToggle={() => setBarraLateralAberta(!barraLateralAberta)}
+        />
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
-    </ProveedorTema>
+    </div>
   );
 }

@@ -6,8 +6,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
 import { Settings, Bell, Lock, Palette } from 'lucide-react';
 
 export default function PaginaConfiguracoes() {

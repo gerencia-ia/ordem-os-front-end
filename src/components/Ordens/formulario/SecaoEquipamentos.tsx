@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/Ui/button';
+import { Badge } from '@/src/components/Ui/badge';
 import type { Equipamento } from '@/src/types/equipamento';
 import { EquipamentoModalCadastro } from '../EquipamentoModalCadastro';
 import { Cpu, Plus, Check } from 'lucide-react';

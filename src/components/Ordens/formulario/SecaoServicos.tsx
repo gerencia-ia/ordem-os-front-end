@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge } from '@/src/components/ui/badge';
+import { Badge } from '@/src/components/Ui/badge';
 import type { Servico } from '@/src/types/ordem';
 import { Wrench, Check } from 'lucide-react';
 

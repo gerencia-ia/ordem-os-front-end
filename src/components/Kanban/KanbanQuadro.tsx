@@ -13,14 +13,21 @@ const normalizar = (val?: string | null) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-function pertenceAoStatus(ordem: OrdemServico, statusId: number, statusNome: string) {
+function pertenceAoStatus(
+  ordem: OrdemServico,
+  statusId: number,
+  statusNome: string,
+) {
   const ordemStatusId = Number(ordem.status?.id || ordem.status_id || 0);
   if (ordemStatusId === statusId) return true;
 
   const nomeAtual = normalizar(ordem.status?.nome || ordem.status_descricao);
   const nomeAlvo = normalizar(statusNome);
 
-  if (nomeAlvo.includes('agendad') && (nomeAtual.includes('agendad') || nomeAtual.includes('abert'))) {
+  if (
+    nomeAlvo.includes('agendad') &&
+    (nomeAtual.includes('agendad') || nomeAtual.includes('abert'))
+  ) {
     return true;
   }
   if (
@@ -84,7 +91,8 @@ export function KanbanQuadro() {
 
   const handleDrop = async (e: React.DragEvent, statusId: number) => {
     e.preventDefault();
-    const ordemId = draggedOrdemId || Number(e.dataTransfer.getData('text/plain'));
+    const ordemId =
+      draggedOrdemId || Number(e.dataTransfer.getData('text/plain'));
     if (!ordemId) return;
 
     await moverOrdem(ordemId, statusId);
@@ -100,7 +108,8 @@ export function KanbanQuadro() {
             Quadro de Ordens (Kanban)
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie o fluxo operacional e transição de status das ordens de serviço por arrastar e soltar.
+            Gerencie o fluxo operacional e transição de status das ordens de
+            serviço por arrastar e soltar.
           </p>
         </div>
       </div>

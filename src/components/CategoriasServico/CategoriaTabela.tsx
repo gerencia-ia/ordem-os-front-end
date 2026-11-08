@@ -7,9 +7,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/src/components/ui/table';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/table';
+import { Badge } from '@/src/components/Ui/badge';
+import { Button } from '@/src/components/Ui/button';
 import { Edit, Trash2, Tag, Loader2 } from 'lucide-react';
 import type { CategoriaServico } from '@/src/types/categoria';
 

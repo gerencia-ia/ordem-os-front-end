@@ -5,12 +5,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
 import { User, Phone, MapPin, MessageCircle } from 'lucide-react';
 import type { Cliente } from '@/src/types/cliente';
 import type { Endereco } from '@/src/types/endereco';
-import { formatadores } from '@/src/lib/utilitarios';
+import { formatarTelefone } from '@/src/utils/phone';
 
 interface DetalheClienteProps {
   cliente: Cliente | null;
@@ -50,7 +50,7 @@ export function DetalheCliente({
             </span>
             <p className="font-medium text-sm flex items-center gap-1.5 mt-0.5">
               <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-              {telefone ? formatadores.telefone(telefone) : '—'}
+              {telefone ? formatarTelefone(telefone) : '—'}
             </p>
           </div>
 

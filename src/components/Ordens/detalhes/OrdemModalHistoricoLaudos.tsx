@@ -7,12 +7,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Button } from '@/src/components/ui/button';
-import { Badge } from '@/src/components/ui/badge';
+} from '@/src/components/Ui/dialog';
+import { Button } from '@/src/components/Ui/button';
+import { Badge } from '@/src/components/Ui/badge';
 import { Loader2 } from 'lucide-react';
 import type { Equipamento, HistoricoLaudo } from '@/src/types/equipamento';
-import { formatadores } from '@/src/lib/utilitarios';
+import { formatarDataHoraCurta } from '@/src/utils/date';
 
 interface OrdemModalHistoricoLaudosProps {
   open: boolean;
@@ -68,10 +68,10 @@ export function OrdemModalHistoricoLaudos({
                     <tr key={item.id} className="hover:bg-muted/30">
                       <td className="py-3 px-4 text-xs font-mono text-muted-foreground whitespace-nowrap">
                         {item.ordem_servico?.data_fechamento
-                          ? formatadores.dataHoraCurta(
+                          ? formatarDataHoraCurta(
                               item.ordem_servico.data_fechamento,
                             )
-                          : formatadores.dataHoraCurta(item.created_at)}
+                          : formatarDataHoraCurta(item.created_at)}
                       </td>
                       <td className="py-3 px-4">
                         <p className="text-xs leading-relaxed line-clamp-3">

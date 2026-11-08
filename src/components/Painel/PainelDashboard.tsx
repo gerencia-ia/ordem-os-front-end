@@ -6,8 +6,8 @@ import { PainelKpis } from './PainelKpis';
 import { PainelGraficoStatus } from './PainelGraficoStatus';
 import { PainelGraficoPrioridades } from './PainelGraficoPrioridades';
 import { LayoutDashboard, AlertCircle, RefreshCw } from 'lucide-react';
-import { Button } from '@/src/components/ui/button';
-import { Skeleton } from '@/src/components/ui/skeleton';
+import { Button } from '@/src/components/Ui/button';
+import { Skeleton } from '@/src/components/Ui/skeleton';
 
 export function PainelDashboard() {
   const {
@@ -32,7 +32,8 @@ export function PainelDashboard() {
             Painel Analítico
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Acompanhamento de procedimentos, métricas de produtividade e visão operacional
+            Acompanhamento de procedimentos, métricas de produtividade e visão
+            operacional
           </p>
         </div>
 

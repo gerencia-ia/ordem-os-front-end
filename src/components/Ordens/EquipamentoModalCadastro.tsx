@@ -16,11 +16,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
+} from '@/src/components/Ui/dialog';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
+import { Label } from '@/src/components/Ui/label';
+import { Textarea } from '@/src/components/Ui/textarea';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 

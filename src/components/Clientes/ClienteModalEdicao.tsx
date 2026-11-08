@@ -6,10 +6,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/Ui/dialog';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
+import { Label } from '@/src/components/Ui/label';
 import { useClienteForm } from '@/src/hooks/useClienteForm';
 import type { Cliente } from '@/src/types/cliente';
 import { Plus, Trash2, Search, Loader2 } from 'lucide-react';

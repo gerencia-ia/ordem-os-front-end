@@ -7,10 +7,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Button } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/Ui/dialog';
+import { Button } from '@/src/components/Ui/button';
+import { Input } from '@/src/components/Ui/input';
+import { Label } from '@/src/components/Ui/label';
 import { Loader2 } from 'lucide-react';
 import { useCategoriaForm } from '@/src/hooks/useCategoriaForm';
 

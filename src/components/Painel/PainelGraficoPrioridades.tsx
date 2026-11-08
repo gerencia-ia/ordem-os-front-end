@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/Ui/card';
 import {
   BarChart,
   Bar,
@@ -29,7 +29,9 @@ interface PainelGraficoPrioridadesProps {
   dados: DadoPrioridadeBar[];
 }
 
-export function PainelGraficoPrioridades({ dados }: PainelGraficoPrioridadesProps) {
+export function PainelGraficoPrioridades({
+  dados,
+}: PainelGraficoPrioridadesProps) {
   const temDados = dados.some((item) => item.total > 0);
 
   return (

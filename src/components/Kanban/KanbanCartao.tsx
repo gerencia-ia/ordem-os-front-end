@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Card, CardContent } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
+import { Card, CardContent } from '@/src/components/Ui/card';
+import { Badge } from '@/src/components/Ui/badge';
 import { Calendar, User, HardHat, ArrowUpRight } from 'lucide-react';
 import type { OrdemServico } from '@/src/types/ordem';
 import type { Usuario } from '@/src/types/usuario';
-import { formatadores } from '@/src/lib/utilitarios';
+import { formatarDataHoraCurta } from '@/src/utils/date';
 
 interface KanbanCartaoProps {
   ordem: OrdemServico;
@@ -90,7 +90,7 @@ export function KanbanCartao({
               {ordem.data_agendamento && (
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3 w-3 shrink-0 text-muted-foreground/70" />
-                  <span>{formatadores.dataHoraCurta(ordem.data_agendamento)}</span>
+                  <span>{formatarDataHoraCurta(ordem.data_agendamento)}</span>
                 </div>
               )}
 

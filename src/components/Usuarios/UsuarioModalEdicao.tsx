@@ -6,17 +6,17 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/Ui/dialog';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
+import { Label } from '@/src/components/Ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
+} from '@/src/components/Ui/select';
 import { useUsuarioForm } from '@/src/hooks/useUsuarioForm';
 import { useRoles } from '@/src/hooks/useRoles';
 import { usePermissions } from '@/src/hooks/usePermissions';

@@ -7,11 +7,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Input } from '@/src/components/ui/input';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
-import { Badge } from '@/src/components/ui/badge';
+} from '@/src/components/Ui/dialog';
+import { Input } from '@/src/components/Ui/input';
+import { Button } from '@/src/components/Ui/button';
+import { Label } from '@/src/components/Ui/label';
+import { Badge } from '@/src/components/Ui/badge';
 import { useClienteForm } from '@/src/hooks/useClienteForm';
 import { EquipamentoModalCliente } from '@/src/components/Clientes/EquipamentoModalCliente';
 import { Plus, Trash2, Search, Loader2 } from 'lucide-react';

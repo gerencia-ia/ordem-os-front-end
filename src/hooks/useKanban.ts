@@ -21,7 +21,9 @@ const normalizar = (val?: string | null) =>
 
 export function useKanban() {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
-  const [colunasStatus, setColunasStatus] = useState<Status[]>(STATUS_COLUNAS_PADRAO);
+  const [colunasStatus, setColunasStatus] = useState<Status[]>(
+    STATUS_COLUNAS_PADRAO,
+  );
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -38,7 +40,9 @@ export function useKanban() {
 
   // Modal de Criação de OS
   const [modalCriarAberta, setModalCriarAberta] = useState(false);
-  const [statusPredefinido, setStatusPredefinido] = useState<number | undefined>(undefined);
+  const [statusPredefinido, setStatusPredefinido] = useState<
+    number | undefined
+  >(undefined);
 
   // Carrega status da API
   const carregarStatus = useCallback(async () => {
@@ -78,7 +82,9 @@ export function useKanban() {
       setOrdens(data);
     } catch (err) {
       const msg =
-        err instanceof Error ? err.message : 'Erro ao carregar ordens do quadro.';
+        err instanceof Error
+          ? err.message
+          : 'Erro ao carregar ordens do quadro.';
       setErro(msg);
       toast.error(msg);
     } finally {
@@ -156,7 +162,9 @@ export function useKanban() {
     if (!termo) return ordens;
 
     return ordens.filter((o) => {
-      const matchNumero = String(o.id).includes(termo) || normalizar(o.numero_ordem).includes(termo);
+      const matchNumero =
+        String(o.id).includes(termo) ||
+        normalizar(o.numero_ordem).includes(termo);
       const matchCliente = normalizar(o.cliente?.nome).includes(termo);
       const matchDesc = normalizar(o.descricao).includes(termo);
       return matchNumero || matchCliente || matchDesc;
@@ -168,8 +176,12 @@ export function useKanban() {
     const ordemAnterior = ordens.find((o) => o.id === ordemId);
     if (!ordemAnterior) return;
 
-    const statusDestino = colunasStatus.find((c) => Number(c.id) === novoStatusId);
-    const statusAntigoId = Number(ordemAnterior.status?.id || ordemAnterior.status_id || 1);
+    const statusDestino = colunasStatus.find(
+      (c) => Number(c.id) === novoStatusId,
+    );
+    const statusAntigoId = Number(
+      ordemAnterior.status?.id || ordemAnterior.status_id || 1,
+    );
 
     if (statusAntigoId === novoStatusId) return;
 
@@ -197,7 +209,9 @@ export function useKanban() {
         atuais.map((o) => (o.id === ordemId ? ordemAnterior : o)),
       );
       const msg =
-        err instanceof Error ? err.message : 'Erro ao atualizar status da ordem.';
+        err instanceof Error
+          ? err.message
+          : 'Erro ao atualizar status da ordem.';
       toast.error(msg);
     } finally {
       setDraggedOrdemId(null);

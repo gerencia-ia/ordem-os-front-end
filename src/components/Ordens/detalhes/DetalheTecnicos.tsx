@@ -5,11 +5,11 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
 import { HardHat, Phone, UserCheck, Plus, Trash2, Edit } from 'lucide-react';
 import type { Usuario } from '@/src/types/usuario';
-import { formatadores } from '@/src/lib/utilitarios';
+import { formatarTelefone } from '@/src/utils/phone';
 
 interface DetalheTecnicosProps {
   tecnicos?: Usuario[] | Usuario | null;
@@ -78,7 +78,7 @@ export function DetalheTecnicos({
                     {tec.telefone && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                         <Phone className="h-3 w-3" />
-                        {formatadores.telefone(tec.telefone)}
+                        {formatarTelefone(tec.telefone)}
                       </p>
                     )}
                   </div>

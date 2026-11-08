@@ -7,8 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/dialog';
+import { Button } from '@/src/components/Ui/button';
 import { useOrdemForm } from '@/src/hooks/useOrdemForm';
 import { SecaoClienteEndereco } from './formulario/SecaoClienteEndereco';
 import { SecaoEquipamentos } from './formulario/SecaoEquipamentos';

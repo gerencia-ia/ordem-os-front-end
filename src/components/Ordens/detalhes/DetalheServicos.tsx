@@ -5,8 +5,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
+} from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
 import { Wrench, Plus, Trash2, Clock } from 'lucide-react';
 import type { OsServico } from '@/src/types/ordem';
 

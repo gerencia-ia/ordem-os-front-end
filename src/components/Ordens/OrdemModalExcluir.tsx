@@ -9,7 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/src/components/ui/alert-dialog';
+} from '@/src/components/Ui/alert-dialog';
 import type { OrdemServico } from '@/src/types/ordem';
 import { Loader2 } from 'lucide-react';
 
