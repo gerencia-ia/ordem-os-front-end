@@ -95,7 +95,9 @@ export function useOrdens() {
         const matchObservacao = normalizar(ordem.observacao).includes(termo);
         const tecnicosLista: Usuario[] = Array.isArray(ordem.tecnicos)
           ? ordem.tecnicos
-          : ordem.tecnicos && typeof ordem.tecnicos === 'object' && 'id' in ordem.tecnicos
+          : ordem.tecnicos &&
+              typeof ordem.tecnicos === 'object' &&
+              'id' in ordem.tecnicos
             ? [ordem.tecnicos as Usuario]
             : [];
 
@@ -146,7 +148,9 @@ export function useOrdens() {
       if (filtroTecnico !== 'todos') {
         const tecnicosLista: Usuario[] = Array.isArray(ordem.tecnicos)
           ? ordem.tecnicos
-          : ordem.tecnicos && typeof ordem.tecnicos === 'object' && 'id' in ordem.tecnicos
+          : ordem.tecnicos &&
+              typeof ordem.tecnicos === 'object' &&
+              'id' in ordem.tecnicos
             ? [ordem.tecnicos as Usuario]
             : [];
 

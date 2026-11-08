@@ -1,12 +1,9 @@
 import { apiDelete, apiGet, apiPost, apiPut } from './api';
-import type { Servico } from '@/src/types/ordem';
-
-export type NovoServicoPayload = {
-  nome: string;
-  valor: number;
-  tempo_servico?: number;
-  categorias_servico_id?: number | null;
-};
+import type {
+  Servico,
+  CriarServicoPayload,
+  EditarServicoPayload,
+} from '@/src/types/servico';
 
 export async function getServicos(): Promise<Servico[]> {
   return apiGet<Servico[]>('/servicos', { cache: 'no-store' });
@@ -17,18 +14,21 @@ export async function getServicoById(id: string | number): Promise<Servico> {
 }
 
 export async function createServico(
-  data: NovoServicoPayload,
+  payload: CriarServicoPayload,
 ): Promise<Servico> {
-  return apiPost<Servico>('/servicos', data);
+  return apiPost<Servico>('/servicos', payload);
 }
 
 export async function updateServico(
   id: string | number,
-  data: Partial<NovoServicoPayload>,
+  payload: EditarServicoPayload,
 ): Promise<Servico> {
-  return apiPut<Servico>(`/servicos/${id}`, data);
+  return apiPut<Servico>(`/servicos/${id}`, payload);
 }
 
 export async function deleteServico(id: string | number): Promise<void> {
   return apiDelete(`/servicos/${id}`);
 }
+
+// Retrocompatibilidade
+export type { NovoServicoPayload } from '@/src/types/servico';

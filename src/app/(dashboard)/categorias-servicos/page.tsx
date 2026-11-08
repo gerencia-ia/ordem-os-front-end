@@ -1,5 +1,7 @@
-import ListaCategoriesServicos from '@/src/components/lista-categorias-servicos';
+'use client';
 
-export default function CategoriesServicosPage() {
-  return <ListaCategoriesServicos />;
+import { CategoriaLista } from '@/src/components/CategoriasServico/CategoriaLista';
+
+export default function PaginaCategoriasServicos() {
+  return <CategoriaLista />;
 }

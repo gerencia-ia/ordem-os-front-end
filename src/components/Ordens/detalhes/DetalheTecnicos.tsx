@@ -31,7 +31,10 @@ export function DetalheTecnicos({
   // Normaliza tecnicos caso o serializer Rails retorne um objeto único ou array
   const lista: Usuario[] = Array.isArray(tecnicos)
     ? tecnicos
-    : tecnicos && typeof tecnicos === 'object' && 'id' in (tecnicos as object) && (tecnicos as Usuario).id
+    : tecnicos &&
+        typeof tecnicos === 'object' &&
+        'id' in (tecnicos as object) &&
+        (tecnicos as Usuario).id
       ? [tecnicos as Usuario]
       : tecnicoResponsavel
         ? [tecnicoResponsavel]

@@ -3,6 +3,9 @@ import type { Cliente } from './cliente';
 import type { Endereco } from './endereco';
 import type { Usuario } from './usuario';
 import type { Equipamento } from './equipamento';
+import type { Servico } from './servico';
+
+export type { Servico, CategoriaServico } from './servico';
 
 export interface Status {
   id: string | number;
@@ -12,20 +15,6 @@ export interface Status {
 export interface Prioridade {
   id: string | number;
   descricao: string;
-}
-
-export interface CategoriaServico {
-  id: number;
-  descricao: string;
-}
-
-export interface Servico {
-  id: number;
-  nome: string;
-  valor: number;
-  tempo_servico: number;
-  categoria?: CategoriaServico | null;
-  categorias_servico?: CategoriaServico | null;
 }
 
 export interface OsServico extends Servico {

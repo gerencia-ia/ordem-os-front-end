@@ -1,5 +1,7 @@
-import ListaServicos from '@/src/components/lista-servicos';
+'use client';
 
-export default function ServicosPage() {
-  return <ListaServicos />;
+import { ServicoLista } from '@/src/components/Servicos/ServicoLista';
+
+export default function PaginaServicos() {
+  return <ServicoLista />;
 }
