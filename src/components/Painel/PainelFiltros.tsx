@@ -21,7 +21,7 @@ export function PainelFiltros({
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         <div className="relative w-48">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
           <Input
             type="month"
             value={filtroMes}
@@ -38,7 +38,7 @@ export function PainelFiltros({
           disabled={loading}
           aria-label="Recarregar métricas"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
     </div>

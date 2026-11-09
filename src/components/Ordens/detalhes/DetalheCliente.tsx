@@ -30,13 +30,13 @@ export function DetalheCliente({
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <User className="h-5 w-5 text-muted-foreground" />
+          <User className="size-5 text-muted-foreground" />
           Cliente
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="space-y-3">
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <div>
             <span className="text-xs text-muted-foreground block">Nome</span>
             <p className="font-semibold text-sm">
@@ -49,7 +49,7 @@ export function DetalheCliente({
               Telefone
             </span>
             <p className="font-medium text-sm flex items-center gap-1.5 mt-0.5">
-              <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+              <Phone className="size-3.5 text-muted-foreground" />
               {telefone ? formatarTelefone(telefone) : '—'}
             </p>
           </div>
@@ -59,7 +59,7 @@ export function DetalheCliente({
               Endereço do Atendimento
             </span>
             <p className="font-medium text-sm flex items-start gap-1.5 mt-0.5 text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+              <MapPin className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
               <span>
                 {enderecoPrincipal
                   ? `${enderecoPrincipal.rua}, ${enderecoPrincipal.numero}${
@@ -83,7 +83,7 @@ export function DetalheCliente({
           onClick={onContatarWhatsApp}
           disabled={!telefone}
         >
-          <MessageCircle className="h-4 w-4" />
+          <MessageCircle className="size-4" />
           Contatar via WhatsApp
         </Button>
       </CardContent>

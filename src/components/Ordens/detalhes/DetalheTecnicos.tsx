@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from '@/src/components/Ui/card';
 import { Button } from '@/src/components/Ui/button';
+import { Separator } from '@/src/components/Ui/separator';
 import {
   HardHat,
   Phone,
@@ -48,7 +49,7 @@ export function DetalheTecnicos({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <HardHat className="h-5 w-5 text-muted-foreground" />
+          <HardHat className="size-5 text-muted-foreground" />
           Técnicos Atribuídos ({lista.length})
         </CardTitle>
         {podeAtribuirTecnicos && lista.length === 0 && (
@@ -59,15 +60,15 @@ export function DetalheTecnicos({
             disabled={salvando}
             className="gap-1.5"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             Atribuir
           </Button>
         )}
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         {lista.length > 0 ? (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {lista.map((tec) => {
               const ehResponsavel =
                 tecnicoResponsavel &&
@@ -76,12 +77,12 @@ export function DetalheTecnicos({
               return (
                 <div
                   key={tec.id}
-                  className="p-3 border rounded-lg bg-card space-y-2"
+                  className="p-3 border rounded-lg bg-card flex flex-col gap-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <UserCheck className="h-4 w-4 text-emerald-600" />
+                        <UserCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
                         <span className="font-semibold text-sm">
                           {tec.nome}
                         </span>
@@ -90,14 +91,14 @@ export function DetalheTecnicos({
                             variant="secondary"
                             className="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border border-amber-300 gap-1 px-1.5 py-0"
                           >
-                            <Crown className="h-3 w-3" />
+                            <Crown className="size-3" />
                             Responsável
                           </Badge>
                         )}
                       </div>
                       {tec.telefone && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Phone className="h-3 w-3" />
+                          <Phone className="size-3" />
                           {formatarTelefone(tec.telefone)}
                         </p>
                       )}
@@ -105,29 +106,32 @@ export function DetalheTecnicos({
                   </div>
 
                   {podeAtribuirTecnicos && (
-                    <div className="flex items-center gap-2 pt-2 border-t">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-7 gap-1"
-                        onClick={() => onAtribuirTecnico(tec)}
-                        disabled={salvando}
-                      >
-                        <Edit className="h-3 w-3" />
-                        Alterar
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 gap-1"
-                        onClick={() => onRemoverTecnico(tec.id)}
-                        disabled={salvando}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Remover
-                      </Button>
+                    <div className="flex flex-col gap-2 pt-1">
+                      <Separator />
+                      <div className="flex items-center gap-2 pt-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7 gap-1"
+                          onClick={() => onAtribuirTecnico(tec)}
+                          disabled={salvando}
+                        >
+                          <Edit className="size-3" />
+                          Alterar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7 text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                          onClick={() => onRemoverTecnico(tec.id)}
+                          disabled={salvando}
+                        >
+                          <Trash2 className="size-3" />
+                          Remover
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -143,7 +147,7 @@ export function DetalheTecnicos({
                 onClick={() => onAtribuirTecnico()}
                 disabled={salvando}
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="size-3.5" />
                 Adicionar mais um técnico
               </Button>
             )}

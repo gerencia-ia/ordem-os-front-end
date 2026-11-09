@@ -64,7 +64,7 @@ export function OrdemModalCadastro({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <PlusCircle className="h-5 w-5 text-primary" />
+            <PlusCircle className="size-5 text-primary" />
             <DialogTitle>Nova Ordem de Serviço</DialogTitle>
           </div>
           <DialogDescription>
@@ -72,7 +72,7 @@ export function OrdemModalCadastro({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4 py-2">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 py-2">
           {/* Seção 1: Cliente e Endereço */}
           <SecaoClienteEndereco
             form={form}
@@ -125,7 +125,7 @@ export function OrdemModalCadastro({
               Cancelar
             </Button>
             <Button type="submit" disabled={salvando || loadingDados}>
-              {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
               Criar Ordem de Serviço
             </Button>
           </DialogFooter>

@@ -35,12 +35,17 @@ export default function PaginaConfiguracoes() {
   ];
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground mt-2">
-          Personalize sua experiência no OSControl
-        </p>
+    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Settings className="size-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Personalize sua experiência no OSControl
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -54,7 +59,7 @@ export default function PaginaConfiguracoes() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
-                    <Icon className="h-6 w-6 text-primary mt-1" />
+                    <Icon className="size-6 text-primary mt-1" />
                     <div>
                       <CardTitle className="text-lg">{opcao.titulo}</CardTitle>
                       <CardDescription>{opcao.descricao}</CardDescription>

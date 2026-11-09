@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/src/components/Ui/button';
-import { Badge } from '@/src/components/Ui/badge';
+import { StatusBadge, PrioridadeBadge } from '@/src/components/Ui/status-badge';
 import {
   Select,
   SelectContent,
@@ -28,46 +28,6 @@ interface DetalheCabecalhoProps {
   onFinalizarAtendimento: () => void;
   acaoLoading: boolean;
   podeAlterarStatus: boolean;
-}
-
-const normalizar = (val?: string | null) =>
-  (val ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-
-function getBadgePrioridade(prioridade?: string | null) {
-  const norm = normalizar(prioridade);
-  const cores: Record<string, string> = {
-    critica: 'bg-red-600 text-white border-transparent',
-    alta: 'bg-orange-500 text-white border-transparent',
-    media: 'bg-amber-500 text-white border-transparent',
-    baixa: 'bg-blue-500 text-white border-transparent',
-  };
-  return cores[norm] || 'bg-muted text-muted-foreground';
-}
-
-function getBadgeStatus(status?: string | null) {
-  const norm = normalizar(status);
-  const cores: Record<string, string> = {
-    agendado:
-      'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200 border-yellow-300',
-    aberta:
-      'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200 border-yellow-300',
-    'em progresso':
-      'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border-blue-300',
-    'em andamento':
-      'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border-blue-300',
-    concluido:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300',
-    concluida:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300',
-    cancelado:
-      'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-300',
-    cancelada:
-      'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-300',
-  };
-  return cores[norm] || 'bg-muted text-muted-foreground';
 }
 
 export function DetalheCabecalho({
@@ -99,7 +59,7 @@ export function DetalheCabecalho({
           onClick={() => router.back()}
           aria-label="Voltar"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
         </Button>
         <div>
           <div className="flex items-center gap-2">
@@ -111,17 +71,10 @@ export function DetalheCabecalho({
                 ({ordem.numero_ordem})
               </span>
             )}
-            <Badge className={getBadgePrioridade(prioridadeNomeAtual)}>
-              {prioridadeNomeAtual}
-            </Badge>
+            <PrioridadeBadge prioridade={prioridadeNomeAtual} />
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <Badge
-              variant="outline"
-              className={getBadgeStatus(statusNomeAtual)}
-            >
-              {statusNomeAtual}
-            </Badge>
+            <StatusBadge status={statusNomeAtual} />
           </div>
         </div>
       </div>
@@ -156,7 +109,7 @@ export function DetalheCabecalho({
 
         {concluido ? (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 rounded-md text-sm font-medium">
-            <CheckCircle className="h-4 w-4" />
+            <CheckCircle className="size-4" />
             <span>Atendimento Concluído</span>
           </div>
         ) : (
@@ -169,9 +122,9 @@ export function DetalheCabecalho({
                 size="sm"
               >
                 {acaoLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  <PlayCircle className="h-4 w-4" />
+                  <PlayCircle className="size-4" />
                 )}
                 <span>Iniciar Atendimento</span>
               </Button>
@@ -179,7 +132,7 @@ export function DetalheCabecalho({
 
             {emAtendimento && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 rounded-md text-sm font-medium">
-                <Clock className="h-4 w-4 animate-pulse" />
+                <Clock className="size-4 animate-pulse" />
                 <span>Em Atendimento</span>
               </div>
             )}
@@ -191,7 +144,7 @@ export function DetalheCabecalho({
               className="gap-2"
               size="sm"
             >
-              <CheckCircle className="h-4 w-4 text-emerald-600" />
+              <CheckCircle className="size-4 text-emerald-600" />
               <span>Finalizar</span>
             </Button>
           </div>

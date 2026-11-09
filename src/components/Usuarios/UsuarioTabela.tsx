@@ -10,6 +10,14 @@ import {
 } from '@/src/components/Ui/table';
 import { Button } from '@/src/components/Ui/button';
 import { Badge } from '@/src/components/Ui/badge';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
 import type { Usuario } from '@/src/types/usuario';
 import { usePermissions } from '@/src/hooks/usePermissions';
 import { formatarCpf } from '@/src/utils/cpf';
@@ -40,25 +48,62 @@ export function UsuarioTabela({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mb-3" />
-        <p className="text-sm text-muted-foreground">Carregando usuários...</p>
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="w-[260px]">Usuário</TableHead>
+              <TableHead className="w-[140px]">Função</TableHead>
+              <TableHead className="w-[160px]">CPF</TableHead>
+              <TableHead className="w-[180px]">Telefone</TableHead>
+              <TableHead className="w-[120px] text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-40" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-28" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-28" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="size-8 rounded-md" />
+                    <Skeleton className="size-8 rounded-md" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
 
   if (usuarios.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-card/50">
-        <UserIcon className="h-10 w-10 text-muted-foreground mb-3" />
-        <h3 className="font-semibold text-foreground">
-          Nenhum usuário encontrado
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-          Nenhum resultado corresponde à sua busca ou não há usuários
-          cadastrados.
-        </p>
-      </div>
+      <Empty className="border rounded-lg bg-card/40 my-4">
+        <EmptyMedia variant="icon">
+          <UserIcon className="size-5 text-muted-foreground" />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>Nenhum usuário encontrado</EmptyTitle>
+          <EmptyDescription>
+            Nenhum resultado corresponde à sua busca ou não há usuários cadastrados.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
@@ -146,20 +191,20 @@ export function UsuarioTabela({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        className="size-8 text-muted-foreground hover:text-foreground"
                         onClick={() => onEditar(user)}
-                        title="Editar usuário"
+                        aria-label={`Editar usuário ${user.nome}`}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="size-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => onExcluir(user)}
-                        title="Excluir usuário"
+                        aria-label={`Excluir usuário ${user.nome}`}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="size-4" />
                       </Button>
                     </div>
                   ) : (

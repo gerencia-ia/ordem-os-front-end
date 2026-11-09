@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/src/components/Ui/dialog';
 import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
@@ -66,9 +67,9 @@ function UsuarioModalEdicaoForm({
   } = form;
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 pt-2">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4 pt-2">
       {/* Nome */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-nome">
           Nome Completo <span className="text-destructive">*</span>
         </Label>
@@ -79,7 +80,7 @@ function UsuarioModalEdicaoForm({
       </div>
 
       {/* CPF */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-cpf">
           CPF <span className="text-destructive">*</span>
         </Label>
@@ -102,7 +103,7 @@ function UsuarioModalEdicaoForm({
       </div>
 
       {/* E-mail */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-email">
           E-mail <span className="text-destructive">*</span>
         </Label>
@@ -118,7 +119,7 @@ function UsuarioModalEdicaoForm({
       </div>
 
       {/* Telefone */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-telefone">
           Telefone <span className="text-destructive">*</span>
         </Label>
@@ -141,7 +142,7 @@ function UsuarioModalEdicaoForm({
       </div>
 
       {/* Nova Senha (Opcional) */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-senha">Nova Senha (Opcional)</Label>
         <Input
           id="edit-senha"
@@ -155,7 +156,7 @@ function UsuarioModalEdicaoForm({
       </div>
 
       {/* Função / Role */}
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-role_id">Função no Sistema</Label>
         <Controller
           control={control}
@@ -195,7 +196,7 @@ function UsuarioModalEdicaoForm({
       </div>
 
       {/* Botões */}
-      <div className="flex justify-end gap-3 pt-4 border-t">
+      <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t">
         <Button
           type="button"
           variant="outline"
@@ -207,14 +208,14 @@ function UsuarioModalEdicaoForm({
         <Button type="submit" disabled={salvando}>
           {salvando ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 size-4 animate-spin" />
               Salvando...
             </>
           ) : (
             'Salvar Alterações'
           )}
         </Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

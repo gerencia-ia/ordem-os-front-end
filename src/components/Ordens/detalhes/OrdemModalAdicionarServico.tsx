@@ -60,12 +60,12 @@ export function OrdemModalAdicionarServico({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
+        <div className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="select-servico">Serviço</Label>
             {loadingServicos ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <Loader2 className="size-4 animate-spin text-primary" />
                 <span>Carregando catálogo de serviços...</span>
               </div>
             ) : servicos.length > 0 ? (
@@ -100,7 +100,7 @@ export function OrdemModalAdicionarServico({
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="input-quantidade">Quantidade (opcional)</Label>
             <Input
               id="input-quantidade"
@@ -133,7 +133,7 @@ export function OrdemModalAdicionarServico({
               servicos.length === 0
             }
           >
-            {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
             {salvando ? 'Adicionando...' : 'Adicionar Serviço'}
           </Button>
         </DialogFooter>

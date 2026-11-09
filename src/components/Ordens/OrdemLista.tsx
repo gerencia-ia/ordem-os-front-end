@@ -74,12 +74,12 @@ export function OrdemLista() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Cabeçalho */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <ClipboardList className="h-6 w-6 text-primary" />
+            <ClipboardList className="size-6 text-primary" />
             <h1 className="text-2xl font-bold tracking-tight">
               Ordens de Serviço
             </h1>
@@ -95,7 +95,7 @@ export function OrdemLista() {
             onClick={() => setModalCadastroAberta(true)}
             className="gap-1.5 shadow-sm"
           >
-            <Plus className="h-4 w-4" /> Nova Ordem
+            <Plus className="size-4" /> Nova Ordem
           </Button>
         )}
       </div>

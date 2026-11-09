@@ -10,7 +10,15 @@ import {
 } from '@/src/components/Ui/table';
 import { Badge } from '@/src/components/Ui/badge';
 import { Button } from '@/src/components/Ui/button';
-import { Edit, Trash2, Wrench, Clock, Loader2 } from 'lucide-react';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
+import { Edit, Trash2, Wrench, Clock } from 'lucide-react';
 import type { Servico } from '@/src/types/servico';
 
 interface ServicoTabelaProps {
@@ -28,43 +36,76 @@ export function ServicoTabela({
 }: ServicoTabelaProps) {
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <p className="text-sm">Carregando catálogo de serviços...</p>
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40">
+              <TableHead>Nome do Serviço</TableHead>
+              <TableHead>Categoria</TableHead>
+              <TableHead className="w-[140px]">Tempo Estimado</TableHead>
+              <TableHead className="w-[140px] text-right">Valor Unitário</TableHead>
+              <TableHead className="w-[120px] text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <Skeleton className="h-4 w-48" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-28" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="h-4 w-24 ml-auto" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="size-8 rounded-md" />
+                    <Skeleton className="size-8 rounded-md" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
 
   if (servicos.length === 0) {
     return (
-      <div className="text-center py-16 border rounded-lg bg-card/40 space-y-3">
-        <div className="inline-flex p-3 rounded-full bg-muted">
-          <Wrench className="h-6 w-6 text-muted-foreground" />
-        </div>
-        <h3 className="font-semibold text-base">Nenhum serviço encontrado</h3>
-        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-          Nenhum serviço disponível ou correspondente aos filtros de busca
-          aplicados.
-        </p>
-      </div>
+      <Empty className="border rounded-lg bg-card/40 my-4">
+        <EmptyMedia variant="icon">
+          <Wrench className="size-5 text-muted-foreground" />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>Nenhum serviço encontrado</EmptyTitle>
+          <EmptyDescription>
+            Nenhum serviço disponível ou correspondente aos filtros de busca aplicados.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-card">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/40">
-              <TableHead>Nome do Serviço</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Tempo Estimado</TableHead>
-              <TableHead className="text-right">Valor Unitário</TableHead>
-              <TableHead className="w-[120px] text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {servicos.map((servico) => {
+    <div className="rounded-md border overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/40">
+            <TableHead>Nome do Serviço</TableHead>
+            <TableHead>Categoria</TableHead>
+            <TableHead className="w-[140px]">Tempo Estimado</TableHead>
+            <TableHead className="w-[140px] text-right">Valor Unitário</TableHead>
+            <TableHead className="w-[120px] text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {servicos.map((servico) => {
               const categoriaNome =
                 servico.categoria?.descricao ||
                 servico.categorias_servico?.descricao ||
@@ -110,20 +151,20 @@ export function ServicoTabela({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        className="size-8 text-muted-foreground hover:text-foreground"
                         onClick={() => onEditar(servico)}
                         aria-label={`Editar ${servico.nome}`}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="size-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
+                        className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => onExcluir(servico)}
                         aria-label={`Excluir ${servico.nome}`}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="size-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -132,7 +173,6 @@ export function ServicoTabela({
             })}
           </TableBody>
         </Table>
-      </div>
     </div>
   );
 }

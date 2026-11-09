@@ -8,6 +8,14 @@ import {
 } from '@/src/components/Ui/card';
 import { Button } from '@/src/components/Ui/button';
 import { Badge } from '@/src/components/Ui/badge';
+import { Separator } from '@/src/components/Ui/separator';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/src/components/Ui/empty';
 import { AirVent, History, FileEdit, CheckCircle2 } from 'lucide-react';
 import type { Equipamento } from '@/src/types/equipamento';
 
@@ -30,21 +38,21 @@ export function DetalheEquipamentos({
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <AirVent className="h-5 w-5 text-muted-foreground" />
+          <AirVent className="size-5 text-muted-foreground" />
           Equipamentos ({lista.length})
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         {lista.length > 0 ? (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {lista.map((equip) => {
               const temLaudo = Boolean(equip.laudo && equip.laudo.trim());
 
               return (
                 <div
                   key={equip.id}
-                  className="p-4 border rounded-lg bg-card hover:border-primary/40 transition-colors space-y-3"
+                  className="p-4 border rounded-lg bg-card hover:border-primary/40 transition-colors flex flex-col gap-3"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
@@ -60,7 +68,7 @@ export function DetalheEquipamentos({
                             variant="outline"
                             className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 text-xs gap-1"
                           >
-                            <CheckCircle2 className="h-3 w-3" />
+                            <CheckCircle2 className="size-3" />
                             Laudo Preenchido
                           </Badge>
                         )}
@@ -78,7 +86,7 @@ export function DetalheEquipamentos({
                         onClick={() => onAbrirHistorico(equip)}
                         className="gap-1.5 text-xs h-8"
                       >
-                        <History className="h-3.5 w-3.5" />
+                        <History className="size-3.5" />
                         Histórico
                       </Button>
 
@@ -90,7 +98,7 @@ export function DetalheEquipamentos({
                           onClick={() => onAbrirLaudo(equip)}
                           className="gap-1.5 text-xs h-8"
                         >
-                          <FileEdit className="h-3.5 w-3.5" />
+                          <FileEdit className="size-3.5" />
                           {temLaudo ? 'Editar Laudo' : 'Adicionar Laudo'}
                         </Button>
                       )}
@@ -98,13 +106,16 @@ export function DetalheEquipamentos({
                   </div>
 
                   {temLaudo && (
-                    <div className="pt-2 border-t text-xs bg-muted/30 p-2.5 rounded">
-                      <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block mb-1">
-                        Laudo atual registrado:
-                      </span>
-                      <p className="italic text-foreground/90 whitespace-pre-wrap leading-relaxed">
-                        &quot;{equip.laudo}&quot;
-                      </p>
+                    <div className="flex flex-col gap-1.5 pt-1">
+                      <Separator />
+                      <div className="text-xs bg-muted/30 p-2.5 rounded border border-border/50">
+                        <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block mb-1">
+                          Laudo atual registrado:
+                        </span>
+                        <p className="italic text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                          &quot;{equip.laudo}&quot;
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -112,9 +123,17 @@ export function DetalheEquipamentos({
             })}
           </div>
         ) : (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            Nenhum equipamento vinculado a esta ordem de serviço.
-          </div>
+          <Empty className="py-6 border rounded-lg">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <AirVent className="size-5" />
+              </EmptyMedia>
+              <EmptyTitle className="text-sm font-medium">Nenhum equipamento vinculado</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                Esta ordem de serviço não possui equipamentos associados.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </CardContent>
     </Card>

@@ -51,7 +51,7 @@ export function CategoriaModalExcluir({
             disabled={excluindo}
             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
-            {excluindo && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {excluindo && <Loader2 className="mr-2 size-4 animate-spin" />}
             {excluindo ? 'Excluindo...' : 'Sim, excluir categoria'}
           </AlertDialogAction>
         </AlertDialogFooter>

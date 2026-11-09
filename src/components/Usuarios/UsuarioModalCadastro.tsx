@@ -7,6 +7,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/src/components/Ui/dialog';
 import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
@@ -88,9 +89,9 @@ export function UsuarioModalCadastro({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4 pt-2">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 pt-2">
           {/* Nome */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="nome">
               Nome Completo <span className="text-destructive">*</span>
             </Label>
@@ -105,7 +106,7 @@ export function UsuarioModalCadastro({
           </div>
 
           {/* CPF */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="cpf">
               CPF <span className="text-destructive">*</span>
             </Label>
@@ -128,7 +129,7 @@ export function UsuarioModalCadastro({
           </div>
 
           {/* E-mail */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">
               E-mail <span className="text-destructive">*</span>
             </Label>
@@ -144,7 +145,7 @@ export function UsuarioModalCadastro({
           </div>
 
           {/* Telefone */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="telefone">
               Telefone <span className="text-destructive">*</span>
             </Label>
@@ -171,7 +172,7 @@ export function UsuarioModalCadastro({
           </div>
 
           {/* Senha */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="senha">
               Senha Inicial <span className="text-destructive">*</span>
             </Label>
@@ -187,7 +188,7 @@ export function UsuarioModalCadastro({
           </div>
 
           {/* Função / Role */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="role_id">
               Função no Sistema <span className="text-destructive">*</span>
             </Label>
@@ -233,7 +234,7 @@ export function UsuarioModalCadastro({
           </div>
 
           {/* Botões */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t">
             <Button
               type="button"
               variant="outline"
@@ -245,14 +246,14 @@ export function UsuarioModalCadastro({
             <Button type="submit" disabled={salvando}>
               {salvando ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   Cadastrando...
                 </>
               ) : (
                 'Cadastrar'
               )}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

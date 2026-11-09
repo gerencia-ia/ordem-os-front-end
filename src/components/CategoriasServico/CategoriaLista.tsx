@@ -1,12 +1,14 @@
 'use client';
 
 import { useCategorias } from '@/src/hooks/useCategorias';
+import { Card, CardContent, CardHeader } from '@/src/components/Ui/card';
+import { Button } from '@/src/components/Ui/button';
 import { CategoriaFiltros } from './CategoriaFiltros';
 import { CategoriaTabela } from './CategoriaTabela';
 import { CategoriaModalCadastro } from './CategoriaModalCadastro';
 import { CategoriaModalEditar } from './CategoriaModalEditar';
 import { CategoriaModalExcluir } from './CategoriaModalExcluir';
-import { Tag } from 'lucide-react';
+import { Tag, Plus } from 'lucide-react';
 
 export function CategoriaLista() {
   const {
@@ -31,36 +33,49 @@ export function CategoriaLista() {
   } = useCategorias();
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Tag className="h-6 w-6 text-primary" />
-            Categorias de Serviços
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <div className="flex items-center gap-2">
+            <Tag className="size-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">
+              Categorias de Serviços
+            </h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Gerencie as categorias utilizadas para classificar e organizar o
             catálogo de serviços.
           </p>
         </div>
+
+        <Button
+          onClick={abrirModalCadastro}
+          className="gap-1.5 shadow-sm"
+        >
+          <Plus className="size-4" /> Nova Categoria
+        </Button>
       </div>
 
-      {/* Barra de Filtros e Busca */}
-      <CategoriaFiltros
-        busca={busca}
-        onBuscaChange={setBusca}
-        onNovaCategoria={abrirModalCadastro}
-        totalCategorias={totalCategorias}
-      />
-
-      {/* Tabela de Categorias */}
-      <CategoriaTabela
-        categorias={categorias}
-        loading={loading}
-        onEditar={abrirModalEditar}
-        onExcluir={abrirModalExcluir}
-      />
+      {/* Card Principal com Filtros e Tabela */}
+      <Card className="shadow-sm border-border/60">
+        <CardHeader className="pb-4">
+          <CategoriaFiltros
+            busca={busca}
+            onBuscaChange={setBusca}
+            onNovaCategoria={abrirModalCadastro}
+            totalCategorias={totalCategorias}
+          />
+        </CardHeader>
+        <CardContent>
+          <CategoriaTabela
+            categorias={categorias}
+            loading={loading}
+            onEditar={abrirModalEditar}
+            onExcluir={abrirModalExcluir}
+          />
+        </CardContent>
+      </Card>
 
       {/* Modal de Cadastro */}
       <CategoriaModalCadastro

@@ -44,12 +44,12 @@ export function ClienteLista() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Cabeçalho da Página */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Users className="h-6 w-6 text-primary" />
+            <Users className="size-6 text-primary" />
             <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -61,7 +61,7 @@ export function ClienteLista() {
           onClick={() => setModalCadastroAberta(true)}
           className="gap-1.5 shadow-sm"
         >
-          <Plus className="h-4 w-4" /> Novo Cliente
+          <Plus className="size-4" /> Novo Cliente
         </Button>
       </div>
 

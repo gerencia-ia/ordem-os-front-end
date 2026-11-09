@@ -61,12 +61,12 @@ export function UsuarioLista({
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Cabeçalho */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Users className="h-6 w-6 text-primary" />
+            <Users className="size-6 text-primary" />
             <h1 className="text-2xl font-bold tracking-tight">{titulo}</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">{descricao}</p>
@@ -76,7 +76,7 @@ export function UsuarioLista({
           onClick={() => setModalCadastroAberta(true)}
           className="gap-1.5 shadow-sm capitalize"
         >
-          <Plus className="h-4 w-4" /> {textoBotao}
+          <Plus className="size-4" /> {textoBotao}
         </Button>
       </div>
 

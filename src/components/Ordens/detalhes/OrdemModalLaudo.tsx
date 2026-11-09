@@ -50,7 +50,7 @@ export function OrdemModalLaudo({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 py-2">
+        <div className="flex flex-col gap-3 py-2">
           <Label htmlFor="laudo-texto">Descrição do Laudo Técnico</Label>
           <Textarea
             id="laudo-texto"
@@ -76,7 +76,7 @@ export function OrdemModalLaudo({
             onClick={() => void onSalvar()}
             disabled={!equipamento || !textoLaudo.trim() || salvando}
           >
-            {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
             {salvando ? 'Salvando...' : 'Salvar Laudo'}
           </Button>
         </DialogFooter>

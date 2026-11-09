@@ -64,9 +64,9 @@ export function ServicoModalEditar({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4 py-2">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 py-2">
           {/* Nome */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="edit-servico-nome">
               Nome do Serviço <span className="text-destructive">*</span>
             </Label>
@@ -82,7 +82,7 @@ export function ServicoModalEditar({
           </div>
 
           {/* Categoria */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="edit-servico-categoria">Categoria</Label>
             <Controller
               control={control}
@@ -117,7 +117,7 @@ export function ServicoModalEditar({
 
           <div className="grid grid-cols-2 gap-4">
             {/* Valor */}
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="edit-servico-valor">
                 Valor (R$) <span className="text-destructive">*</span>
               </Label>
@@ -137,7 +137,7 @@ export function ServicoModalEditar({
             </div>
 
             {/* Tempo */}
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="edit-servico-tempo">Tempo Estimado (min)</Label>
               <Input
                 id="edit-servico-tempo"
@@ -165,7 +165,7 @@ export function ServicoModalEditar({
               Cancelar
             </Button>
             <Button type="submit" disabled={salvando}>
-              {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
               {salvando ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </DialogFooter>

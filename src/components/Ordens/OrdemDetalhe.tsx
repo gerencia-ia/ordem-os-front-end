@@ -105,7 +105,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="size-8 animate-spin text-primary" />
         <p className="text-sm text-muted-foreground">
           Carregando dados da ordem de serviço...
         </p>
@@ -115,10 +115,8 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
 
   if (error || !ordem) {
     return (
-      <div className="p-8 max-w-lg mx-auto text-center space-y-4">
-        <div className="flex justify-center">
-          <AlertCircle className="h-12 w-12 text-destructive" />
-        </div>
+      <div className="p-8 max-w-lg mx-auto text-center flex flex-col items-center gap-4">
+        <AlertCircle className="size-12 text-destructive" />
         <h2 className="text-xl font-semibold">Ordem não encontrada</h2>
         <p className="text-sm text-muted-foreground">
           {error ||
@@ -129,7 +127,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
           variant="outline"
           className="gap-2"
         >
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className="size-4" />
           Tentar novamente
         </Button>
       </div>
@@ -139,7 +137,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
   const statusIdAtual = Number(ordem.status?.id || ordem.status_id || 1);
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 flex flex-col gap-6 max-w-7xl mx-auto">
       {/* Cabeçalho de Navegação e Ações Principais */}
       <DetalheCabecalho
         ordem={ordem}
@@ -154,7 +152,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Coluna Principal: Informações Gerais, Serviços e Equipamentos */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 flex flex-col gap-6">
           <DetalheInfoGeral
             ordem={ordem}
             podeVerMetricasFinanceiras={podeVerMetricasFinanceiras}
@@ -179,7 +177,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
         </div>
 
         {/* Coluna Lateral: Cliente, Técnico e Atividades Recentes */}
-        <div className="space-y-6">
+        <div className="flex flex-col gap-6">
           <DetalheCliente
             cliente={ordem.cliente}
             endereco={ordem.endereco}

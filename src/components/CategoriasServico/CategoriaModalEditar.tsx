@@ -51,8 +51,8 @@ export function CategoriaModalEditar({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4 py-2">
-          <div className="space-y-1.5">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="edit-categoria-descricao">
               Descrição da Categoria <span className="text-destructive">*</span>
             </Label>
@@ -79,7 +79,7 @@ export function CategoriaModalEditar({
               Cancelar
             </Button>
             <Button type="submit" disabled={salvando}>
-              {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
               {salvando ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </DialogFooter>

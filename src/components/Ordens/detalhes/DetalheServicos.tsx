@@ -7,6 +7,14 @@ import {
   CardTitle,
 } from '@/src/components/Ui/card';
 import { Button } from '@/src/components/Ui/button';
+import { Separator } from '@/src/components/Ui/separator';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/src/components/Ui/empty';
 import { Wrench, Plus, Trash2, Clock } from 'lucide-react';
 import type { OsServico } from '@/src/types/ordem';
 
@@ -46,7 +54,7 @@ export function DetalheServicos({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Wrench className="h-5 w-5 text-muted-foreground" />
+          <Wrench className="size-5 text-muted-foreground" />
           Serviços ({lista.length})
         </CardTitle>
         {!concluido && podeAlterarServicos && (
@@ -56,13 +64,13 @@ export function DetalheServicos({
             onClick={onAdicionarServico}
             className="gap-1.5"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             Adicionar Serviço
           </Button>
         )}
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         {lista.length > 0 ? (
           <>
             <div className="divide-y border rounded-lg overflow-hidden">
@@ -88,7 +96,7 @@ export function DetalheServicos({
                       </div>
                       {servico.tempo_servico ? (
                         <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Clock className="h-3 w-3" />
+                          <Clock className="size-3" />
                           <span>
                             {servico.tempo_servico} min
                             {qtd > 1 &&
@@ -123,12 +131,12 @@ export function DetalheServicos({
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => onRemoverServico(servico.id)}
                           disabled={removendoId === servico.id}
                           aria-label={`Remover serviço ${servico.nome}`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="size-4" />
                         </Button>
                       )}
                     </div>
@@ -138,34 +146,45 @@ export function DetalheServicos({
             </div>
 
             {/* Totais do Bloco */}
-            <div className="border-t pt-3 flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-2">
-              <div className="text-muted-foreground flex items-center gap-1.5">
-                <Clock className="h-4 w-4" />
-                <span>Tempo total estimado:</span>
-                <span className="font-medium text-foreground">
-                  {tempoTotalMinutos > 0 ? `${tempoTotalMinutos} min` : '—'}
-                </span>
-              </div>
-
-              {podeVerMetricasFinanceiras && (
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">
-                    Subtotal dos serviços:
-                  </span>
-                  <span className="font-bold text-base text-foreground">
-                    R${' '}
-                    {valorTotalServicos.toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2,
-                    })}
+            <div className="flex flex-col gap-3">
+              <Separator />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-2">
+                <div className="text-muted-foreground flex items-center gap-1.5">
+                  <Clock className="size-4" />
+                  <span>Tempo total estimado:</span>
+                  <span className="font-medium text-foreground">
+                    {tempoTotalMinutos > 0 ? `${tempoTotalMinutos} min` : '—'}
                   </span>
                 </div>
-              )}
+
+                {podeVerMetricasFinanceiras && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">
+                      Subtotal dos serviços:
+                    </span>
+                    <span className="font-bold text-base text-foreground">
+                      R${' '}
+                      {valorTotalServicos.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         ) : (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            Nenhum serviço vinculado a esta ordem de serviço.
-          </div>
+          <Empty className="py-6 border rounded-lg">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Wrench className="size-5" />
+              </EmptyMedia>
+              <EmptyTitle className="text-sm font-medium">Nenhum serviço vinculado</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                Esta ordem de serviço ainda não possui serviços adicionados.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </CardContent>
     </Card>

@@ -10,6 +10,14 @@ import {
 } from '@/src/components/Ui/table';
 import { Button } from '@/src/components/Ui/button';
 import { Badge } from '@/src/components/Ui/badge';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
 import type { Cliente } from '@/src/types/cliente';
 import { formatarTelefone } from '@/src/utils/phone';
 import { gerarLinkWhatsApp } from '@/src/utils/whatsapp';
@@ -38,25 +46,62 @@ export function ClienteTabela({
 }: ClienteTabelaProps) {
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mb-3" />
-        <p className="text-sm text-muted-foreground">Carregando clientes...</p>
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="w-[280px]">Cliente</TableHead>
+              <TableHead className="w-[220px]">Telefones</TableHead>
+              <TableHead>Endereço Principal</TableHead>
+              <TableHead className="w-[160px]">Última Visita</TableHead>
+              <TableHead className="w-[120px] text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-28" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-48" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="size-8 rounded-md" />
+                    <Skeleton className="size-8 rounded-md" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
 
   if (clientes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-card/50">
-        <User className="h-10 w-10 text-muted-foreground mb-3" />
-        <h3 className="font-semibold text-foreground">
-          Nenhum cliente encontrado
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-          Nenhum resultado corresponde à sua busca ou não há clientes
-          cadastrados no sistema.
-        </p>
-      </div>
+      <Empty className="border rounded-lg bg-card/40 my-4">
+        <EmptyMedia variant="icon">
+          <User className="size-5 text-muted-foreground" />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>Nenhum cliente encontrado</EmptyTitle>
+          <EmptyDescription>
+            Nenhum resultado corresponde à sua busca ou não há clientes cadastrados no sistema.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 

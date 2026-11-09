@@ -91,8 +91,8 @@ export function EquipamentoModalCadastro({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
-          <div className="space-y-1.5">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="eq-marca">
               Marca / Modelo <span className="text-destructive">*</span>
             </Label>
@@ -107,7 +107,7 @@ export function EquipamentoModalCadastro({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="eq-btus">
                 Capacidade / BTUs <span className="text-destructive">*</span>
               </Label>
@@ -123,7 +123,7 @@ export function EquipamentoModalCadastro({
               )}
             </div>
 
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="eq-local">
                 Local de Instalação <span className="text-destructive">*</span>
               </Label>
@@ -140,7 +140,7 @@ export function EquipamentoModalCadastro({
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="eq-obs">Observações Adicionais</Label>
             <Textarea
               id="eq-obs"
@@ -160,7 +160,7 @@ export function EquipamentoModalCadastro({
               Cancelar
             </Button>
             <Button type="submit" disabled={salvando}>
-              {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
               Adicionar Equipamento
             </Button>
           </DialogFooter>

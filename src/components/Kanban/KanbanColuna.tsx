@@ -100,14 +100,14 @@ export function KanbanColuna({
         onDragOver={(e) => onDragOver(e, statusId)}
         onDragLeave={onDragLeave}
         onDrop={(e) => onDrop(e, statusId)}
-        className={`flex-1 min-h-[460px] rounded-lg p-2.5 mt-2.5 transition-all space-y-2.5 ${cores.container} ${
+        className={`flex-1 min-h-[460px] rounded-lg p-2.5 mt-2.5 transition-all flex flex-col gap-2.5 ${cores.container} ${
           isOver
             ? 'ring-2 ring-primary/80 ring-offset-2 bg-primary/5 border-primary/50'
             : ''
         }`}
       >
         {ordens.length > 0 ? (
-          <div className="space-y-2.5">
+          <div className="flex flex-col gap-2.5">
             {ordens.map((ordem) => (
               <KanbanCartao
                 key={ordem.id}
@@ -130,7 +130,7 @@ export function KanbanColuna({
           onClick={() => onNovaOrdem(statusId)}
           className="w-full text-xs text-muted-foreground hover:text-foreground border border-dashed border-border/70 hover:border-border mt-3 gap-1.5"
         >
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="size-3.5" />
           Adicionar Ordem
         </Button>
       </div>

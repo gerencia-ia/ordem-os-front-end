@@ -47,9 +47,9 @@ export function OrdemModalFinalizar({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="flex flex-col gap-4 py-2">
           {podeVerMetricasFinanceiras && (
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="input-valor-final">
                 Valor Total Cobrado (R$)
               </Label>
@@ -65,7 +65,7 @@ export function OrdemModalFinalizar({
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="textarea-observacao-final">
               Observações Finais
             </Label>
@@ -95,7 +95,7 @@ export function OrdemModalFinalizar({
             disabled={salvando}
             className="bg-emerald-600 hover:bg-emerald-700 text-white"
           >
-            {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
             {salvando ? 'Finalizando...' : 'Concluir Atendimento'}
           </Button>
         </DialogFooter>

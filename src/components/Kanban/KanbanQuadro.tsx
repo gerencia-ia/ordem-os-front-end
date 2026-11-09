@@ -99,15 +99,17 @@ export function KanbanQuadro() {
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-6 flex flex-col gap-6 max-w-[1600px] mx-auto">
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Columns3 className="h-6 w-6 text-primary" />
-            Quadro de Ordens (Kanban)
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <div className="flex items-center gap-2">
+            <Columns3 className="size-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">
+              Quadro de Ordens (Kanban)
+            </h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Gerencie o fluxo operacional e transição de status das ordens de
             serviço por arrastar e soltar.
           </p>
@@ -126,7 +128,7 @@ export function KanbanQuadro() {
       {/* Quadro de Colunas */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="size-8 animate-spin text-primary" />
           <p className="text-sm">Carregando quadro de ordens...</p>
         </div>
       ) : (

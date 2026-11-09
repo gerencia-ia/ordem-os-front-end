@@ -24,7 +24,7 @@ export function KanbanFiltros({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 max-w-xl">
         {/* Filtro de Mês/Ano */}
         <div className="relative sm:w-48">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
           <Input
             type="month"
             value={filtroMes}
@@ -36,7 +36,7 @@ export function KanbanFiltros({
 
         {/* Busca textual */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por cliente, OS # ou descrição..."
             value={busca}
@@ -47,7 +47,7 @@ export function KanbanFiltros({
       </div>
 
       <Button onClick={onNovaOrdem} className="gap-2">
-        <Plus className="h-4 w-4" />
+        <Plus className="size-4" />
         Nova Ordem
       </Button>
     </div>

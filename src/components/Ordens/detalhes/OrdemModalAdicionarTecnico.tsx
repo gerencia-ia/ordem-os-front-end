@@ -62,12 +62,12 @@ export function OrdemModalAdicionarTecnico({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
+        <div className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="select-tecnico">Técnico</Label>
             {loadingTecnicos ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <Loader2 className="size-4 animate-spin text-primary" />
                 <span>Carregando técnicos...</span>
               </div>
             ) : listaTecnicos.length > 0 ? (
@@ -117,7 +117,7 @@ export function OrdemModalAdicionarTecnico({
               listaTecnicos.length === 0
             }
           >
-            {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
             {salvando ? 'Atribuindo...' : 'Salvar Atribuição'}
           </Button>
         </DialogFooter>

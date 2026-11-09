@@ -7,6 +7,7 @@ import { PainelKpis } from './PainelKpis';
 import { LayoutDashboard, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/src/components/Ui/button';
 import { Skeleton } from '@/src/components/Ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/Ui/alert';
 
 const PainelGraficoStatus = dynamic(
   () => import('./PainelGraficoStatus').then((m) => m.PainelGraficoStatus),
@@ -41,14 +42,16 @@ export function PainelDashboard() {
   } = usePainel();
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
       {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <LayoutDashboard className="h-6 w-6 text-primary" />
-            Painel Analítico
-          </h1>
+          <div className="flex items-center gap-2">
+            <LayoutDashboard className="size-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">
+              Painel Analítico
+            </h1>
+          </div>
           <p className="text-sm text-muted-foreground mt-0.5">
             Acompanhamento de procedimentos, métricas de produtividade e visão
             operacional
@@ -65,26 +68,29 @@ export function PainelDashboard() {
 
       {/* Erro */}
       {erro && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive flex items-center justify-between gap-3">
+        <Alert variant="destructive" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 shrink-0" />
-            <span className="text-sm font-medium">{erro}</span>
+            <AlertCircle className="size-4 shrink-0" />
+            <div>
+              <AlertTitle className="text-sm font-semibold">Falha ao carregar dados</AlertTitle>
+              <AlertDescription className="text-xs">{erro}</AlertDescription>
+            </div>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={recarregar}
-            className="border-destructive/30 hover:bg-destructive/10"
+            className="border-destructive/30 hover:bg-destructive/10 text-xs"
           >
-            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            <RefreshCw className="size-3.5 mr-1.5" />
             Tentar novamente
           </Button>
-        </div>
+        </Alert>
       )}
 
       {/* Estado de Carregamento */}
       {loading ? (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-24 w-full rounded-xl" />

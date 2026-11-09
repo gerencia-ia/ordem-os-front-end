@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/Ui/select';
-import { Search, Plus, FilterX, Wrench } from 'lucide-react';
+import { Search, FilterX, Wrench } from 'lucide-react';
 import type { CategoriaServico } from '@/src/types/categoria';
 
 interface ServicoFiltrosProps {
@@ -19,7 +19,7 @@ interface ServicoFiltrosProps {
   filtroCategoria: string;
   onCategoriaChange: (val: string) => void;
   categorias: CategoriaServico[];
-  onNovoServico: () => void;
+  onNovoServico?: () => void;
   onLimparFiltros: () => void;
   totalServicos: number;
 }
@@ -30,7 +30,6 @@ export function ServicoFiltros({
   filtroCategoria,
   onCategoriaChange,
   categorias,
-  onNovoServico,
   onLimparFiltros,
   totalServicos,
 }: ServicoFiltrosProps) {
@@ -41,13 +40,25 @@ export function ServicoFiltros({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 max-w-2xl">
         {/* Busca textual */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por nome do serviço..."
             value={busca}
             onChange={(e) => onBuscaChange(e.target.value)}
-            className="pl-9"
+            className="pl-9 pr-9"
           />
+          {busca && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onBuscaChange('')}
+              className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-muted-foreground hover:text-foreground"
+              aria-label="Limpar busca"
+            >
+              <FilterX className="size-4" />
+            </Button>
+          )}
         </div>
 
         {/* Filtro por categoria */}
@@ -74,22 +85,17 @@ export function ServicoFiltros({
             onClick={onLimparFiltros}
             className="gap-1.5 text-xs text-muted-foreground hover:text-foreground h-9"
           >
-            <FilterX className="h-3.5 w-3.5" />
+            <FilterX className="size-3.5" />
             Limpar
           </Button>
         )}
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Wrench className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Wrench className="size-3.5" />
           <span>{totalServicos} serviço(s)</span>
         </div>
-
-        <Button onClick={onNovoServico} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Serviço
-        </Button>
       </div>
     </div>
   );

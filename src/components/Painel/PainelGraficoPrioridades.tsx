@@ -38,7 +38,7 @@ export function PainelGraficoPrioridades({
     <Card className="flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          <BarChart3 className="size-4 text-muted-foreground" />
           Ordens por Prioridade
         </CardTitle>
         <CardDescription>
@@ -48,7 +48,7 @@ export function PainelGraficoPrioridades({
 
       <CardContent className="flex-1 flex flex-col justify-center">
         {temDados ? (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <ResponsiveContainer width="100%" height={230}>
               <BarChart
                 data={dados}

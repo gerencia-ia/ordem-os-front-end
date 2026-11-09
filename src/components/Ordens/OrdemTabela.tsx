@@ -9,8 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/src/components/Ui/table';
-import { Badge } from '@/src/components/Ui/badge';
 import { Button } from '@/src/components/Ui/button';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
+import { StatusBadge, PrioridadeBadge } from '@/src/components/Ui/status-badge';
 import type { OrdemServico } from '@/src/types/ordem';
 import type { Usuario } from '@/src/types/usuario';
 import { usePermissions } from '@/src/hooks/usePermissions';
@@ -21,40 +30,6 @@ interface OrdemTabelaProps {
   loading: boolean;
   onExcluir: (ordem: OrdemServico) => void;
   onLimparFiltros: () => void;
-}
-
-const normalizar = (val?: string | null) =>
-  (val ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-
-function getBadgeStatus(status?: string | null) {
-  const norm = normalizar(status);
-  const cores: Record<string, string> = {
-    aberta:
-      'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200 border-yellow-300',
-    'em andamento':
-      'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border-blue-300',
-    concluida:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300',
-    concluido:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300',
-    cancelada:
-      'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-300',
-  };
-  return cores[norm] || 'bg-muted text-muted-foreground';
-}
-
-function getBadgePrioridade(prioridade?: string | null) {
-  const norm = normalizar(prioridade);
-  const cores: Record<string, string> = {
-    critica: 'bg-red-600 text-white hover:bg-red-700',
-    alta: 'bg-orange-500 text-white hover:bg-orange-600',
-    media: 'bg-amber-500 text-white hover:bg-amber-600',
-    baixa: 'bg-blue-500 text-white hover:bg-blue-600',
-  };
-  return cores[norm] || 'bg-muted text-muted-foreground';
 }
 
 export function OrdemTabela({
@@ -87,34 +62,88 @@ export function OrdemTabela({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mb-3" />
-        <p className="text-sm text-muted-foreground">
-          Carregando ordens de serviço...
-        </p>
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="w-[110px]">OS</TableHead>
+              <TableHead className="min-w-[180px]">Cliente</TableHead>
+              <TableHead className="w-[140px]">Data / Prazo</TableHead>
+              <TableHead className="w-[130px]">Status</TableHead>
+              <TableHead className="w-[110px]">Prioridade</TableHead>
+              <TableHead className="w-[140px]">Técnico</TableHead>
+              {!isTecnico && (
+                <TableHead className="w-[120px]">Valor</TableHead>
+              )}
+              <TableHead className="w-[100px] text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <Skeleton className="h-4 w-16" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+                {!isTecnico && (
+                  <TableCell>
+                    <Skeleton className="h-4 w-20" />
+                  </TableCell>
+                )}
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="size-8 rounded-md" />
+                    <Skeleton className="size-8 rounded-md" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
 
   if (ordens.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-card/50">
-        <ClipboardList className="h-10 w-10 text-muted-foreground mb-3" />
-        <h3 className="font-semibold text-foreground">
-          Nenhuma ordem de serviço encontrada
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-          Ajuste os filtros de busca ou crie uma nova ordem de serviço.
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-4"
-          onClick={onLimparFiltros}
-        >
-          Limpar Filtros
-        </Button>
-      </div>
+      <Empty className="border rounded-lg bg-card/40 my-4">
+        <EmptyMedia variant="icon">
+          <ClipboardList className="size-5 text-muted-foreground" />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>Nenhuma ordem de serviço encontrada</EmptyTitle>
+          <EmptyDescription>
+            Ajuste os filtros de busca ou crie uma nova ordem de serviço.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onLimparFiltros}
+            className="text-xs"
+          >
+            Limpar todos os filtros
+          </Button>
+        </EmptyContent>
+      </Empty>
     );
   }
 
@@ -180,21 +209,12 @@ export function OrdemTabela({
 
                 {/* Status */}
                 <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={`text-xs font-normal border ${getBadgeStatus(statusTexto)}`}
-                  >
-                    {statusTexto}
-                  </Badge>
+                  <StatusBadge status={statusTexto} className="text-xs" />
                 </TableCell>
 
                 {/* Prioridade */}
                 <TableCell>
-                  <Badge
-                    className={`text-[11px] font-normal ${getBadgePrioridade(prioridadeTexto)}`}
-                  >
-                    {prioridadeTexto}
-                  </Badge>
+                  <PrioridadeBadge prioridade={prioridadeTexto} className="text-xs" />
                 </TableCell>
 
                 {/* Técnicos */}
@@ -204,7 +224,7 @@ export function OrdemTabela({
 
                 {/* Valor Total (Oculto para Técnicos conforme RBAC) */}
                 {!isTecnico && (
-                  <TableCell className="text-xs font-semibold text-emerald-600">
+                  <TableCell className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                     {formatarMoeda(
                       ordem.valor_total || ordem.custo_estimado || 0,
                     )}
@@ -218,10 +238,10 @@ export function OrdemTabela({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        title="Ver detalhes da ordem"
+                        className="size-8 text-muted-foreground hover:text-foreground"
+                        aria-label="Ver detalhes da ordem"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="size-4" />
                       </Button>
                     </Link>
 
@@ -230,11 +250,11 @@ export function OrdemTabela({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => onExcluir(ordem)}
-                        title="Excluir ordem"
+                        aria-label="Excluir ordem"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="size-4" />
                       </Button>
                     )}
                   </div>

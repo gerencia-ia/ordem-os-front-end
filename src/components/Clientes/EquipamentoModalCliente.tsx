@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from '@/src/components/Ui/dialog';
 import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
@@ -88,9 +89,9 @@ export function EquipamentoModalCliente({
             Preencha os dados do equipamento para o cliente
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
+        <div className="flex flex-col gap-4 pt-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="equip-marca" className="text-xs">
                 Marca
               </Label>
@@ -103,7 +104,7 @@ export function EquipamentoModalCliente({
                 placeholder="Ex: LG, Daikin, Midea"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="equip-btus" className="text-xs">
                 BTUs
               </Label>
@@ -116,7 +117,7 @@ export function EquipamentoModalCliente({
                 placeholder="Ex: 9000, 12000"
               />
             </div>
-            <div className="space-y-1.5 md:col-span-2">
+            <div className="flex flex-col gap-1.5 md:col-span-2">
               <Label htmlFor="equip-local" className="text-xs">
                 Local de Instalação
               </Label>
@@ -133,7 +134,7 @@ export function EquipamentoModalCliente({
               />
             </div>
           </div>
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="equip-obs" className="text-xs">
               Observação
             </Label>
@@ -149,14 +150,23 @@ export function EquipamentoModalCliente({
               placeholder="Ex: Condensadora na fachada externa"
             />
           </div>
-          <Button
-            className="w-full mt-2"
-            type="button"
-            onClick={handleAddEquipamento}
-            disabled={savingEquip}
-          >
-            {savingEquip ? 'Salvando...' : 'Cadastrar Equipamento'}
-          </Button>
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={savingEquip}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAddEquipamento}
+              disabled={savingEquip}
+            >
+              {savingEquip ? 'Salvando...' : 'Cadastrar Equipamento'}
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>

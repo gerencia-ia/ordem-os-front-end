@@ -27,7 +27,7 @@ export function PainelGraficoStatus({ dados }: PainelGraficoStatusProps) {
     <Card className="flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <PieIcon className="h-4 w-4 text-muted-foreground" />
+          <PieIcon className="size-4 text-muted-foreground" />
           Distribuição por Status
         </CardTitle>
         <CardDescription>
@@ -37,7 +37,7 @@ export function PainelGraficoStatus({ dados }: PainelGraficoStatusProps) {
 
       <CardContent className="flex-1 flex flex-col justify-center">
         {temDados ? (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <ResponsiveContainer width="100%" height={230}>
               <PieChart>
                 <Pie

@@ -9,8 +9,24 @@ import {
   DialogTitle,
 } from '@/src/components/Ui/dialog';
 import { Button } from '@/src/components/Ui/button';
-import { Badge } from '@/src/components/Ui/badge';
-import { Loader2 } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/src/components/Ui/table';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
+import { StatusBadge } from '@/src/components/Ui/status-badge';
+import { History } from 'lucide-react';
 import type { Equipamento, HistoricoLaudo } from '@/src/types/equipamento';
 import { formatarDataHoraCurta } from '@/src/utils/date';
 
@@ -47,57 +63,90 @@ export function OrdemModalHistoricoLaudos({
         </DialogHeader>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-sm">Carregando histórico...</p>
+          <div className="rounded-md border overflow-hidden mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="w-[140px]">Data Fechamento</TableHead>
+                  <TableHead>Parecer do Laudo</TableHead>
+                  <TableHead className="w-[80px]">OS</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-12" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : laudos.length > 0 ? (
-          <div className="mt-4 border rounded-md overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse">
-                <thead className="bg-muted/50 border-b text-xs text-muted-foreground uppercase">
-                  <tr>
-                    <th className="text-left py-3 px-4">Data Fechamento</th>
-                    <th className="text-left py-3 px-4">Parecer do Laudo</th>
-                    <th className="text-left py-3 px-4">OS</th>
-                    <th className="text-left py-3 px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {laudos.map((item) => (
-                    <tr key={item.id} className="hover:bg-muted/30">
-                      <td className="py-3 px-4 text-xs font-mono text-muted-foreground whitespace-nowrap">
-                        {item.ordem_servico?.data_fechamento
-                          ? formatarDataHoraCurta(
-                              item.ordem_servico.data_fechamento,
-                            )
-                          : formatarDataHoraCurta(item.created_at)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <p className="text-xs leading-relaxed line-clamp-3">
-                          {item.laudo}
-                        </p>
-                      </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="text-xs font-semibold">
-                          #{item.ordem_servico?.id || '-'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <Badge variant="outline" className="text-xs">
-                          {item.ordem_servico?.status || 'Registrado'}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="mt-4 rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="w-[140px]">Data Fechamento</TableHead>
+                  <TableHead>Parecer do Laudo</TableHead>
+                  <TableHead className="w-[80px]">OS</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {laudos.map((item) => (
+                  <TableRow key={item.id} className="hover:bg-muted/30">
+                    <TableCell className="text-xs font-mono text-muted-foreground whitespace-nowrap">
+                      {item.ordem_servico?.data_fechamento
+                        ? formatarDataHoraCurta(
+                            item.ordem_servico.data_fechamento,
+                          )
+                        : formatarDataHoraCurta(item.created_at)}
+                    </TableCell>
+                    <TableCell>
+                      <p className="text-xs leading-relaxed line-clamp-3">
+                        {item.laudo}
+                      </p>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <span className="text-xs font-semibold">
+                        #{item.ordem_servico?.id || '-'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <StatusBadge
+                        status={item.ordem_servico?.status || 'Registrado'}
+                        className="text-xs"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
-          <div className="flex justify-center py-12 text-sm text-muted-foreground">
-            Nenhum laudo anterior registrado para este equipamento.
-          </div>
+          <Empty className="border rounded-lg bg-card/40 my-4">
+            <EmptyMedia variant="icon">
+              <History className="size-5 text-muted-foreground" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>Nenhum laudo anterior</EmptyTitle>
+              <EmptyDescription>
+                Nenhum laudo técnico anterior registrado para este equipamento.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
 
         <DialogFooter className="mt-4">

@@ -62,9 +62,9 @@ export function ServicoModalCadastro({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4 py-2">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 py-2">
           {/* Nome */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="servico-nome">
               Nome do Serviço <span className="text-destructive">*</span>
             </Label>
@@ -80,7 +80,7 @@ export function ServicoModalCadastro({
           </div>
 
           {/* Categoria */}
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="servico-categoria">Categoria</Label>
             <Controller
               control={control}
@@ -115,7 +115,7 @@ export function ServicoModalCadastro({
 
           <div className="grid grid-cols-2 gap-4">
             {/* Valor */}
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="servico-valor">
                 Valor (R$) <span className="text-destructive">*</span>
               </Label>
@@ -135,7 +135,7 @@ export function ServicoModalCadastro({
             </div>
 
             {/* Tempo */}
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="servico-tempo">Tempo Estimado (min)</Label>
               <Input
                 id="servico-tempo"
@@ -163,7 +163,7 @@ export function ServicoModalCadastro({
               Cancelar
             </Button>
             <Button type="submit" disabled={salvando}>
-              {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
               {salvando ? 'Salvando...' : 'Cadastrar Serviço'}
             </Button>
           </DialogFooter>

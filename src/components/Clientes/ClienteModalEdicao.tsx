@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/src/components/Ui/dialog';
 import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
@@ -62,10 +63,10 @@ function ClienteModalEdicaoForm({
     .filter(({ field }) => !field._destroy);
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6 pt-2">
+    <form onSubmit={onSubmit} className="flex flex-col gap-6 pt-2">
       {/* Dados Básicos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-1.5 md:col-span-2">
+        <div className="flex flex-col gap-1.5 md:col-span-2">
           <Label htmlFor="edit-nome">
             Nome Completo <span className="text-destructive">*</span>
           </Label>
@@ -75,7 +76,7 @@ function ClienteModalEdicaoForm({
           )}
         </div>
 
-        <div className="space-y-1.5">
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="edit-email">Email</Label>
           <Input
             id="edit-email"
@@ -88,7 +89,7 @@ function ClienteModalEdicaoForm({
           )}
         </div>
 
-        <div className="space-y-1.5">
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="edit-data-visita">Data da Última Visita</Label>
           <Input
             id="edit-data-visita"
@@ -99,7 +100,7 @@ function ClienteModalEdicaoForm({
       </div>
 
       {/* Telefones */}
-      <div className="space-y-3 border-t pt-4">
+      <div className="flex flex-col gap-3 border-t pt-4">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-semibold">Telefones</Label>
           <Button
@@ -109,7 +110,7 @@ function ClienteModalEdicaoForm({
             onClick={() => telefonesFieldArray.append({ numero: '' })}
             className="h-7 text-xs gap-1"
           >
-            <Plus className="h-3.5 w-3.5" /> Adicionar Telefone
+            <Plus className="size-3.5" /> Adicionar Telefone
           </Button>
         </div>
 
@@ -132,10 +133,10 @@ function ClienteModalEdicaoForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removerTelefone(index)}
-                className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0"
+                className="size-9 text-muted-foreground hover:text-destructive shrink-0"
                 title="Remover telefone"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-4" />
               </Button>
             )}
           </div>
@@ -143,7 +144,7 @@ function ClienteModalEdicaoForm({
       </div>
 
       {/* Endereços */}
-      <div className="space-y-4 border-t pt-4">
+      <div className="flex flex-col gap-4 border-t pt-4">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-semibold">Endereços</Label>
           <Button
@@ -162,14 +163,14 @@ function ClienteModalEdicaoForm({
             }
             className="h-7 text-xs gap-1"
           >
-            <Plus className="h-3.5 w-3.5" /> Adicionar Endereço
+            <Plus className="size-3.5" /> Adicionar Endereço
           </Button>
         </div>
 
         {enderecosAtivos.map(({ field, index }) => (
           <div
             key={field.id}
-            className="p-3 border rounded-md bg-muted/20 space-y-3 relative"
+            className="p-3 border rounded-md bg-muted/20 flex flex-col gap-3 relative"
           >
             {enderecosAtivos.length > 1 && (
               <Button
@@ -177,15 +178,15 @@ function ClienteModalEdicaoForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removerEndereco(index)}
-                className="absolute top-2 right-2 h-7 w-7 text-muted-foreground hover:text-destructive"
+                className="absolute top-2 right-2 size-7 text-muted-foreground hover:text-destructive"
                 title="Remover endereço"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="size-3.5" />
               </Button>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <Label className="text-xs">CEP</Label>
                 <div className="flex gap-1.5">
                   <Input
@@ -204,15 +205,15 @@ function ClienteModalEdicaoForm({
                     title="Buscar CEP"
                   >
                     {buscandoCep === index ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      <Search className="h-4 w-4" />
+                      <Search className="size-4" />
                     )}
                   </Button>
                 </div>
               </div>
 
-              <div className="space-y-1 md:col-span-2">
+              <div className="flex flex-col gap-1 md:col-span-2">
                 <Label className="text-xs">Rua / Logradouro *</Label>
                 <Input
                   placeholder="Rua das Flores"
@@ -227,7 +228,7 @@ function ClienteModalEdicaoForm({
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <Label className="text-xs">Número *</Label>
                 <Input
                   placeholder="123"
@@ -240,7 +241,7 @@ function ClienteModalEdicaoForm({
                 )}
               </div>
 
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <Label className="text-xs">Bairro *</Label>
                 <Input
                   placeholder="Centro"
@@ -253,7 +254,7 @@ function ClienteModalEdicaoForm({
                 )}
               </div>
 
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <Label className="text-xs">Cidade *</Label>
                 <Input
                   placeholder="São Paulo"
@@ -266,7 +267,7 @@ function ClienteModalEdicaoForm({
                 )}
               </div>
 
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <Label className="text-xs">Complemento</Label>
                 <Input
                   placeholder="Apto 101"
@@ -279,7 +280,7 @@ function ClienteModalEdicaoForm({
       </div>
 
       {/* Ações */}
-      <div className="flex justify-end gap-3 pt-4 border-t">
+      <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t">
         <Button
           type="button"
           variant="outline"
@@ -291,14 +292,14 @@ function ClienteModalEdicaoForm({
         <Button type="submit" disabled={salvando}>
           {salvando ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 size-4 animate-spin" />
               Salvando...
             </>
           ) : (
             'Salvar Alterações'
           )}
         </Button>
-      </div>
+      </DialogFooter>
     </form>
   );
 }

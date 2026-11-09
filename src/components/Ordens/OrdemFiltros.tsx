@@ -53,11 +53,11 @@ export function OrdemFiltros({
     filtroData !== '';
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         {/* Busca Textual */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por cliente, número da OS ou descrição..."
             value={busca}
@@ -146,7 +146,7 @@ export function OrdemFiltros({
             onClick={onLimparFiltros}
             className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
           >
-            <RotateCcw className="h-3 w-3" /> Limpar filtros
+            <RotateCcw className="size-3" /> Limpar filtros
           </Button>
         )}
       </div>
