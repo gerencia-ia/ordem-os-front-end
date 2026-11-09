@@ -60,7 +60,6 @@ export function useUsuarioForm({
           cpf: string;
           email: string;
           telefone: string;
-          senha?: string;
           password?: string;
           role_id?: number;
         } = {
@@ -72,7 +71,6 @@ export function useUsuarioForm({
         };
 
         if (data.senha && data.senha.trim().length >= 6) {
-          payload.senha = data.senha.trim();
           payload.password = data.senha.trim();
         }
 
@@ -85,7 +83,6 @@ export function useUsuarioForm({
           cpf: data.cpf.replace(/\D/g, ''),
           email: data.email.trim(),
           telefone: data.telefone.replace(/\D/g, ''),
-          senha: senhaLimpa,
           password: senhaLimpa,
           role_id: Number(data.role_id),
         });

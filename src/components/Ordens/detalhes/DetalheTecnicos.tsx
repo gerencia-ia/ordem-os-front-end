@@ -7,12 +7,21 @@ import {
   CardTitle,
 } from '@/src/components/Ui/card';
 import { Button } from '@/src/components/Ui/button';
-import { HardHat, Phone, UserCheck, Plus, Trash2, Edit } from 'lucide-react';
+import {
+  HardHat,
+  Phone,
+  UserCheck,
+  Plus,
+  Trash2,
+  Edit,
+  Crown,
+} from 'lucide-react';
+import { Badge } from '@/src/components/Ui/badge';
 import type { Usuario } from '@/src/types/usuario';
 import { formatarTelefone } from '@/src/utils/phone';
 
 interface DetalheTecnicosProps {
-  tecnicos?: Usuario[] | Usuario | null;
+  tecnicos?: Usuario[] | null;
   tecnicoResponsavel?: Usuario | null;
   podeAtribuirTecnicos: boolean;
   onAtribuirTecnico: (tecnicoAtual?: Usuario | null) => void;
@@ -28,17 +37,12 @@ export function DetalheTecnicos({
   onRemoverTecnico,
   salvando,
 }: DetalheTecnicosProps) {
-  // Normaliza tecnicos caso o serializer Rails retorne um objeto único ou array
+  // Normaliza lista de técnicos (sempre array no Rails 8)
   const lista: Usuario[] = Array.isArray(tecnicos)
     ? tecnicos
-    : tecnicos &&
-        typeof tecnicos === 'object' &&
-        'id' in (tecnicos as object) &&
-        (tecnicos as Usuario).id
-      ? [tecnicos as Usuario]
-      : tecnicoResponsavel
-        ? [tecnicoResponsavel]
-        : [];
+    : tecnicoResponsavel
+      ? [tecnicoResponsavel]
+      : [];
 
   return (
     <Card>
@@ -64,54 +68,71 @@ export function DetalheTecnicos({
       <CardContent className="space-y-4">
         {lista.length > 0 ? (
           <div className="space-y-3">
-            {lista.map((tec) => (
-              <div
-                key={tec.id}
-                className="p-3 border rounded-lg bg-card space-y-2"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <UserCheck className="h-4 w-4 text-emerald-600" />
-                      <span className="font-semibold text-sm">{tec.nome}</span>
-                    </div>
-                    {tec.telefone && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                        <Phone className="h-3 w-3" />
-                        {formatarTelefone(tec.telefone)}
-                      </p>
-                    )}
-                  </div>
-                </div>
+            {lista.map((tec) => {
+              const ehResponsavel =
+                tecnicoResponsavel &&
+                String(tec.id) === String(tecnicoResponsavel.id);
 
-                {podeAtribuirTecnicos && (
-                  <div className="flex items-center gap-2 pt-2 border-t">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7 gap-1"
-                      onClick={() => onAtribuirTecnico(tec)}
-                      disabled={salvando}
-                    >
-                      <Edit className="h-3 w-3" />
-                      Alterar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs h-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 gap-1"
-                      onClick={() => onRemoverTecnico(tec.id)}
-                      disabled={salvando}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                      Remover
-                    </Button>
+              return (
+                <div
+                  key={tec.id}
+                  className="p-3 border rounded-lg bg-card space-y-2"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <UserCheck className="h-4 w-4 text-emerald-600" />
+                        <span className="font-semibold text-sm">
+                          {tec.nome}
+                        </span>
+                        {ehResponsavel && (
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border border-amber-300 gap-1 px-1.5 py-0"
+                          >
+                            <Crown className="h-3 w-3" />
+                            Responsável
+                          </Badge>
+                        )}
+                      </div>
+                      {tec.telefone && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <Phone className="h-3 w-3" />
+                          {formatarTelefone(tec.telefone)}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {podeAtribuirTecnicos && (
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 gap-1"
+                        onClick={() => onAtribuirTecnico(tec)}
+                        disabled={salvando}
+                      >
+                        <Edit className="h-3 w-3" />
+                        Alterar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 gap-1"
+                        onClick={() => onRemoverTecnico(tec.id)}
+                        disabled={salvando}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Remover
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
             {podeAtribuirTecnicos && (
               <Button

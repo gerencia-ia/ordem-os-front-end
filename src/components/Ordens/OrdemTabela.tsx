@@ -144,11 +144,7 @@ export function OrdemTabela({
 
             const tecnicosLista: Usuario[] = Array.isArray(ordem.tecnicos)
               ? ordem.tecnicos
-              : ordem.tecnicos &&
-                  typeof ordem.tecnicos === 'object' &&
-                  'id' in ordem.tecnicos
-                ? [ordem.tecnicos as Usuario]
-                : [];
+              : [];
 
             const nomesTecnicos =
               tecnicosLista.length > 0

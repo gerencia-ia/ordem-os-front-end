@@ -15,7 +15,7 @@ import { Label } from '@/src/components/Ui/label';
 import { Alert, AlertDescription } from '@/src/components/Ui/alert';
 import { Checkbox } from '@/src/components/Ui/checkbox';
 import { LogIn, AlertCircle } from 'lucide-react';
-import { loginUsuario, salvarToken } from '@/src/services/auth.service';
+import { loginUsuario } from '@/src/services/auth.service';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,10 +55,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Envia o CPF sem máscara para a API
-      const response = await loginUsuario(cpfLimpo, senha);
-
-      salvarToken(response.token);
+      // Envia o CPF sem máscara para a API (com parâmetro 'password')
+      await loginUsuario(cpfLimpo, senha);
 
       if (lembrarMe) {
         localStorage.setItem('cpf', cpfLimpo);
@@ -71,7 +69,6 @@ export default function LoginPage() {
           ? err.message
           : 'Erro ao fazer login. Verifique suas credenciais.';
       setErro(mensagemErro);
-      console.error(err);
     } finally {
       setLoading(false);
     }

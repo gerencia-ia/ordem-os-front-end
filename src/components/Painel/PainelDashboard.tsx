@@ -1,13 +1,31 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { usePainel } from '@/src/hooks/usePainel';
 import { PainelFiltros } from './PainelFiltros';
 import { PainelKpis } from './PainelKpis';
-import { PainelGraficoStatus } from './PainelGraficoStatus';
-import { PainelGraficoPrioridades } from './PainelGraficoPrioridades';
 import { LayoutDashboard, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/src/components/Ui/button';
 import { Skeleton } from '@/src/components/Ui/skeleton';
+
+const PainelGraficoStatus = dynamic(
+  () => import('./PainelGraficoStatus').then((m) => m.PainelGraficoStatus),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[320px] w-full rounded-xl" />,
+  },
+);
+
+const PainelGraficoPrioridades = dynamic(
+  () =>
+    import('./PainelGraficoPrioridades').then(
+      (m) => m.PainelGraficoPrioridades,
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[320px] w-full rounded-xl" />,
+  },
+);
 
 export function PainelDashboard() {
   const {

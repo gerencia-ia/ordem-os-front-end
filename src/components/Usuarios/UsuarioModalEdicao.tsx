@@ -49,7 +49,7 @@ function UsuarioModalEdicaoForm({
 
   const podeAlterarFuncao = podeAlterarFuncaoDeUsuario(user.id);
   const rolesPermitidas = filtrarRolesPermitidas(roles);
-  const isAutoEdicao = String(user.id) === String(usuario?.user_id);
+  const isAutoEdicao = String(user.id) === String(usuario?.id);
 
   const { form, salvando, onSubmit } = useUsuarioForm({
     userParaEdicao: user,

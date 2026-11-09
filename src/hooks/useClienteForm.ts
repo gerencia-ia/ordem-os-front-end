@@ -9,10 +9,10 @@ import {
   type Cliente,
   type NovoClientePayload,
   type AtualizarClientePayload,
+  type NovoEquipamentoData,
 } from '@/src/types/cliente';
 import { buscarEnderecoPorCep } from '@/src/utils/viacep';
 import { createCliente, updateCliente } from '@/src/services/clientes.service';
-import type { NovoEquipamentoData } from '@/src/components/Clientes/EquipamentoModalCliente';
 import { toast } from 'sonner';
 
 interface UseClienteFormProps {

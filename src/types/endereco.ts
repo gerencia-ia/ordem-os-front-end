@@ -26,6 +26,16 @@ export const enderecoSchema = z
   })
   .superRefine((data, ctx) => {
     if (!data._destroy) {
+      if (data.cep && data.cep.trim()) {
+        const cepDigitos = data.cep.replace(/\D/g, '');
+        if (cepDigitos.length !== 8) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'CEP deve conter 8 dígitos',
+            path: ['cep'],
+          });
+        }
+      }
       if (!data.rua || data.rua.trim().length < 2) {
         ctx.addIssue({
           code: 'custom',

@@ -12,14 +12,9 @@ import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
 import { toast } from 'sonner';
 import { createEquipamento } from '@/src/services/equipamentos.service';
+import type { NovoEquipamentoData } from '@/src/types/cliente';
 
-export interface NovoEquipamentoData {
-  marca: string;
-  btus: string;
-  local_instalacao: string;
-  observacao: string;
-  cliente_id?: number;
-}
+export type { NovoEquipamentoData };
 
 interface EquipamentoModalClienteProps {
   open: boolean;

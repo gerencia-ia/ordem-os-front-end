@@ -9,7 +9,17 @@ import { estaAutenticado } from '@/src/services/auth.service';
 import { usePermissions } from '@/src/hooks/usePermissions';
 import { toast } from 'sonner';
 
-const subscribe = () => () => {};
+const subscribe = (callback: () => void) => {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('storage', callback);
+  window.addEventListener('auth:logout', callback);
+  window.addEventListener('auth:login', callback);
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener('auth:logout', callback);
+    window.removeEventListener('auth:login', callback);
+  };
+};
 
 export default function LayoutPainel({
   children,
@@ -22,39 +32,29 @@ export default function LayoutPainel({
     () => true,
     () => false,
   );
-  const [autenticado, setAutenticado] = useState(false);
+  const isAuth = useSyncExternalStore(subscribe, estaAutenticado, () => false);
   const router = useRouter();
   const pathname = usePathname();
   const { podeAcessar, perfil } = usePermissions();
 
   useEffect(() => {
-    // Só verificar autenticação no cliente após montar
     if (!montado) return;
 
-    // Pequeno delay para garantir que localStorage está atualizado
-    const timer = setTimeout(() => {
-      const isAuth = estaAutenticado();
+    if (!isAuth) {
+      router.push('/login');
+      return;
+    }
 
-      if (!isAuth) {
-        router.push('/login');
-        return;
-      }
-
-      // Verificação de permissão de rota
-      if (pathname && perfil && !podeAcessar(pathname)) {
-        toast.error('Você não possui permissão para acessar esta área.');
-        router.push('/ordens');
-        return;
-      }
-
-      setAutenticado(true);
-    }, 50);
-
-    return () => clearTimeout(timer);
-  }, [montado, pathname, router, podeAcessar, perfil]);
+    // Verificação de permissão de rota
+    if (pathname && perfil && !podeAcessar(pathname)) {
+      toast.error('Você não possui permissão para acessar esta área.');
+      router.push('/ordens');
+      return;
+    }
+  }, [montado, isAuth, pathname, router, podeAcessar, perfil]);
 
   // Não mostrar nada até verificar autenticação
-  if (!montado || !autenticado) {
+  if (!montado || !isAuth) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">

@@ -234,8 +234,19 @@ export function useOrdemDetalhe(ordemId: string | number) {
     try {
       const dataInicio =
         ordem.data_inicio_atendimento || new Date().toISOString();
+      const agora = new Date().toISOString();
+
+      if (new Date(agora) < new Date(dataInicio)) {
+        toast.error(
+          'Horário de finalização não pode ser anterior ao início do atendimento.',
+        );
+        setFinalizandoSalvo(false);
+        return;
+      }
+
       await finalizarOrdem(ordem.id, {
         data_inicio_atendimento: dataInicio,
+        data_fim_atendimento: agora,
         valor_total: valorFinal.trim() ? valorFinal : undefined,
         observacao: observacaoFinal.trim() ? observacaoFinal : undefined,
       });
@@ -399,10 +410,10 @@ export function useOrdemDetalhe(ordemId: string | number) {
     if (!ordem) return;
     const targetId =
       tecnicoId ??
-      (Array.isArray(ordem.tecnicos)
+      ordem.tecnico_responsavel?.id ??
+      (ordem.tecnicos && ordem.tecnicos.length > 0
         ? ordem.tecnicos[0]?.id
-        : (ordem.tecnicos as Usuario | null)?.id) ??
-      ordem.tecnico_responsavel?.id;
+        : undefined);
     if (!targetId) return;
     setTecnicoSaving(true);
     try {
@@ -435,7 +446,7 @@ export function useOrdemDetalhe(ordemId: string | number) {
     if (!phone.startsWith('55') && phone.length <= 11) {
       phone = `55${phone}`;
     }
-    window.open(`https://wa.me/${phone}`, '_blank');
+    window.open(`https://wa.me/${phone}`, '_blank', 'noopener,noreferrer');
   };
 
   return {

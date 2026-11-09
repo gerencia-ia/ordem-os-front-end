@@ -30,7 +30,14 @@ export function usePermissions() {
     getServerSnapshot,
   );
 
-  const perfil: Perfil | null = normalizarPerfil(usuario?.role);
+  const roleNome =
+    typeof usuario?.role === 'object' && usuario?.role !== null
+      ? usuario.role.nome
+      : typeof usuario?.role === 'string'
+        ? usuario.role
+        : null;
+
+  const perfil: Perfil | null = normalizarPerfil(roleNome);
 
   const filtrarRolesPermitidas = <T extends { nome: string }>(
     roles: T[],
@@ -48,7 +55,9 @@ export function usePermissions() {
   ): boolean => {
     if (!alvoUserId || !usuario) return false;
     // O usuário logado não pode alterar o próprio perfil
-    if (String(alvoUserId) === String(usuario.user_id)) {
+    const usuarioLogadoId =
+      usuario.id ?? (usuario as unknown as { user_id?: number }).user_id;
+    if (String(alvoUserId) === String(usuarioLogadoId)) {
       return false;
     }
     // Apenas Administrador pode alterar papéis de forma ampla

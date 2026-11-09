@@ -6,6 +6,7 @@ import { zodResolver } from '@/src/lib/zod-resolver';
 import {
   criarOrdemFormSchema,
   type CriarOrdemFormData,
+  type CriarOrdemServicoPayload,
   type Status,
   type Prioridade,
 } from '@/src/types/ordem';
@@ -47,6 +48,7 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
       status_id: 0,
       prioridade_id: 0,
       data_agendamento: '',
+      data_vencimento: '',
       descricao: '',
       observacao: '',
       servico_ids: [],
@@ -283,7 +285,7 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     try {
       setSalvando(true);
 
-      const payload = {
+      const payload: CriarOrdemServicoPayload = {
         ordem_servico: {
           cliente_id: Number(data.cliente_id),
           endereco_id: Number(data.endereco_id),
@@ -296,6 +298,7 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
           status_id: Number(data.status_id),
           prioridade_id: Number(data.prioridade_id),
           data_agendamento: data.data_agendamento || undefined,
+          data_vencimento: data.data_vencimento || undefined,
           custo_estimado: valorTotalServicos,
         },
       };

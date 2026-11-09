@@ -3,6 +3,25 @@ import { obterToken, removerToken } from './auth.service';
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
+export class ApiError extends Error {
+  status: number;
+  errors: string[];
+  details?: Record<string, unknown>;
+
+  constructor(
+    message: string,
+    status: number,
+    errors: string[] = [],
+    details?: Record<string, unknown>,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.errors = errors;
+    this.details = details;
+  }
+}
+
 function getHeaders(customHeaders?: HeadersInit): HeadersInit {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -17,33 +36,51 @@ function getHeaders(customHeaders?: HeadersInit): HeadersInit {
   return headers;
 }
 
+let isRedirectingToLogin = false;
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (response.status === 401) {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isRedirectingToLogin) {
+      isRedirectingToLogin = true;
       removerToken();
-      window.dispatchEvent(new Event('auth:logout'));
       // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = '/login';
     }
-    throw new Error('Sessão expirada. Faça login novamente.');
+    throw new ApiError('Sessão expirada. Faça login novamente.', 401, [
+      'Sessão expirada. Faça login novamente.',
+    ]);
   }
 
   if (!response.ok) {
     let mensagemErro = 'Erro na requisição';
+    let errosArray: string[] = [];
+    let details: Record<string, unknown> | undefined;
+
     try {
       const data = await response.json();
+      details = data.details;
+
       if (Array.isArray(data.errors)) {
+        errosArray = data.errors;
         mensagemErro = data.errors.join(', ');
       } else if (data.errors && typeof data.errors === 'object') {
-        mensagemErro = Object.values(data.errors).flat().join(', ');
-      } else {
-        mensagemErro = data.message || data.error || mensagemErro;
+        const valores = Object.values(data.errors).flat() as string[];
+        errosArray = valores;
+        mensagemErro = valores.join(', ');
+      } else if (data.message || data.error) {
+        const msg = data.message || data.error;
+        errosArray = [msg];
+        mensagemErro = msg;
       }
     } catch {
       const text = await response.text().catch(() => '');
-      if (text) mensagemErro = text;
+      if (text) {
+        mensagemErro = text;
+        errosArray = [text];
+      }
     }
-    throw new Error(mensagemErro);
+
+    throw new ApiError(mensagemErro, response.status, errosArray, details);
   }
 
   if (
@@ -52,6 +89,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   ) {
     return undefined as T;
   }
+
   return response.json();
 }
 

@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/src/components/Ui/card';
 import { Badge } from '@/src/components/Ui/badge';
 import { Calendar, User, HardHat, ArrowUpRight } from 'lucide-react';
 import type { OrdemServico } from '@/src/types/ordem';
-import type { Usuario } from '@/src/types/usuario';
 import { formatarDataHoraCurta } from '@/src/utils/date';
 
 interface KanbanCartaoProps {
@@ -42,9 +41,9 @@ export function KanbanCartao({
   // Normaliza técnico responsável
   const tecnicoNome =
     ordem.tecnico_responsavel?.nome ||
-    (Array.isArray(ordem.tecnicos)
+    (Array.isArray(ordem.tecnicos) && ordem.tecnicos.length > 0
       ? ordem.tecnicos[0]?.nome
-      : (ordem.tecnicos as Usuario | null)?.nome);
+      : undefined);
 
   return (
     <div

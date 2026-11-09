@@ -17,8 +17,8 @@ export interface CriarUsuarioPayload {
   cpf: string;
   email: string;
   telefone: string;
-  senha: string;
-  password?: string;
+  password: string;
+  senha?: string;
   role_id: number;
 }
 
@@ -29,8 +29,8 @@ export interface AtualizarUsuarioPayload {
   cpf?: string;
   email?: string;
   telefone?: string;
-  senha?: string;
   password?: string;
+  senha?: string;
   role_id?: number;
 }
 

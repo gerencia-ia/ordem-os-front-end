@@ -130,8 +130,8 @@ export function OrdemLista() {
         </CardContent>
       </Card>
 
-      {/* Modal de Criação Desacoplado */}
-      {!isTecnico && (
+      {/* Modal de Criação Desacoplado - Montagem sob demanda */}
+      {!isTecnico && modalCadastroAberta && (
         <OrdemModalCadastro
           aberto={modalCadastroAberta}
           onOpenChange={setModalCadastroAberta}

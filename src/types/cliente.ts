@@ -2,6 +2,14 @@ import { z } from 'zod';
 import { Telefone, telefoneSchema } from './telefone';
 import { Endereco, enderecoSchema } from './endereco';
 
+export interface NovoEquipamentoData {
+  marca: string;
+  btus: string;
+  local_instalacao: string;
+  observacao?: string;
+  cliente_id?: number;
+}
+
 export interface Cliente {
   id: number;
   nome: string;
