@@ -92,7 +92,8 @@ export function SecaoClienteEndereco({
           {/* Seleção de Endereço */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="os-endereco">
-              Endereço de Atendimento <span className="text-destructive">*</span>
+              Endereço de Atendimento{' '}
+              <span className="text-destructive">*</span>
             </Label>
             <Select
               value={enderecoId ? String(enderecoId) : ''}
@@ -147,8 +148,8 @@ export function SecaoClienteEndereco({
                   <strong>
                     {end.rua}, {end.numero}
                   </strong>
-                  {end.complemento ? ` (${end.complemento})` : ''} - {end.bairro},{' '}
-                  {end.cidade}
+                  {end.complemento ? ` (${end.complemento})` : ''} -{' '}
+                  {end.bairro}, {end.cidade}
                   {end.cep ? ` • CEP: ${end.cep}` : ''}
                 </span>
               );

@@ -6,7 +6,9 @@ export interface StatusBadgeProps extends React.ComponentProps<typeof Badge> {
   status?: string | null;
 }
 
-export interface PrioridadeBadgeProps extends React.ComponentProps<typeof Badge> {
+export interface PrioridadeBadgeProps extends React.ComponentProps<
+  typeof Badge
+> {
   prioridade?: string | null;
 }
 
@@ -27,7 +29,11 @@ export function getStatusClasses(status?: string | null): string {
   if (norm.includes('abert') || norm.includes('agendad')) {
     return 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border-amber-300/70 dark:border-amber-700/50';
   }
-  if (norm.includes('andamento') || norm.includes('atendimento') || norm.includes('progresso')) {
+  if (
+    norm.includes('andamento') ||
+    norm.includes('atendimento') ||
+    norm.includes('progresso')
+  ) {
     return 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border-blue-300/70 dark:border-blue-700/50';
   }
   if (norm.includes('conclui')) {
@@ -72,7 +78,11 @@ export function StatusBadge({
   return (
     <Badge
       variant="outline"
-      className={cn('font-medium shadow-2xs transition-colors', getStatusClasses(status), className)}
+      className={cn(
+        'font-medium shadow-2xs transition-colors',
+        getStatusClasses(status),
+        className,
+      )}
       {...props}
     >
       {texto}
@@ -89,7 +99,11 @@ export function PrioridadeBadge({
   const texto = children || prioridade || 'Normal';
   return (
     <Badge
-      className={cn('font-medium shadow-2xs transition-colors', getPrioridadeClasses(prioridade), className)}
+      className={cn(
+        'font-medium shadow-2xs transition-colors',
+        getPrioridadeClasses(prioridade),
+        className,
+      )}
       {...props}
     >
       {texto}

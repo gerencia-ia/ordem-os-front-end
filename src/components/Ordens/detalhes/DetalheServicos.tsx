@@ -179,7 +179,9 @@ export function DetalheServicos({
               <EmptyMedia variant="icon">
                 <Wrench className="size-5" />
               </EmptyMedia>
-              <EmptyTitle className="text-sm font-medium">Nenhum serviço vinculado</EmptyTitle>
+              <EmptyTitle className="text-sm font-medium">
+                Nenhum serviço vinculado
+              </EmptyTitle>
               <EmptyDescription className="text-xs">
                 Esta ordem de serviço ainda não possui serviços adicionados.
               </EmptyDescription>

@@ -128,7 +128,9 @@ export function DetalheEquipamentos({
               <EmptyMedia variant="icon">
                 <AirVent className="size-5" />
               </EmptyMedia>
-              <EmptyTitle className="text-sm font-medium">Nenhum equipamento vinculado</EmptyTitle>
+              <EmptyTitle className="text-sm font-medium">
+                Nenhum equipamento vinculado
+              </EmptyTitle>
               <EmptyDescription className="text-xs">
                 Esta ordem de serviço não possui equipamentos associados.
               </EmptyDescription>

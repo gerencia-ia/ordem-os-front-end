@@ -100,7 +100,8 @@ export function UsuarioTabela({
         <EmptyHeader>
           <EmptyTitle>Nenhum usuário encontrado</EmptyTitle>
           <EmptyDescription>
-            Nenhum resultado corresponde à sua busca ou não há usuários cadastrados.
+            Nenhum resultado corresponde à sua busca ou não há usuários
+            cadastrados.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

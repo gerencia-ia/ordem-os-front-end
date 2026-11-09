@@ -72,9 +72,7 @@ export function OrdemTabela({
               <TableHead className="w-[130px]">Status</TableHead>
               <TableHead className="w-[110px]">Prioridade</TableHead>
               <TableHead className="w-[140px]">Técnico</TableHead>
-              {!isTecnico && (
-                <TableHead className="w-[120px]">Valor</TableHead>
-              )}
+              {!isTecnico && <TableHead className="w-[120px]">Valor</TableHead>}
               <TableHead className="w-[100px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -214,7 +212,10 @@ export function OrdemTabela({
 
                 {/* Prioridade */}
                 <TableCell>
-                  <PrioridadeBadge prioridade={prioridadeTexto} className="text-xs" />
+                  <PrioridadeBadge
+                    prioridade={prioridadeTexto}
+                    className="text-xs"
+                  />
                 </TableCell>
 
                 {/* Técnicos */}

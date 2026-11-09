@@ -174,7 +174,10 @@ export default function LoginPage() {
               >
                 {loading ? (
                   <>
-                    <Loader2 className="animate-spin" data-icon="inline-start" />
+                    <Loader2
+                      className="animate-spin"
+                      data-icon="inline-start"
+                    />
                     <span>Entrando...</span>
                   </>
                 ) : (

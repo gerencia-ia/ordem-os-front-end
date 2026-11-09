@@ -78,13 +78,21 @@ export function PainelKpis({
       {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
-          <Card key={idx} className="hover:shadow-sm transition-shadow py-5 gap-3 bg-card">
+          <Card
+            key={idx}
+            className="hover:shadow-sm transition-shadow py-5 gap-3 bg-card"
+          >
             <CardHeader className="px-5 pb-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">
                 {card.titulo}
               </CardTitle>
               <CardAction>
-                <div className={cn('p-2.5 rounded-lg flex items-center justify-center', card.bgIcon)}>
+                <div
+                  className={cn(
+                    'p-2.5 rounded-lg flex items-center justify-center',
+                    card.bgIcon,
+                  )}
+                >
                   <Icon className={cn('size-5', card.corIcon)} />
                 </div>
               </CardAction>

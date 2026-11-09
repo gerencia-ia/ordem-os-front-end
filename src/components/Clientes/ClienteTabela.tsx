@@ -98,7 +98,8 @@ export function ClienteTabela({
         <EmptyHeader>
           <EmptyTitle>Nenhum cliente encontrado</EmptyTitle>
           <EmptyDescription>
-            Nenhum resultado corresponde à sua busca ou não há clientes cadastrados no sistema.
+            Nenhum resultado corresponde à sua busca ou não há clientes
+            cadastrados no sistema.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

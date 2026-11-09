@@ -53,10 +53,7 @@ export function ServicoLista() {
           </p>
         </div>
 
-        <Button
-          onClick={abrirModalCadastro}
-          className="gap-1.5 shadow-sm"
-        >
+        <Button onClick={abrirModalCadastro} className="gap-1.5 shadow-sm">
           <Plus className="size-4" /> Novo Serviço
         </Button>
       </div>

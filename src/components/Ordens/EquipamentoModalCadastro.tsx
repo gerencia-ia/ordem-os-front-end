@@ -91,7 +91,10 @@ export function EquipamentoModalCadastro({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 py-2">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-4 py-2"
+        >
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="eq-marca">
               Marca / Modelo <span className="text-destructive">*</span>

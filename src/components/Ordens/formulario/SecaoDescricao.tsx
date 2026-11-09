@@ -31,7 +31,9 @@ export function SecaoDescricao({ form }: SecaoDescricaoProps) {
       <CardContent className="px-4 flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="os-descricao">Descrição do Problema / Serviço</Label>
+            <Label htmlFor="os-descricao">
+              Descrição do Problema / Serviço
+            </Label>
             <Textarea
               id="os-descricao"
               placeholder="Descreva a solicitação do cliente..."

@@ -68,11 +68,16 @@ export function PainelDashboard() {
 
       {/* Erro */}
       {erro && (
-        <Alert variant="destructive" className="flex items-center justify-between">
+        <Alert
+          variant="destructive"
+          className="flex items-center justify-between"
+        >
           <div className="flex items-center gap-3">
             <AlertCircle className="size-4 shrink-0" />
             <div>
-              <AlertTitle className="text-sm font-semibold">Falha ao carregar dados</AlertTitle>
+              <AlertTitle className="text-sm font-semibold">
+                Falha ao carregar dados
+              </AlertTitle>
               <AlertDescription className="text-xs">{erro}</AlertDescription>
             </div>
           </div>

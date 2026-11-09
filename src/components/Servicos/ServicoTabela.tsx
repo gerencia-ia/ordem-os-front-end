@@ -43,7 +43,9 @@ export function ServicoTabela({
               <TableHead>Nome do Serviço</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead className="w-[140px]">Tempo Estimado</TableHead>
-              <TableHead className="w-[140px] text-right">Valor Unitário</TableHead>
+              <TableHead className="w-[140px] text-right">
+                Valor Unitário
+              </TableHead>
               <TableHead className="w-[120px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -85,7 +87,8 @@ export function ServicoTabela({
         <EmptyHeader>
           <EmptyTitle>Nenhum serviço encontrado</EmptyTitle>
           <EmptyDescription>
-            Nenhum serviço disponível ou correspondente aos filtros de busca aplicados.
+            Nenhum serviço disponível ou correspondente aos filtros de busca
+            aplicados.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -100,79 +103,81 @@ export function ServicoTabela({
             <TableHead>Nome do Serviço</TableHead>
             <TableHead>Categoria</TableHead>
             <TableHead className="w-[140px]">Tempo Estimado</TableHead>
-            <TableHead className="w-[140px] text-right">Valor Unitário</TableHead>
+            <TableHead className="w-[140px] text-right">
+              Valor Unitário
+            </TableHead>
             <TableHead className="w-[120px] text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {servicos.map((servico) => {
-              const categoriaNome =
-                servico.categoria?.descricao ||
-                servico.categorias_servico?.descricao ||
-                'Geral';
+            const categoriaNome =
+              servico.categoria?.descricao ||
+              servico.categorias_servico?.descricao ||
+              'Geral';
 
-              return (
-                <TableRow key={servico.id} className="hover:bg-muted/30">
-                  {/* Nome */}
-                  <TableCell className="font-medium text-sm">
-                    {servico.nome}
-                  </TableCell>
+            return (
+              <TableRow key={servico.id} className="hover:bg-muted/30">
+                {/* Nome */}
+                <TableCell className="font-medium text-sm">
+                  {servico.nome}
+                </TableCell>
 
-                  {/* Categoria */}
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs font-normal">
-                      {categoriaNome}
-                    </Badge>
-                  </TableCell>
+                {/* Categoria */}
+                <TableCell>
+                  <Badge variant="outline" className="text-xs font-normal">
+                    {categoriaNome}
+                  </Badge>
+                </TableCell>
 
-                  {/* Tempo */}
-                  <TableCell>
-                    {servico.tempo_servico ? (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5" />
-                        {servico.tempo_servico} min
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
+                {/* Tempo */}
+                <TableCell>
+                  {servico.tempo_servico ? (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5" />
+                      {servico.tempo_servico} min
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </TableCell>
 
-                  {/* Valor */}
-                  <TableCell className="text-right font-semibold text-sm">
-                    R${' '}
-                    {Number(servico.valor).toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2,
-                    })}
-                  </TableCell>
+                {/* Valor */}
+                <TableCell className="text-right font-semibold text-sm">
+                  R${' '}
+                  {Number(servico.valor).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                  })}
+                </TableCell>
 
-                  {/* Ações */}
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-muted-foreground hover:text-foreground"
-                        onClick={() => onEditar(servico)}
-                        aria-label={`Editar ${servico.nome}`}
-                      >
-                        <Edit className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => onExcluir(servico)}
-                        aria-label={`Excluir ${servico.nome}`}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                {/* Ações */}
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-muted-foreground hover:text-foreground"
+                      onClick={() => onEditar(servico)}
+                      aria-label={`Editar ${servico.nome}`}
+                    >
+                      <Edit className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => onExcluir(servico)}
+                      aria-label={`Excluir ${servico.nome}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }
