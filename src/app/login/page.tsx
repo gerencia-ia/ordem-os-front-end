@@ -14,7 +14,7 @@ import { Input } from '@/src/components/Ui/input';
 import { Label } from '@/src/components/Ui/label';
 import { Alert, AlertDescription } from '@/src/components/Ui/alert';
 import { Checkbox } from '@/src/components/Ui/checkbox';
-import { LogIn, AlertCircle } from 'lucide-react';
+import { LogIn, AlertCircle, Loader2 } from 'lucide-react';
 import { loginUsuario } from '@/src/services/auth.service';
 
 export default function LoginPage() {
@@ -121,7 +121,6 @@ export default function LoginPage() {
                   onChange={(e) => setCpf(formatCPF(e.target.value))}
                   maxLength={14}
                   disabled={loading}
-                  className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                 />
               </div>
 
@@ -133,7 +132,7 @@ export default function LoginPage() {
                   </Label>
                   <a
                     href="#"
-                    className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-xs text-primary hover:underline transition-colors"
                   >
                     Esqueceu a senha?
                   </a>
@@ -145,7 +144,6 @@ export default function LoginPage() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   disabled={loading}
-                  className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                 />
               </div>
 
@@ -159,30 +157,31 @@ export default function LoginPage() {
                   }
                   disabled={loading}
                 />
-                <label
+                <Label
                   htmlFor="lembrar"
-                  className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                  className="text-sm font-normal text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                 >
                   Lembrar-me neste dispositivo
-                </label>
+                </Label>
               </div>
 
               {/* Login Button */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-2 rounded-lg transition-all duration-300"
+                size="lg"
+                className="w-full"
               >
                 {loading ? (
-                  <span className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Entrando...
-                  </span>
+                  <>
+                    <Loader2 className="animate-spin" data-icon="inline-start" />
+                    <span>Entrando...</span>
+                  </>
                 ) : (
-                  <span className="flex items-center gap-2">
-                    <LogIn className="w-4 h-4" />
-                    Entrar
-                  </span>
+                  <>
+                    <LogIn data-icon="inline-start" />
+                    <span>Entrar</span>
+                  </>
                 )}
               </Button>
             </form>
@@ -192,7 +191,7 @@ export default function LoginPage() {
               Não possui uma conta?{' '}
               <a
                 href="#"
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+                className="text-primary hover:underline font-semibold"
               >
                 Cadastre-se
               </a>

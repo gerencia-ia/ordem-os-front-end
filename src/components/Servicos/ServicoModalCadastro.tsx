@@ -11,6 +11,15 @@ import {
 import { Button } from '@/src/components/Ui/button';
 import { Input } from '@/src/components/Ui/input';
 import { Label } from '@/src/components/Ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
+import { Controller } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import type { CategoriaServico } from '@/src/types/categoria';
 import { useServicoForm } from '@/src/hooks/useServicoForm';
@@ -38,6 +47,7 @@ export function ServicoModalCadastro({
 
   const {
     register,
+    control,
     formState: { errors },
   } = form;
 
@@ -72,19 +82,35 @@ export function ServicoModalCadastro({
           {/* Categoria */}
           <div className="space-y-1.5">
             <Label htmlFor="servico-categoria">Categoria</Label>
-            <select
-              id="servico-categoria"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              {...register('categorias_servico_id')}
-              disabled={salvando}
-            >
-              <option value="">Selecione uma categoria (opcional)</option>
-              {categorias.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.descricao}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="categorias_servico_id"
+              render={({ field }) => (
+                <Select
+                  value={field.value ? String(field.value) : 'nenhuma'}
+                  onValueChange={(val) =>
+                    field.onChange(val === 'nenhuma' ? null : Number(val))
+                  }
+                  disabled={salvando}
+                >
+                  <SelectTrigger id="servico-categoria" className="w-full">
+                    <SelectValue placeholder="Selecione uma categoria (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="nenhuma">
+                        Nenhuma (opcional)
+                      </SelectItem>
+                      {categorias.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.descricao}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

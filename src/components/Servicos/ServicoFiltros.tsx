@@ -2,6 +2,14 @@
 
 import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
 import { Search, Plus, FilterX, Wrench } from 'lucide-react';
 import type { CategoriaServico } from '@/src/types/categoria';
 
@@ -43,18 +51,21 @@ export function ServicoFiltros({
         </div>
 
         {/* Filtro por categoria */}
-        <select
-          value={filtroCategoria}
-          onChange={(e) => onCategoriaChange(e.target.value)}
-          className="border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring sm:w-52"
-        >
-          <option value="todas">Todas as categorias</option>
-          {categorias.map((cat) => (
-            <option key={cat.id} value={String(cat.id)}>
-              {cat.descricao}
-            </option>
-          ))}
-        </select>
+        <Select value={filtroCategoria} onValueChange={onCategoriaChange}>
+          <SelectTrigger className="w-full sm:w-52">
+            <SelectValue placeholder="Todas as categorias" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="todas">Todas as categorias</SelectItem>
+              {categorias.map((cat) => (
+                <SelectItem key={cat.id} value={String(cat.id)}>
+                  {cat.descricao}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
 
         {temFiltroAtivo && (
           <Button

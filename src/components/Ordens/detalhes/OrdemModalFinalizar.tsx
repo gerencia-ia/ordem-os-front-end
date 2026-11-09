@@ -11,6 +11,7 @@ import {
 import { Button } from '@/src/components/Ui/button';
 import { Input } from '@/src/components/Ui/input';
 import { Label } from '@/src/components/Ui/label';
+import { Textarea } from '@/src/components/Ui/textarea';
 import { Loader2 } from 'lucide-react';
 
 interface OrdemModalFinalizarProps {
@@ -68,9 +69,8 @@ export function OrdemModalFinalizar({
             <Label htmlFor="textarea-observacao-final">
               Observações Finais
             </Label>
-            <textarea
+            <Textarea
               id="textarea-observacao-final"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               rows={4}
               placeholder="Descreva detalhes da conclusão do serviço, peças utilizadas, etc..."
               value={observacaoFinal}

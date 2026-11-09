@@ -4,6 +4,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/src/components/Ui/button';
 import { Badge } from '@/src/components/Ui/badge';
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
+import {
   ArrowLeft,
   Clock,
   CheckCircle,
@@ -125,18 +133,24 @@ export function DetalheCabecalho({
             <span className="text-xs text-muted-foreground whitespace-nowrap">
               Mudar status:
             </span>
-            <select
-              className="border rounded-md px-2.5 py-1.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-              value={statusIdAtual}
-              onChange={(e) => onStatusChange(Number(e.target.value))}
+            <Select
+              value={statusIdAtual ? String(statusIdAtual) : undefined}
+              onValueChange={(val) => onStatusChange(Number(val))}
               disabled={acaoLoading}
             >
-              {statusList.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.nome}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-40 h-8 text-xs">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {statusList.map((st) => (
+                    <SelectItem key={st.id} value={String(st.id)}>
+                      {st.nome}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
         )}
 

@@ -322,13 +322,16 @@ export function ClienteModalCadastro({
                       <span>
                         {eq.marca} - {eq.btus} BTUs ({eq.local_instalacao})
                       </span>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => removerEquipamento(idx)}
-                        className="hover:text-destructive"
+                        className="size-4 p-0 text-muted-foreground hover:text-destructive hover:bg-transparent"
+                        aria-label={`Remover equipamento ${eq.marca}`}
                       >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+                        <Trash2 className="size-3" />
+                      </Button>
                     </Badge>
                   ))}
                 </div>

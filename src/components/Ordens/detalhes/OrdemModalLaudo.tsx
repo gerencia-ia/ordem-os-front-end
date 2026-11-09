@@ -10,6 +10,7 @@ import {
 } from '@/src/components/Ui/dialog';
 import { Button } from '@/src/components/Ui/button';
 import { Label } from '@/src/components/Ui/label';
+import { Textarea } from '@/src/components/Ui/textarea';
 import { Loader2 } from 'lucide-react';
 import type { Equipamento } from '@/src/types/equipamento';
 
@@ -51,9 +52,8 @@ export function OrdemModalLaudo({
 
         <div className="space-y-3 py-2">
           <Label htmlFor="laudo-texto">Descrição do Laudo Técnico</Label>
-          <textarea
+          <Textarea
             id="laudo-texto"
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             rows={5}
             placeholder="Descreva o estado, testes realizados e parecer técnico..."
             value={textoLaudo}

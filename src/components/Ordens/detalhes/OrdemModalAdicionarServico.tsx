@@ -11,6 +11,14 @@ import {
 import { Button } from '@/src/components/Ui/button';
 import { Input } from '@/src/components/Ui/input';
 import { Label } from '@/src/components/Ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
 import { Loader2 } from 'lucide-react';
 import type { Servico } from '@/src/types/servico';
 
@@ -61,26 +69,30 @@ export function OrdemModalAdicionarServico({
                 <span>Carregando catálogo de serviços...</span>
               </div>
             ) : servicos.length > 0 ? (
-              <select
-                id="select-servico"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              <Select
                 value={servicoId}
-                onChange={(e) => onServicoIdChange(e.target.value)}
+                onValueChange={onServicoIdChange}
                 disabled={salvando}
               >
-                <option value="">Selecione um serviço</option>
-                {servicos.map((s) => (
-                  <option key={s.id} value={String(s.id)}>
-                    {s.nome}
-                    {podeVerMetricasFinanceiras
-                      ? ` - R$ ${Number(s.valor).toLocaleString('pt-BR', {
-                          minimumFractionDigits: 2,
-                        })}`
-                      : ''}
-                    {s.tempo_servico ? ` (${s.tempo_servico} min)` : ''}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="select-servico" className="w-full">
+                  <SelectValue placeholder="Selecione um serviço" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {servicos.map((s) => (
+                      <SelectItem key={s.id} value={String(s.id)}>
+                        {s.nome}
+                        {podeVerMetricasFinanceiras
+                          ? ` - R$ ${Number(s.valor).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                            })}`
+                          : ''}
+                        {s.tempo_servico ? ` (${s.tempo_servico} min)` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Nenhum serviço disponível para seleção.

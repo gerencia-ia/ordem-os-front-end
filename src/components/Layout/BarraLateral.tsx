@@ -146,19 +146,18 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
             const ativo = isAtivoOuFilho(menu.href, menu.children);
             return (
               <div key={menu.href} className="space-y-1">
-                <Link href={menu.href}>
-                  <button
-                    onClick={aoFechar}
-                    className={cn(
-                      'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left',
-                      ativo
-                        ? 'bg-primary-foreground text-primary font-semibold'
-                        : 'hover:bg-primary/80 text-primary-foreground/90',
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span>{menu.label}</span>
-                  </button>
+                <Link
+                  href={menu.href}
+                  onClick={aoFechar}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left',
+                    ativo
+                      ? 'bg-primary-foreground text-primary font-semibold'
+                      : 'hover:bg-primary/80 text-primary-foreground/90',
+                  )}
+                >
+                  <Icon className="size-5" />
+                  <span>{menu.label}</span>
                 </Link>
 
                 {menu.children && menu.children.length > 0 && (
@@ -167,18 +166,18 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
                       const childAtivo = isAtivoExato(child.href);
 
                       return (
-                        <Link key={child.href} href={child.href}>
-                          <button
-                            onClick={aoFechar}
-                            className={cn(
-                              'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
-                              childAtivo
-                                ? 'bg-primary-foreground text-primary font-semibold'
-                                : 'text-primary-foreground/80 hover:bg-primary/80',
-                            )}
-                          >
-                            {child.label}
-                          </button>
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={aoFechar}
+                          className={cn(
+                            'w-full block text-left px-3 py-2 rounded-md text-sm transition-colors',
+                            childAtivo
+                              ? 'bg-primary-foreground text-primary font-semibold'
+                              : 'text-primary-foreground/80 hover:bg-primary/80',
+                          )}
+                        >
+                          {child.label}
                         </Link>
                       );
                     })}

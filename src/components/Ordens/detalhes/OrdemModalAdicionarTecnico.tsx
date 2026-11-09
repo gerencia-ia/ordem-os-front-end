@@ -10,6 +10,14 @@ import {
 } from '@/src/components/Ui/dialog';
 import { Button } from '@/src/components/Ui/button';
 import { Label } from '@/src/components/Ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
 import { Loader2 } from 'lucide-react';
 import type { Usuario } from '@/src/types/usuario';
 
@@ -63,21 +71,25 @@ export function OrdemModalAdicionarTecnico({
                 <span>Carregando técnicos...</span>
               </div>
             ) : listaTecnicos.length > 0 ? (
-              <select
-                id="select-tecnico"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              <Select
                 value={tecnicoId}
-                onChange={(e) => onTecnicoIdChange(e.target.value)}
+                onValueChange={onTecnicoIdChange}
                 disabled={salvando}
               >
-                <option value="">Selecione um técnico</option>
-                {listaTecnicos.map((tec) => (
-                  <option key={tec.id} value={String(tec.id)}>
-                    {tec.nome}
-                    {tec.telefone ? ` — (${tec.telefone})` : ''}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="select-tecnico" className="w-full">
+                  <SelectValue placeholder="Selecione um técnico" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {listaTecnicos.map((tec) => (
+                      <SelectItem key={tec.id} value={String(tec.id)}>
+                        {tec.nome}
+                        {tec.telefone ? ` — (${tec.telefone})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Nenhum técnico disponível no momento.
