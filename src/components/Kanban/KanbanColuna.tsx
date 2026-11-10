@@ -27,6 +27,14 @@ const normalizar = (val?: string | null) =>
 function getCoresColuna(nome: string) {
   const norm = normalizar(nome);
 
+  if (norm.includes('nao iniciad')) {
+    return {
+      header: 'text-slate-700 dark:text-slate-300',
+      badge:
+        'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300',
+      container: 'border-slate-200/80 bg-slate-50/40 dark:bg-slate-900/20',
+    };
+  }
   if (norm.includes('agendad') || norm.includes('abert')) {
     return {
       header: 'text-amber-800 dark:text-amber-300',
@@ -81,7 +89,7 @@ export function KanbanColuna({
   const cores = getCoresColuna(status.nome);
 
   return (
-    <div className="flex flex-col rounded-xl border border-border/70 bg-card/60 p-3 min-w-[280px] max-w-[340px] flex-1">
+    <div className="flex flex-col rounded-xl border border-border/70 bg-card/60 p-3 min-w-[280px] flex-1">
       {/* Topo da Coluna */}
       <div className="flex items-center justify-between pb-3 px-1 border-b border-border/40">
         <h2 className={`font-semibold text-sm ${cores.header}`}>

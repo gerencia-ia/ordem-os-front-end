@@ -13,37 +13,70 @@ const normalizar = (val?: string | null) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
+type CategoriaStatus =
+  | 'nao_iniciado'
+  | 'em_progresso'
+  | 'concluido'
+  | 'cancelado';
+
+function obterCategoriaStatus(
+  statusId?: number | null,
+  statusNome?: string | null,
+): CategoriaStatus {
+  const nomeNorm = normalizar(statusNome);
+
+  // 1. Verificações por nome semântico (mais específico primeiro)
+  if (nomeNorm.includes('nao iniciad')) {
+    return 'nao_iniciado';
+  }
+  if (nomeNorm.includes('conclui') || nomeNorm.includes('finaliz')) {
+    return 'concluido';
+  }
+  if (nomeNorm.includes('cancelad')) {
+    return 'cancelado';
+  }
+  if (
+    nomeNorm.includes('progresso') ||
+    nomeNorm.includes('andamento') ||
+    nomeNorm.includes('atendimento')
+  ) {
+    return 'em_progresso';
+  }
+  // Se houver ordens antigas com status "aberta" ou "agendada" (status sendo descontinuado),
+  // mapeia para "Não iniciada" para manter visibilidade
+  if (
+    nomeNorm.includes('agendad') ||
+    nomeNorm.includes('abert') ||
+    nomeNorm.includes('aguardando')
+  ) {
+    return 'nao_iniciado';
+  }
+
+  // 2. Mapeamento por ID do banco de dados (Rails backend)
+  const id = Number(statusId);
+  if (id === 2 || id === 1) return 'nao_iniciado';
+  if (id === 3) return 'em_progresso';
+  if (id === 5) return 'concluido';
+  if (id === 6) return 'cancelado';
+
+  return 'nao_iniciado';
+}
+
 function pertenceAoStatus(
   ordem: OrdemServico,
-  statusId: number,
-  statusNome: string,
-) {
+  statusIdColuna: number,
+  statusNomeColuna: string,
+): boolean {
+  const categoriaColuna = obterCategoriaStatus(
+    statusIdColuna,
+    statusNomeColuna,
+  );
+
   const ordemStatusId = Number(ordem.status?.id || ordem.status_id || 0);
-  if (ordemStatusId === statusId) return true;
+  const ordemStatusNome = ordem.status?.nome || ordem.status_descricao;
+  const categoriaOrdem = obterCategoriaStatus(ordemStatusId, ordemStatusNome);
 
-  const nomeAtual = normalizar(ordem.status?.nome || ordem.status_descricao);
-  const nomeAlvo = normalizar(statusNome);
-
-  if (
-    nomeAlvo.includes('agendad') &&
-    (nomeAtual.includes('agendad') || nomeAtual.includes('abert'))
-  ) {
-    return true;
-  }
-  if (
-    (nomeAlvo.includes('progresso') || nomeAlvo.includes('andamento')) &&
-    (nomeAtual.includes('progresso') || nomeAtual.includes('andamento'))
-  ) {
-    return true;
-  }
-  if (nomeAlvo.includes('conclui') && nomeAtual.includes('conclui')) {
-    return true;
-  }
-  if (nomeAlvo.includes('cancelad') && nomeAtual.includes('cancelad')) {
-    return true;
-  }
-
-  return false;
+  return categoriaColuna === categoriaOrdem;
 }
 
 export function KanbanQuadro() {
@@ -99,7 +132,7 @@ export function KanbanQuadro() {
   };
 
   return (
-    <div className="p-6 flex flex-col gap-6 max-w-[1600px] mx-auto">
+    <div className="p-6 flex flex-col gap-6 w-full">
       {/* Cabeçalho */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -132,7 +165,7 @@ export function KanbanQuadro() {
           <p className="text-sm">Carregando quadro de ordens...</p>
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-6 items-start scrollbar-thin">
+        <div className="flex gap-4 overflow-x-auto pb-6 items-start w-full scrollbar-thin">
           {colunasStatus.map((status) => {
             const statusId = Number(status.id);
             const ordensDaColuna = ordens.filter((o) =>

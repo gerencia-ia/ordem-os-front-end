@@ -26,6 +26,9 @@ function normalizar(val?: string | null): string {
 export function getStatusClasses(status?: string | null): string {
   const norm = normalizar(status);
 
+  if (norm.includes('nao iniciad') || norm.includes('pendente')) {
+    return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300/70 dark:border-slate-700/50';
+  }
   if (norm.includes('abert') || norm.includes('agendad')) {
     return 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border-amber-300/70 dark:border-amber-700/50';
   }

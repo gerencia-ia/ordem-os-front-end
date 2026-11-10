@@ -7,10 +7,10 @@ import { getOrdens, updateOrdemStatus } from '@/src/services/ordens.service';
 import { getStatus } from '@/src/services/status.service';
 
 const STATUS_COLUNAS_PADRAO: Status[] = [
-  { id: 1, nome: 'Agendado' },
-  { id: 2, nome: 'Em Progresso' },
-  { id: 3, nome: 'Concluído' },
-  { id: 4, nome: 'Cancelado' },
+  { id: 1, nome: 'Não iniciada' },
+  { id: 2, nome: 'Em andamento' },
+  { id: 3, nome: 'Concluída' },
+  { id: 4, nome: 'Cancelada' },
 ];
 
 const normalizar = (val?: string | null) =>
@@ -18,6 +18,42 @@ const normalizar = (val?: string | null) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+
+function ordenarColunasOperacionais(lista: Status[]): Status[] {
+  const getPeso = (nome: string) => {
+    const n = normalizar(nome);
+    if (n.includes('nao iniciad')) return 1;
+    if (n.includes('progresso') || n.includes('andamento')) return 2;
+    if (n.includes('conclui')) return 3;
+    if (n.includes('cancelad')) return 4;
+    return 99;
+  };
+
+  const operacionais = lista.filter((s) => {
+    const nomeNorm = normalizar(s.nome);
+    // Ignora explicitamente status de agendado/aberto que estão sendo descontinuados
+    if (nomeNorm.includes('agendad') || nomeNorm.includes('abert')) {
+      return false;
+    }
+    return (
+      nomeNorm.includes('nao iniciad') ||
+      nomeNorm.includes('progresso') ||
+      nomeNorm.includes('andamento') ||
+      nomeNorm.includes('conclui') ||
+      nomeNorm.includes('cancelad')
+    );
+  });
+
+  const temNaoIniciado = operacionais.some((s) =>
+    normalizar(s.nome).includes('nao iniciad'),
+  );
+
+  const final = temNaoIniciado
+    ? operacionais
+    : [{ id: 2, nome: 'Não iniciada' }, ...operacionais];
+
+  return [...final].sort((a, b) => getPeso(a.nome) - getPeso(b.nome));
+}
 
 export function useKanban() {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
@@ -49,21 +85,7 @@ export function useKanban() {
     try {
       const lista = await getStatus();
       if (lista && lista.length > 0) {
-        // Filtra os 4 status operacionais principais para as colunas do kanban
-        const operacionais = lista.filter((s) => {
-          const nomeNorm = normalizar(s.nome);
-          return (
-            nomeNorm.includes('agendad') ||
-            nomeNorm.includes('progresso') ||
-            nomeNorm.includes('andamento') ||
-            nomeNorm.includes('conclui') ||
-            nomeNorm.includes('cancelad')
-          );
-        });
-
-        if (operacionais.length > 0) {
-          setColunasStatus(operacionais);
-        }
+        setColunasStatus(ordenarColunasOperacionais(lista));
       }
     } catch {
       // Mantém fallback padrão
@@ -121,19 +143,7 @@ export function useKanban() {
         }
 
         if (statusData.status === 'fulfilled' && statusData.value?.length > 0) {
-          const operacionais = statusData.value.filter((s) => {
-            const nomeNorm = normalizar(s.nome);
-            return (
-              nomeNorm.includes('agendad') ||
-              nomeNorm.includes('progresso') ||
-              nomeNorm.includes('andamento') ||
-              nomeNorm.includes('conclui') ||
-              nomeNorm.includes('cancelad')
-            );
-          });
-          if (operacionais.length > 0) {
-            setColunasStatus(operacionais);
-          }
+          setColunasStatus(ordenarColunasOperacionais(statusData.value));
         }
       } catch (err) {
         if (ativo) {
