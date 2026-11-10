@@ -7,7 +7,7 @@ export interface Status {
 
 export interface Prioridade {
   id: string
-  nome: string
+  descricao: string
 }
 
 export interface Role {

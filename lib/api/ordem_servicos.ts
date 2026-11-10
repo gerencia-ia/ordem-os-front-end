@@ -71,7 +71,7 @@ export async function removeServicoOrdem(ordemId: number | string, servicoId: nu
 // Adicionar/atribuir técnico à ordem
 export async function addTecnicoOrdem(ordemId: number | string, tecnicoId: number | string) {
   return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/tecnicos`, {
-    tecnico_id: tecnicoId,
+    user_id: tecnicoId,
   })
 }
 
@@ -97,4 +97,3 @@ export async function removeTecnicoResponsavel(ordemId: number | string) {
     },
   })
 }
-

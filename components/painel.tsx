@@ -92,7 +92,7 @@ export default function Painel() {
 
     const porPrioridade = new Map<string, number>()
     ordens.forEach((ordem) => {
-      const nome = ordem.prioridade?.nome || "Sem prioridade"
+      const nome = ordem.prioridade?.descricao || "Sem prioridade"
       porPrioridade.set(nome, (porPrioridade.get(nome) ?? 0) + 1)
     })
     const prioridades = Array.from(porPrioridade, ([nome, total]) => ({ nome, total }))

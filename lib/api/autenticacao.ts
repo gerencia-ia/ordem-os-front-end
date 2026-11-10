@@ -1,8 +1,16 @@
 import { API_BASE_URL } from "./config"
 import { jwtDecode } from "jwt-decode"
 
+type UsuarioAutenticado = {
+  id: number
+  nome: string
+  cpf: string
+  role: string | { nome?: string | null } | null
+}
+
 export type LoginResponse = {
   token: string
+  user: UsuarioAutenticado
 }
 
 export type TokenPayload = {
@@ -25,6 +33,17 @@ export function getNomeRole(role: TokenPayload["role"] | undefined): string | nu
 }
 
 export function getUsuario(): TokenPayload | null {
+  if (typeof window !== "undefined") {
+    const usuarioSalvo = localStorage.getItem("usuario")
+    if (usuarioSalvo) {
+      try {
+        return JSON.parse(usuarioSalvo) as TokenPayload
+      } catch {
+        localStorage.removeItem("usuario")
+      }
+    }
+  }
+
   const token = obterToken()
   if (!token) {
     return null
@@ -60,6 +79,15 @@ export function salvarToken(token: string): void {
   localStorage.setItem("token", token)
 }
 
+export function salvarUsuario(usuario: UsuarioAutenticado): void {
+  localStorage.setItem("usuario", JSON.stringify({
+    user_id: usuario.id,
+    nome: usuario.nome,
+    cpf: usuario.cpf,
+    role: usuario.role,
+  }))
+}
+
 // Recuperar token do localStorage
 export function obterToken(): string | null {
   if (typeof window === "undefined") return null
@@ -82,6 +110,7 @@ export function obterHeadersAutenticados(): HeadersInit {
 export function removerToken(): void {
   if (typeof window === "undefined") return
   localStorage.removeItem("token")
+  localStorage.removeItem("usuario")
 }
 
 // Verificar se usuário está autenticado
