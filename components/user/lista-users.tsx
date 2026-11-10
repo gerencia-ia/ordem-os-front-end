@@ -26,7 +26,14 @@ export default function ListaUsers() {
   const [userSelecionado, setUserSelecionado] =
     useState<User | null>(null)
 
-  const [novoUser, setNovoUser] = useState({
+  const [novoUser, setNovoUser] = useState<{
+    nome: string
+    cpf: string
+    email: string
+    telefone: string
+    senha: string
+    role_id: number | null
+  }>({
     nome: "",
     cpf: "",
     email: "",
@@ -40,8 +47,6 @@ export default function ListaUsers() {
     cpf: "",
     email: "",
     telefone: "",
-    senha: "",
-    role_id: null,
   })
 
   useEffect(() => {
@@ -70,6 +75,11 @@ export default function ListaUsers() {
   }, [])
 
   async function handleCriarUser() {
+    if (!novoUser.role_id) {
+      setError("Selecione uma função para o usuário")
+      return
+    }
+
     try {
       setSaving(true)
 
@@ -110,8 +120,6 @@ export default function ListaUsers() {
       cpf: user.cpf ?? "",
       email: user.email ?? "",
       telefone: user.telefone ?? "",
-      senha: user.senha ?? "",
-      role_id: user.role_id ?? null,
     })
 
     setModalEditarOpen(true)

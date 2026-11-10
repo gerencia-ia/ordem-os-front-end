@@ -1,18 +1,49 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
+import { API_BASE_URL } from "./config"
 import { jwtDecode } from "jwt-decode"
+
+type UsuarioAutenticado = {
+  id: number
+  nome: string
+  cpf: string
+  role: string | { nome?: string | null } | null
+}
 
 export type LoginResponse = {
   token: string
+  user: UsuarioAutenticado
 }
 
 export type TokenPayload = {
   user_id: number
   nome: string
   cpf: string
-  role: string 
+  role: string | { nome?: string | null } | null
+}
+
+export function getNomeRole(role: TokenPayload["role"] | undefined): string | null {
+  if (typeof role === "string") {
+    return role
+  }
+
+  if (role && typeof role === "object" && typeof role.nome === "string") {
+    return role.nome
+  }
+
+  return null
 }
 
 export function getUsuario(): TokenPayload | null {
+  if (typeof window !== "undefined") {
+    const usuarioSalvo = localStorage.getItem("usuario")
+    if (usuarioSalvo) {
+      try {
+        return JSON.parse(usuarioSalvo) as TokenPayload
+      } catch {
+        localStorage.removeItem("usuario")
+      }
+    }
+  }
+
   const token = obterToken()
   if (!token) {
     return null
@@ -26,13 +57,13 @@ export function getUsuario(): TokenPayload | null {
 }
 
 // Fazer login com CPF e senha
-export async function loginUsuario(cpf: string, senha: string): Promise<LoginResponse> {
+export async function loginUsuario(cpf: string, password: string): Promise<LoginResponse> {
   const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ cpf, senha }),
+    body: JSON.stringify({ cpf, password }),
   })
 
   if (!response.ok) {
@@ -46,6 +77,15 @@ export async function loginUsuario(cpf: string, senha: string): Promise<LoginRes
 // Armazenar token no localStorage
 export function salvarToken(token: string): void {
   localStorage.setItem("token", token)
+}
+
+export function salvarUsuario(usuario: UsuarioAutenticado): void {
+  localStorage.setItem("usuario", JSON.stringify({
+    user_id: usuario.id,
+    nome: usuario.nome,
+    cpf: usuario.cpf,
+    role: usuario.role,
+  }))
 }
 
 // Recuperar token do localStorage
@@ -70,6 +110,7 @@ export function obterHeadersAutenticados(): HeadersInit {
 export function removerToken(): void {
   if (typeof window === "undefined") return
   localStorage.removeItem("token")
+  localStorage.removeItem("usuario")
 }
 
 // Verificar se usuário está autenticado

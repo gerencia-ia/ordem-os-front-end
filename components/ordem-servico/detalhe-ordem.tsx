@@ -463,7 +463,7 @@ export default function DetalheOrdem({ ordemId }: DetalheOrdemProps) {
                 <div>
                   <label className="text-sm text-muted-foreground">Prioridade</label>
                   <div className="mt-1">
-                    <Badge className={getBadgePrioridade(ordem.prioridade_descricao)}>{ordem.prioridade_descricao}</Badge>
+                    <Badge className={getBadgePrioridade(ordem.prioridade?.descricao ?? "")}>{ordem.prioridade?.descricao ?? "-"}</Badge>
                   </div>
                 </div>
          

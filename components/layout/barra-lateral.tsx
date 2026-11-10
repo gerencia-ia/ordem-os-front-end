@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { Home, Kanban, List, Users, Settings, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { getUsuario } from "@/lib/api/autenticacao"
+import { getNomeRole, getUsuario } from "@/lib/api/autenticacao"
 
 interface BarraLateralProps {
   estaAberta: boolean
@@ -30,36 +30,45 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
   const pathname = usePathname();
   const usuario = getUsuario();
 
+  const normalizarRole = (role?: string) =>
+    role
+      ?.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase() ?? "";
+
   const todosMenus: MenuItem[] = [
-    { href: "/painel", label: "Painel", icon: Home, roles: ["Secretaria", "Técnico"] },
-    { href: "/kanban", label: "Quadro Kanban", icon: Kanban, roles: ["Secretaria", "Técnico"] },
-    { href: "/ordens", label: "Ordens de Serviço", icon: List, roles: ["Secretaria", "Técnico"] },
-    { href: "/clientes", label: "Clientes", icon: Users, roles: ["Secretaria", "Técnico"] },
+    { href: "/painel", label: "Painel", icon: Home, roles: ["Secretaria", "Técnico", "Administrador"] },
+    { href: "/kanban", label: "Quadro Kanban", icon: Kanban, roles: ["Secretaria", "Técnico", "Administrador"] },
+    { href: "/ordens", label: "Ordens de Serviço", icon: List, roles: ["Secretaria", "Técnico", "Administrador"] },
+    { href: "/clientes", label: "Clientes", icon: Users, roles: ["Secretaria", "Técnico", "Administrador"] },
     {
       href: "/configuracoes",
       label: "Configurações",
       icon: Settings,
-      roles: ["Secretaria"],
+      roles: ["Secretaria", "Administrador"],
       children: [
-        { href: "/tecnicos", label: "Técnicos", roles: ["Secretaria"] },
-        { href: "/servicos", label: "Serviços", roles: ["Secretaria"] },
-        { href: "/categorias-servicos", label: "Categorias de Serviço", roles: ["Secretaria"] },
+        { href: "/tecnicos", label: "Técnicos", roles: ["Secretaria", "Administrador"] },
+        { href: "/servicos", label: "Serviços", roles: ["Secretaria", "Administrador"] },
+        { href: "/categorias-servicos", label: "Categorias de Serviço", roles: ["Secretaria", "Administrador"] },
       ],
     },
   ]
 
+  const roleUsuario = normalizarRole(getNomeRole(usuario?.role) ?? undefined)
+
   // Filtrar menus baseado na role do usuário
   const menus = todosMenus
     .filter((menu) => {
-      if (!usuario?.role) return false
-      return menu.roles.includes(usuario.role)
+      if (!roleUsuario) return false
+      return menu.roles.some((role) => normalizarRole(role) === roleUsuario)
     })
     .map((menu) => {
       if (!menu.children) return menu
 
       const childrenFilhos = menu.children.filter((child) => {
-        if (!usuario?.role) return false
-        return child.roles.includes(usuario.role)
+        if (!roleUsuario) return false
+        return child.roles.some((role) => normalizarRole(role) === roleUsuario)
       })
 
       return { ...menu, children: childrenFilhos }

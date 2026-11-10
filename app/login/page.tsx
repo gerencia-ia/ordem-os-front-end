@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LogIn, AlertCircle } from "lucide-react"
-import { loginUsuario, salvarToken, getUsuario } from "@/lib/api/autenticacao"
+import { loginUsuario, salvarToken, salvarUsuario } from "@/lib/api/autenticacao"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -53,8 +53,7 @@ export default function LoginPage() {
       const response = await loginUsuario(cpfLimpo, senha)
       
       salvarToken(response.token)
-
-      const usuario = getUsuario();
+      salvarUsuario(response.user)
 
       if (lembrarMe) {
         localStorage.setItem("cpf", cpfLimpo)

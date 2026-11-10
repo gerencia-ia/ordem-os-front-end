@@ -20,7 +20,7 @@ interface UserForm {
   email: string
   telefone: string
   senha: string
-  role_id: number
+  role_id: number | null
 }
 
 interface ModalCriarUserProps {
@@ -124,7 +124,10 @@ export default function ModalCriarUser({
           />
 
             <Input
-            placeholder="Senha"
+            placeholder="Senha (mínimo 6 caracteres)"
+            type="password"
+            minLength={6}
+            required
             value={user.senha}
             onChange={(e) =>
               setUser((state) => ({
@@ -161,7 +164,9 @@ export default function ModalCriarUser({
               !user.nome.trim() ||
               !user.cpf.trim() ||
               !user.email.trim() ||
-              !user.telefone.trim()
+              !user.telefone.trim() ||
+              user.senha.length < 6 ||
+              !user.role_id
             }
           >
             {saving ? "Salvando..." : "Adicionar"}

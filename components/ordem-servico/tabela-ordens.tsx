@@ -164,10 +164,10 @@ export function TabelaOrdens({
                     <TableCell>
                       <Badge
                         className={getBadgePrioridade(
-                          ordem.prioridade?.nome ?? ""
+                          ordem.prioridade?.descricao ?? ""
                         )}
                       >
-                        {ordem.prioridade?.nome ?? "-"}
+                        {ordem.prioridade?.descricao ?? "-"}
                       </Badge>
                     </TableCell>
 
