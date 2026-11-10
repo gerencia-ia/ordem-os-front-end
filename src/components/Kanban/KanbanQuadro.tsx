@@ -14,10 +14,7 @@ const normalizar = (val?: string | null) =>
     .toLowerCase();
 
 type CategoriaStatus =
-  | 'nao_iniciado'
-  | 'em_progresso'
-  | 'concluido'
-  | 'cancelado';
+  'nao_iniciado' | 'em_progresso' | 'concluido' | 'cancelado';
 
 function obterCategoriaStatus(
   statusId?: number | null,
