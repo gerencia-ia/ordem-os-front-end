@@ -17,7 +17,8 @@ export async function createUser(data: {
   senha: string
   role_id: number
 }): Promise<User> {
-  return apiPost<User>("/users", data)
+  const { senha, ...user } = data
+  return apiPost<User>("/users", { user: { ...user, password: senha } })
 }
 
 export async function updateUser(

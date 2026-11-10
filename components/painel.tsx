@@ -1,300 +1,203 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
-  BarChart,
   Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts"
+import { AlertCircle, CheckCircle, Clock, DollarSign, ListChecks } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { TrendingUp, Clock, DollarSign, CheckCircle, AlertCircle } from "lucide-react"
 import { getOrdensServico } from "@/lib/api/ordem_servicos"
 import type { OrdemServico } from "@/lib/tipos"
 
+const CORES_STATUS = ["#F59E0B", "#3B82F6", "#10B981", "#EF4444", "#8B5CF6", "#06B6D4"]
+
+function normalizar(valor?: string | null) {
+  return (valor ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR")
+}
+
+function statusConcluido(ordem: OrdemServico) {
+  return normalizar(ordem.status?.nome).includes("conclu")
+}
+
+function statusCancelado(ordem: OrdemServico) {
+  return normalizar(ordem.status?.nome).includes("cancel")
+}
+
+function statusEmAndamento(ordem: OrdemServico) {
+  const status = normalizar(ordem.status?.nome)
+  return status.includes("progresso") || status.includes("andamento") || status.includes("execu")
+}
+
+function moeda(valor: number) {
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+}
+
 export default function Painel() {
   const [ordens, setOrdens] = useState<OrdemServico[]>([])
-  const [loading, setLoading] = useState(false)
-  const [filtroMes, setFiltroMes] = useState<string>(() => {
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+  const [filtroMes, setFiltroMes] = useState(() => {
     const hoje = new Date()
     return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`
   })
 
   useEffect(() => {
-    async function fetchOrdens() {
+    let ativo = true
+    async function carregarOrdens() {
+      setLoading(true)
+      setErro(null)
       try {
-        setLoading(true)
-        const [ano, mes] = filtroMes.split("-")
-        const data = await getOrdensServico(parseInt(mes), parseInt(ano))
-        setOrdens(data)
-      } catch (err) {
-        console.error("Erro ao carregar ordens:", err)
+        const [ano, mes] = filtroMes.split("-").map(Number)
+        const dados = await getOrdensServico(mes, ano)
+        if (ativo) setOrdens(dados)
+      } catch (error) {
+        if (ativo) setErro(error instanceof Error ? error.message : "Não foi possível carregar os dados do painel.")
       } finally {
-        setLoading(false)
+        if (ativo) setLoading(false)
       }
     }
-    fetchOrdens()
+    carregarOrdens()
+    return () => { ativo = false }
   }, [filtroMes])
 
-  // Calcula métricas
-  const metricas = {
-    total: ordens.length,
-    agendadas: ordens.filter(o => o.status_descricao === "Agendado").length,
-    emProgresso: ordens.filter(o => o.status_descricao === "Em Progresso").length,
-    concluidas: ordens.filter(o => o.status_descricao === "Concluido").length,
-    canceladas: ordens.filter(o => o.status_descricao === "Cancelado").length,
-    valorTotal: ordens.reduce((sum, o) => sum + (Number(o.valor_total) || 0), 0),
-    taxaConclusao: ordens.length > 0 ? Math.round((ordens.filter(o => o.status_descricao === "Concluido").length / ordens.length) * 100) : 0,
-  }
+  const dados = useMemo(() => {
+    const concluidas = ordens.filter(statusConcluido)
+    const emAndamento = ordens.filter(statusEmAndamento)
+    const canceladas = ordens.filter(statusCancelado)
+    const abertas = ordens.filter((ordem) => !statusConcluido(ordem) && !statusCancelado(ordem))
+    const hoje = new Date()
+    hoje.setHours(0, 0, 0, 0)
+    const atrasadas = abertas.filter((ordem) => {
+      if (!ordem.data_vencimento) return false
+      const vencimento = new Date(`${ordem.data_vencimento.slice(0, 10)}T00:00:00`)
+      return vencimento < hoje
+    })
 
-  // Dados para gráfico de pizza
-  const dadosStatusPie = [
-    { name: "Agendadas", value: metricas.agendadas },
-    { name: "Em Progresso", value: metricas.emProgresso },
-    { name: "Concluídas", value: metricas.concluidas },
-    { name: "Canceladas", value: metricas.canceladas },
-  ].filter(item => item.value > 0)
+    const porStatus = new Map<string, number>()
+    ordens.forEach((ordem) => {
+      const nome = ordem.status?.nome || "Sem status"
+      porStatus.set(nome, (porStatus.get(nome) ?? 0) + 1)
+    })
+    const status = Array.from(porStatus, ([name, value]) => ({ name, value }))
 
-  const CORES = ["#F59E0B", "#3B82F6", "#10B981", "#EF4444"]
+    const porPrioridade = new Map<string, number>()
+    ordens.forEach((ordem) => {
+      const nome = ordem.prioridade?.nome || "Sem prioridade"
+      porPrioridade.set(nome, (porPrioridade.get(nome) ?? 0) + 1)
+    })
+    const prioridades = Array.from(porPrioridade, ([nome, total]) => ({ nome, total }))
 
-  // Dados para gráfico de barras por prioridade
-  const dadosPrioridade = [
-    {
-      nome: "Crítica",
-      total: ordens.filter(o => o.prioridade_descricao === "critica").length,
-    },
-    {
-      nome: "Alta",
-      total: ordens.filter(o => o.prioridade_descricao === "alta").length,
-    },
-    {
-      nome: "Média",
-      total: ordens.filter(o => o.prioridade_descricao === "media").length,
-    },
-    {
-      nome: "Baixa",
-      total: ordens.filter(o => o.prioridade_descricao === "baixa").length,
-    },
-  ]
+    const [ano, mes] = filtroMes.split("-").map(Number)
+    const diasNoMes = new Date(ano, mes, 0).getDate()
+    const tendencia = Array.from({ length: diasNoMes }, (_, indice) => {
+      const dia = indice + 1
+      const doDia = ordens.filter((ordem) => {
+        if (!ordem.data_agendamento) return false
+        const data = new Date(ordem.data_agendamento)
+        return data.getFullYear() === ano && data.getMonth() + 1 === mes && data.getDate() === dia
+      })
+      return {
+        dia: String(dia).padStart(2, "0"),
+        ordens: doDia.length,
+        concluidas: doDia.filter(statusConcluido).length,
+      }
+    })
 
-  // Dados para comparação de status ao longo do mês
-  const dadosTendencia = [
-    {
-      status: "Agendadas",
-      quantidade: metricas.agendadas,
-    },
-    {
-      status: "Em Progresso",
-      quantidade: metricas.emProgresso,
-    },
-    {
-      status: "Concluídas",
-      quantidade: metricas.concluidas,
-    },
-  ]
+    return {
+      total: ordens.length,
+      abertas: abertas.length,
+      emAndamento: emAndamento.length,
+      concluidas: concluidas.length,
+      atrasadas: atrasadas.length,
+      faturamentoConcluido: concluidas.reduce((total, ordem) => total + (Number(ordem.valor_total) || 0), 0),
+      taxaConclusao: ordens.length ? Math.round((concluidas.length / ordens.length) * 100) : 0,
+      status,
+      prioridades,
+      tendencia,
+    }
+  }, [ordens, filtroMes])
 
   const kpis = [
-    {
-      titulo: "Total de Ordens",
-      valor: metricas.total,
-      icon: CheckCircle,
-      cor: "text-blue-500",
-      bgCor: "bg-blue-50 dark:bg-blue-950",
-    },
-    {
-      titulo: "Em Progresso",
-      valor: metricas.emProgresso,
-      icon: Clock,
-      cor: "text-orange-500",
-      bgCor: "bg-orange-50 dark:bg-orange-950",
-    },
-    {
-      titulo: "Concluídas",
-      valor: metricas.concluidas,
-      icon: CheckCircle,
-      cor: "text-green-500",
-      bgCor: "bg-green-50 dark:bg-green-950",
-    },
-    {
-      titulo: "Taxa de Conclusão",
-      valor: `${metricas.taxaConclusao}%`,
-      icon: TrendingUp,
-      cor: "text-purple-500",
-      bgCor: "bg-purple-50 dark:bg-purple-950",
-    },
+    { titulo: "Ordens no período", valor: dados.total, Icone: ListChecks, cor: "text-blue-500", fundo: "bg-blue-50 dark:bg-blue-950" },
+    { titulo: "Em andamento", valor: dados.emAndamento, Icone: Clock, cor: "text-orange-500", fundo: "bg-orange-50 dark:bg-orange-950" },
+    { titulo: "Concluídas", valor: `${dados.concluidas} (${dados.taxaConclusao}%)`, Icone: CheckCircle, cor: "text-green-500", fundo: "bg-green-50 dark:bg-green-950" },
+    { titulo: "Faturamento concluído", valor: moeda(dados.faturamentoConcluido), Icone: DollarSign, cor: "text-purple-500", fundo: "bg-purple-50 dark:bg-purple-950" },
   ]
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Painel Administrativo</h1>
-        <p className="text-muted-foreground">Acompanhamento de procedimentos e atividades</p>
-      </div>
-
-      {/* Filtro de Mês */}
-      <div className="flex gap-4 items-end">
-        <div className="flex-1 max-w-xs">
-          <label className="text-sm font-medium block mb-2">Filtrar por Mês</label>
-          <Input
-            type="month"
-            value={filtroMes}
-            onChange={(e) => setFiltroMes(e.target.value)}
-          />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Painel Administrativo</h1>
+          <p className="text-muted-foreground">Indicadores calculados a partir das ordens de serviço.</p>
+        </div>
+        <div className="w-full max-w-xs">
+          <label className="text-sm font-medium block mb-2" htmlFor="filtro-mes">Período de agendamento</label>
+          <Input id="filtro-mes" type="month" value={filtroMes} onChange={(event) => setFiltroMes(event.target.value)} />
         </div>
       </div>
 
       {loading && <p className="text-center text-muted-foreground">Carregando dados...</p>}
+      {erro && <Card><CardContent className="pt-6 text-destructive">Erro ao carregar o painel: {erro}</CardContent></Card>}
 
-      {!loading && (
-        <>
-          {/* KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {kpis.map((kpi, idx) => {
-              const Icon = kpi.icon
-              return (
-                <Card key={idx} className={`${kpi.bgCor} hover:shadow-lg transition-shadow`}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground font-medium">{kpi.titulo}</p>
-                        <p className="text-3xl font-bold mt-2">{kpi.valor}</p>
-                      </div>
-                      <Icon className={`h-10 w-10 ${kpi.cor} opacity-60`} />
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-
-          {/* Status das Ordens e Prioridades */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Pizza - Distribuição por Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Distribuição por Status</CardTitle>
-                <CardDescription>Status das ordens do mês</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {dadosStatusPie.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={dadosStatusPie}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value }) => `${name}: ${value}`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {dadosStatusPie.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={CORES[index % CORES.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                    Sem dados para este período
-                  </div>
-                )}
+      {!loading && !erro && <>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {kpis.map(({ titulo, valor, Icone, cor, fundo }) => (
+            <Card key={titulo} className={fundo}>
+              <CardContent className="pt-6 flex items-center justify-between gap-3">
+                <div><p className="text-sm text-muted-foreground font-medium">{titulo}</p><p className="text-2xl font-bold mt-2">{valor}</p></div>
+                <Icone className={`h-9 w-9 shrink-0 ${cor} opacity-70`} />
               </CardContent>
             </Card>
+          ))}
+        </div>
 
-            {/* Barras - Distribuição por Prioridade */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ordens por Prioridade</CardTitle>
-                <CardDescription>Volume de ordens por nível de prioridade</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {dadosPrioridade.some(item => item.total > 0) ? (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={dadosPrioridade}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="nome" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="total" fill="#8B5CF6" radius={[8, 8, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                    Sem dados para este período
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-       
-          {/* Resumo de Métricas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-orange-500" />
-                  Agendadas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{metricas.agendadas}</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {metricas.total > 0 
-                    ? `${Math.round((metricas.agendadas / metricas.total) * 100)}% do total`
-                    : "Sem ordens"}
-                </p>
-              </CardContent>
-            </Card>
+        <Card className={dados.atrasadas ? "border-orange-300" : ""}>
+          <CardContent className="pt-5 flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-orange-500" />
+            <span><strong>{dados.atrasadas}</strong> ordem(ns) em aberto com vencimento anterior a hoje.</span>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                  Em Progresso
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{metricas.emProgresso}</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {metricas.total > 0 
-                    ? `${Math.round((metricas.emProgresso / metricas.total) * 100)}% do total`
-                    : "Sem ordens"}
-                </p>
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader><CardTitle>Ordens por status</CardTitle><CardDescription>Distribuição no período selecionado</CardDescription></CardHeader>
+            <CardContent>
+              {dados.status.length ? <ResponsiveContainer width="100%" height={280}>
+                <PieChart><Pie data={dados.status} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, value }) => `${name}: ${value}`}>
+                  {dados.status.map((item, indice) => <Cell key={item.name} fill={CORES_STATUS[indice % CORES_STATUS.length]} />)}
+                </Pie><Tooltip /></PieChart>
+              </ResponsiveContainer> : <p className="h-[280px] flex items-center justify-center text-muted-foreground">Sem ordens neste período.</p>}
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  Valor Total
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">
-                  R$ {metricas.valorTotal.toFixed(2)}
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Ordens concluídas e em progresso
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </>
-      )}
+          <Card>
+            <CardHeader><CardTitle>Ordens por prioridade</CardTitle><CardDescription>Volume por nível de prioridade</CardDescription></CardHeader>
+            <CardContent>
+              {dados.prioridades.length ? <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={dados.prioridades}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="nome" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="total" name="Ordens" fill="#8B5CF6" radius={[8, 8, 0, 0]} /></BarChart>
+              </ResponsiveContainer> : <p className="h-[280px] flex items-center justify-center text-muted-foreground">Sem ordens neste período.</p>}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader><CardTitle>Agendamentos ao longo do mês</CardTitle><CardDescription>Ordens agendadas por dia e quantas foram concluídas</CardDescription></CardHeader>
+          <CardContent><ResponsiveContainer width="100%" height={280}>
+            <BarChart data={dados.tendencia}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="dia" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="ordens" name="Agendadas" fill="#3B82F6" /><Bar dataKey="concluidas" name="Concluídas" fill="#10B981" /></BarChart>
+          </ResponsiveContainer></CardContent>
+        </Card>
+      </>}
     </div>
   )
 }

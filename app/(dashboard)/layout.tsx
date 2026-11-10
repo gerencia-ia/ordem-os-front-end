@@ -9,7 +9,7 @@ import { ProveedorTema } from "@/components/provedor-tema"
 import { estaAutenticado } from "@/lib/api/autenticacao"
 
 export default function LayoutPainel({ children }: { children: React.ReactNode }) {
-  const [barraLateralAberta, setBarraLateralAberta] = useState(false)
+  const [barraLateralAberta, setBarraLateralAberta] = useState(true)
   const [montado, setMontado] = useState(false)
   const [autenticado, setAutenticado] = useState(false)
   const router = useRouter()

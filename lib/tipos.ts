@@ -89,7 +89,9 @@ export interface Tarefa {
 export interface OsServico {
   id: string
   nome: string
+  descricao?: string
   valor: number
+  quantidade?: number | null
   tempo_servico: number
   categorias_servico_id: number
   categoria?: {
