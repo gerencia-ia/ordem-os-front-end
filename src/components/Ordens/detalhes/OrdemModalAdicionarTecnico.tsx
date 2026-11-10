@@ -1,0 +1,127 @@
+'use client';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/src/components/Ui/dialog';
+import { Button } from '@/src/components/Ui/button';
+import { Label } from '@/src/components/Ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
+import { Loader2 } from 'lucide-react';
+import type { Usuario } from '@/src/types/usuario';
+
+interface OrdemModalAdicionarTecnicoProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tecnicos: Usuario[];
+  loadingTecnicos: boolean;
+  tecnicoId: string;
+  onTecnicoIdChange: (val: string) => void;
+  onSalvar: () => void | Promise<void>;
+  salvando: boolean;
+}
+
+export function OrdemModalAdicionarTecnico({
+  open,
+  onOpenChange,
+  tecnicos,
+  loadingTecnicos,
+  tecnicoId,
+  onTecnicoIdChange,
+  onSalvar,
+  salvando,
+}: OrdemModalAdicionarTecnicoProps) {
+  // Filtra estritamente usuários com perfil de técnico
+  const listaTecnicos = tecnicos.filter((u) => {
+    const perfilNorm = (u.role?.nome || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    return perfilNorm === 'tecnico' || u.role_id === 2;
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Atribuir Técnico à Ordem</DialogTitle>
+          <DialogDescription>
+            Selecione o profissional que será responsável pela execução dos
+            serviços.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="select-tecnico">Técnico</Label>
+            {loadingTecnicos ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                <Loader2 className="size-4 animate-spin text-primary" />
+                <span>Carregando técnicos...</span>
+              </div>
+            ) : listaTecnicos.length > 0 ? (
+              <Select
+                value={tecnicoId}
+                onValueChange={onTecnicoIdChange}
+                disabled={salvando}
+              >
+                <SelectTrigger id="select-tecnico" className="w-full">
+                  <SelectValue placeholder="Selecione um técnico" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {listaTecnicos.map((tec) => (
+                      <SelectItem key={tec.id} value={String(tec.id)}>
+                        {tec.nome}
+                        {tec.telefone ? ` — (${tec.telefone})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhum técnico disponível no momento.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={salvando}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={() => void onSalvar()}
+            disabled={
+              !tecnicoId.trim() ||
+              salvando ||
+              loadingTecnicos ||
+              listaTecnicos.length === 0
+            }
+          >
+            {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {salvando ? 'Atribuindo...' : 'Salvar Atribuição'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
