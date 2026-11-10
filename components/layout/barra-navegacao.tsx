@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
-import { removerToken, getUsuario } from "@/lib/api/autenticacao"
+import { removerToken, getNomeRole, getUsuario } from "@/lib/api/autenticacao"
 
 interface BarraNavegacaoProps {
   onMenuToggle: () => void
@@ -88,7 +88,7 @@ export function BarraNavegacao({ onMenuToggle }: BarraNavegacaoProps) {
           </p>
 
           <p className="text-xs text-muted-foreground">
-            Perfil: {usuario?.role ?? "-"}
+            Perfil: {getNomeRole(usuario?.role) ?? "-"}
           </p>
         </div>
 

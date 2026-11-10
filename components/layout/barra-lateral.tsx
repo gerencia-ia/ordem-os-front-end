@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { Home, Kanban, List, Users, Settings, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { getUsuario } from "@/lib/api/autenticacao"
+import { getNomeRole, getUsuario } from "@/lib/api/autenticacao"
 
 interface BarraLateralProps {
   estaAberta: boolean
@@ -55,7 +55,7 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
     },
   ]
 
-  const roleUsuario = normalizarRole(usuario?.role)
+  const roleUsuario = normalizarRole(getNomeRole(usuario?.role) ?? undefined)
 
   // Filtrar menus baseado na role do usuário
   const menus = todosMenus

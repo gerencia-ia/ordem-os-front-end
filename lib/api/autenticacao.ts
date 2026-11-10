@@ -9,7 +9,19 @@ export type TokenPayload = {
   user_id: number
   nome: string
   cpf: string
-  role: string 
+  role: string | { nome?: string | null } | null
+}
+
+export function getNomeRole(role: TokenPayload["role"] | undefined): string | null {
+  if (typeof role === "string") {
+    return role
+  }
+
+  if (role && typeof role === "object" && typeof role.nome === "string") {
+    return role.nome
+  }
+
+  return null
 }
 
 export function getUsuario(): TokenPayload | null {
@@ -26,13 +38,13 @@ export function getUsuario(): TokenPayload | null {
 }
 
 // Fazer login com CPF e senha
-export async function loginUsuario(cpf: string, senha: string): Promise<LoginResponse> {
+export async function loginUsuario(cpf: string, password: string): Promise<LoginResponse> {
   const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ cpf, senha }),
+    body: JSON.stringify({ cpf, password }),
   })
 
   if (!response.ok) {
