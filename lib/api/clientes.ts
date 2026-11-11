@@ -10,6 +10,7 @@ export type NovoClientePayload = {
   equipamentos_attributes?: Array<{
     marca?: string
     btus?: string
+    inverter?: boolean
     local_instalacao?: string
     observacao?: string
   }>
@@ -34,6 +35,7 @@ export type AtualizarClientePayload = {
     id?: number
     marca?: string
     btus?: string
+    inverter?: boolean
     local_instalacao?: string
     observacao?: string
     _destroy?: boolean

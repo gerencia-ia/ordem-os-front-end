@@ -4,6 +4,7 @@ import { apiGet, apiPost } from "./api"
 export type NovoEquipamentoPayload = {
   marca: string
   btus: string
+  inverter: boolean
   local_instalacao: string
   observacao?: string
   cliente_id: number

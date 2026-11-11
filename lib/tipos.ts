@@ -71,6 +71,7 @@ export interface Equipamento {
   id: string
   marca: string
   btus: string
+  inverter: boolean
   local_instalacao: string
   observacao: string
   cliente: Cliente | null

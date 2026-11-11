@@ -72,6 +72,7 @@ export interface NovoEquipamento {
   marca: string
   localInstalacao: string
   capacidade: string
+  inverter: boolean
   observacao: string
   clienteId: string
 }
@@ -277,6 +278,9 @@ export function useCriarOrdem() {
 
               btus:
                 equipamento.capacidade,
+
+              inverter:
+                equipamento.inverter,
 
               local_instalacao:
                 equipamento.localInstalacao,

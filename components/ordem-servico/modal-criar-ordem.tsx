@@ -80,6 +80,7 @@ interface NovoEquipamento {
   marca: string
   localInstalacao: string
   capacidade: string
+  inverter: boolean
   observacao: string
   clienteId: string
 }
@@ -120,6 +121,7 @@ const estadoInicialEquipamento: NovoEquipamento = {
   marca: "",
   localInstalacao: "",
   capacidade: "",
+  inverter: false,
   observacao: "",
   clienteId: "",
 }
@@ -1302,6 +1304,24 @@ export function ModalCriarOrdem({
                   }
                   placeholder="Ex: 12000"
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium" htmlFor="novo-equipamento-inverter">
+                  Tecnologia Inverter
+                </label>
+                <select
+                  id="novo-equipamento-inverter"
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={novoEquipamento.inverter ? "true" : "false"}
+                  onChange={(e) => setNovoEquipamento((state) => ({
+                    ...state,
+                    inverter: e.target.value === "true",
+                  }))}
+                >
+                  <option value="false">Não</option>
+                  <option value="true">Sim</option>
+                </select>
               </div>
 
               <div className="space-y-1">
