@@ -13,6 +13,7 @@ import { useOrdemForm } from '@/src/hooks/useOrdemForm';
 import { SecaoClienteEndereco } from './formulario/SecaoClienteEndereco';
 import { SecaoEquipamentos } from './formulario/SecaoEquipamentos';
 import { SecaoServicos } from './formulario/SecaoServicos';
+import { SecaoMateriais } from './formulario/SecaoMateriais';
 import { SecaoAgendamentoEquipe } from './formulario/SecaoAgendamentoEquipe';
 import { SecaoDescricao } from './formulario/SecaoDescricao';
 import { Loader2, PlusCircle } from 'lucide-react';
@@ -44,6 +45,10 @@ export function OrdemModalCadastro({
     equipamentoIdsSelecionados,
     tecnicoIdsSelecionados,
     valorTotalServicos,
+    materiais,
+    materiaisSelecionados,
+    adicionarMaterial,
+    removerMaterial,
     onClienteChange,
     toggleServico,
     toggleEquipamento,
@@ -99,6 +104,14 @@ export function OrdemModalCadastro({
             valorTotal={valorTotalServicos}
             loadingServicos={loadingDados}
             onToggleServico={toggleServico}
+          />
+
+          <SecaoMateriais
+            materiais={materiais}
+            itens={materiaisSelecionados}
+            loading={loadingDados}
+            onAdicionar={adicionarMaterial}
+            onRemover={removerMaterial}
           />
 
           {/* Seção 4: Agendamento e Técnicos */}

@@ -1,5 +1,6 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from './api';
 import type { OrdemServico, CriarOrdemServicoPayload } from '@/src/types/ordem';
+import type { MaterialOrdemInput } from '@/src/types/material';
 
 export async function getOrdens(
   mes?: number,
@@ -74,6 +75,20 @@ export async function removeServicoOrdem(
   servicoId: number | string,
 ): Promise<void> {
   return apiDelete<void>(`/ordem_servicos/${ordemId}/servicos/${servicoId}`);
+}
+
+export async function addMaterialOrdem(
+  ordemId: number | string,
+  material: MaterialOrdemInput,
+): Promise<OrdemServico> {
+  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/materiais`, material);
+}
+
+export async function removeMaterialOrdem(
+  ordemId: number | string,
+  itemId: number | string,
+): Promise<void> {
+  return apiDelete<void>(`/ordem_servicos/${ordemId}/materiais/${itemId}`);
 }
 
 export async function addTecnicoOrdem(

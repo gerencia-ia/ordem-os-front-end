@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { Cliente } from './cliente';
 import type { Endereco } from './endereco';
 import type { Usuario } from './usuario';
+import type { OsMaterialItem, MaterialOrdemInput } from './material';
 
 export interface Status {
   id: string | number;
@@ -72,6 +73,8 @@ export interface OrdemServico {
   // Serviços associados com quantidade e categoria
   servicos: OsServicoItem[];
 
+  materiais?: OsMaterialItem[];
+
   // Equipamentos associados com laudo desta OS
   equipamentos: OsEquipamentoItem[];
 }
@@ -84,6 +87,7 @@ export interface CriarOrdemServicoPayload {
     tecnico_ids?: number[];
     equipamento_ids?: number[];
     servico_ids?: number[];
+    os_materiais_attributes?: MaterialOrdemInput[];
     descricao?: string;
     status_id: number;
     prioridade_id: number;

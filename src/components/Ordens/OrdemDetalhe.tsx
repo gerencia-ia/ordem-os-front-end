@@ -8,6 +8,7 @@ import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { DetalheCabecalho } from './detalhes/DetalheCabecalho';
 import { DetalheInfoGeral } from './detalhes/DetalheInfoGeral';
 import { DetalheServicos } from './detalhes/DetalheServicos';
+import { DetalheMateriais } from './detalhes/DetalheMateriais';
 import { DetalheEquipamentos } from './detalhes/DetalheEquipamentos';
 import { DetalheCliente } from './detalhes/DetalheCliente';
 import { DetalheTecnicos } from './detalhes/DetalheTecnicos';
@@ -16,6 +17,7 @@ import { DetalheHistoricoAtividades } from './detalhes/DetalheHistoricoAtividade
 import { OrdemModalLaudo } from './detalhes/OrdemModalLaudo';
 import { OrdemModalHistoricoLaudos } from './detalhes/OrdemModalHistoricoLaudos';
 import { OrdemModalAdicionarServico } from './detalhes/OrdemModalAdicionarServico';
+import { OrdemModalAdicionarMaterial } from './detalhes/OrdemModalAdicionarMaterial';
 import { OrdemModalAdicionarTecnico } from './detalhes/OrdemModalAdicionarTecnico';
 import { OrdemModalFinalizar } from './detalhes/OrdemModalFinalizar';
 
@@ -74,6 +76,21 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
     fecharModalAdicionarServico,
     salvarServico,
     removerServico,
+    materiaisDisponiveis,
+    materiaisLoading,
+    modalMaterialAberta,
+    materialIdInput,
+    materialNomeInput,
+    materialValorInput,
+    materialSaving,
+    remocaoMaterialId,
+    abrirModalAdicionarMaterial,
+    fecharModalAdicionarMaterial,
+    selecionarMaterial,
+    setMaterialNomeInput,
+    setMaterialValorInput,
+    salvarMaterial,
+    removerMaterial,
     // Técnicos
     usuariosDisponiveis,
     usuariosLoading,
@@ -168,6 +185,16 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
             removendoId={remocaoServicoId}
           />
 
+          <DetalheMateriais
+            materiais={ordem.materiais}
+            statusId={statusIdAtual}
+            podeAlterarMateriais={podeAlterarServicos}
+            podeVerMetricasFinanceiras={podeVerMetricasFinanceiras}
+            onAdicionar={abrirModalAdicionarMaterial}
+            onRemover={removerMaterial}
+            removendoId={remocaoMaterialId}
+          />
+
           <DetalheEquipamentos
             equipamentos={ordem.equipamentos}
             onAbrirLaudo={abrirModalLaudo}
@@ -234,6 +261,23 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
         onSalvar={salvarServico}
         salvando={servicoSaving}
         podeVerMetricasFinanceiras={podeVerMetricasFinanceiras}
+      />
+
+      <OrdemModalAdicionarMaterial
+        open={modalMaterialAberta}
+        onOpenChange={(aberta) => {
+          if (!aberta) fecharModalAdicionarMaterial();
+        }}
+        materiais={materiaisDisponiveis}
+        loading={materiaisLoading}
+        materialId={materialIdInput}
+        nome={materialNomeInput}
+        valor={materialValorInput}
+        onMaterialIdChange={selecionarMaterial}
+        onNomeChange={setMaterialNomeInput}
+        onValorChange={setMaterialValorInput}
+        onSalvar={salvarMaterial}
+        salvando={materialSaving}
       />
 
       <OrdemModalAdicionarTecnico
