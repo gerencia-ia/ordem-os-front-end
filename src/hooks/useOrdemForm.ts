@@ -14,12 +14,14 @@ import type { Servico } from '@/src/types/servico';
 import type { Cliente } from '@/src/types/cliente';
 import type { Usuario } from '@/src/types/usuario';
 import type { Equipamento } from '@/src/types/equipamento';
+import type { Material, MaterialOrdemInput } from '@/src/types/material';
 import { getClientes } from '@/src/services/clientes.service';
 import { getUsuarios } from '@/src/services/usuarios.service';
 import { getServicos } from '@/src/services/servicos.service';
 import { getStatus } from '@/src/services/status.service';
 import { getPrioridades } from '@/src/services/prioridades.service';
 import { getEquipamentosByCliente } from '@/src/services/equipamentos.service';
+import { getMateriais } from '@/src/services/materiais.service';
 import { createOrdem } from '@/src/services/ordens.service';
 import { toast } from 'sonner';
 
@@ -39,6 +41,8 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
   const [statusList, setStatusList] = useState<Status[]>([]);
   const [prioridadesList, setPrioridadesList] = useState<Prioridade[]>([]);
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
+  const [materiais, setMateriais] = useState<Material[]>([]);
+  const [materiaisSelecionados, setMateriaisSelecionados] = useState<MaterialOrdemInput[]>([]);
 
   const form = useForm<CriarOrdemFormData>({
     resolver: zodResolver(criarOrdemFormSchema),
@@ -103,12 +107,14 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
           servicosData,
           statusData,
           prioridadesData,
+          materiaisData,
         ] = await Promise.all([
           getClientes(),
           getUsuarios(),
           getServicos(),
           getStatus(),
           getPrioridades(),
+          getMateriais(),
         ]);
 
         if (ativo) {
@@ -125,6 +131,7 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
           setServicos(servicosData);
           setStatusList(statusData);
           setPrioridadesList(prioridadesData);
+          setMateriais(materiaisData);
 
           // Pré-seleciona primeiro status e prioridade se existirem
           if (statusData.length > 0) {
@@ -228,10 +235,25 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
       .reduce((acc, curr) => acc + (Number(curr.valor) || 0), 0);
   }, [servicos, servicoIdsSelecionados]);
 
+  const valorTotalMateriais = useMemo(
+    () => materiaisSelecionados.reduce((total, item) => total + Number(item.valor || 0), 0),
+    [materiaisSelecionados],
+  );
+
+  const valorTotalItens = valorTotalServicos + valorTotalMateriais;
+
   // Atualiza custo_estimado no form sempre que serviços mudarem
   useEffect(() => {
-    form.setValue('custo_estimado', valorTotalServicos);
-  }, [valorTotalServicos, form]);
+    form.setValue('custo_estimado', valorTotalItens);
+  }, [valorTotalItens, form]);
+
+  const adicionarMaterial = useCallback((item: MaterialOrdemInput) => {
+    setMateriaisSelecionados((atuais) => [...atuais, item]);
+  }, []);
+
+  const removerMaterial = useCallback((indice: number) => {
+    setMateriaisSelecionados((atuais) => atuais.filter((_, i) => i !== indice));
+  }, []);
 
   // Ações de alternância de IDs
   const toggleServico = useCallback(
@@ -299,13 +321,15 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
           prioridade_id: Number(data.prioridade_id),
           data_agendamento: data.data_agendamento || undefined,
           data_vencimento: data.data_vencimento || undefined,
-          custo_estimado: valorTotalServicos,
+          custo_estimado: valorTotalItens,
+          os_materiais_attributes: materiaisSelecionados,
         },
       };
 
       await createOrdem(payload);
       toast.success('Ordem de serviço criada com sucesso!');
       form.reset();
+      setMateriaisSelecionados([]);
       onSuccess?.();
     } catch (err) {
       const msg =
@@ -328,10 +352,15 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     statusList,
     prioridadesList,
     equipamentos,
+    materiais,
+    materiaisSelecionados,
+    adicionarMaterial,
+    removerMaterial,
     servicoIdsSelecionados,
     equipamentoIdsSelecionados,
     tecnicoIdsSelecionados,
     valorTotalServicos,
+    valorTotalMateriais,
     onClienteChange,
     toggleServico,
     toggleEquipamento,

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { OrdemServico, Status } from '@/src/types/ordem';
 import type { Servico } from '@/src/types/servico';
+import type { Material, MaterialOrdemInput } from '@/src/types/material';
 import type { Usuario } from '@/src/types/usuario';
 import type { Equipamento, HistoricoLaudo } from '@/src/types/equipamento';
 import {
@@ -14,11 +15,14 @@ import {
   finalizarOrdem,
   addServicoOrdem,
   removeServicoOrdem,
+  addMaterialOrdem,
+  removeMaterialOrdem,
   addTecnicoOrdem,
   removeTecnicoOrdem,
 } from '@/src/services/ordens.service';
 import { getHistoricoLaudos } from '@/src/services/equipamentos.service';
 import { getServicos } from '@/src/services/servicos.service';
+import { getMateriais } from '@/src/services/materiais.service';
 import { getUsuarios } from '@/src/services/usuarios.service';
 import { getStatus } from '@/src/services/status.service';
 import { normalizarPerfil } from '@/src/lib/permissions';
@@ -66,6 +70,16 @@ export function useOrdemDetalhe(ordemId: string | number) {
   const [remocaoServicoId, setRemocaoServicoId] = useState<
     number | string | null
   >(null);
+
+  // Materiais da OS
+  const [materiaisDisponiveis, setMateriaisDisponiveis] = useState<Material[]>([]);
+  const [materiaisLoading, setMateriaisLoading] = useState(false);
+  const [modalMaterialAberta, setModalMaterialAberta] = useState(false);
+  const [materialIdInput, setMaterialIdInput] = useState('avulso');
+  const [materialNomeInput, setMaterialNomeInput] = useState('');
+  const [materialValorInput, setMaterialValorInput] = useState('');
+  const [materialSaving, setMaterialSaving] = useState(false);
+  const [remocaoMaterialId, setRemocaoMaterialId] = useState<number | null>(null);
 
   // Modal Técnico
   const [modalTecnicoAberta, setModalTecnicoAberta] = useState(false);
@@ -367,6 +381,68 @@ export function useOrdemDetalhe(ordemId: string | number) {
     }
   };
 
+  const abrirModalAdicionarMaterial = () => {
+    setMaterialIdInput('avulso');
+    setMaterialNomeInput('');
+    setMaterialValorInput('');
+    setModalMaterialAberta(true);
+    if (materiaisDisponiveis.length > 0) return;
+    setMateriaisLoading(true);
+    void getMateriais().then(setMateriaisDisponiveis).catch(() => {
+      toast.error('Não foi possível carregar o catálogo de materiais.');
+    }).finally(() => setMateriaisLoading(false));
+  };
+
+  const selecionarMaterial = (id: string) => {
+    setMaterialIdInput(id);
+    const material = materiaisDisponiveis.find((item) => String(item.id) === id);
+    setMaterialNomeInput(material?.nome ?? '');
+    setMaterialValorInput(material?.valor_referencia == null ? '' : String(material.valor_referencia));
+  };
+
+  const fecharModalAdicionarMaterial = () => {
+    setModalMaterialAberta(false);
+    setMaterialIdInput('avulso');
+    setMaterialNomeInput('');
+    setMaterialValorInput('');
+  };
+
+  const salvarMaterial = async () => {
+    if (!ordem || !materialNomeInput.trim() || materialValorInput.trim() === '') return;
+    const valor = Number(materialValorInput);
+    if (!Number.isFinite(valor) || valor < 0) return;
+    const input: MaterialOrdemInput = {
+      material_id: materialIdInput === 'avulso' ? null : Number(materialIdInput),
+      nome_material: materialNomeInput.trim(),
+      valor,
+    };
+    setMaterialSaving(true);
+    try {
+      await addMaterialOrdem(ordem.id, input);
+      toast.success('Material lançado na ordem de serviço.');
+      fecharModalAdicionarMaterial();
+      await carregarOrdem();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao lançar material.');
+    } finally {
+      setMaterialSaving(false);
+    }
+  };
+
+  const removerMaterial = async (itemId: number) => {
+    if (!ordem) return;
+    setRemocaoMaterialId(itemId);
+    try {
+      await removeMaterialOrdem(ordem.id, itemId);
+      toast.success('Material removido da ordem de serviço.');
+      await carregarOrdem();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao remover material.');
+    } finally {
+      setRemocaoMaterialId(null);
+    }
+  };
+
   // Técnicos
   const abrirModalTecnico = (tecnicoAtual?: Usuario | null) => {
     setTecnicoAtualSubstituir(tecnicoAtual || null);
@@ -497,6 +573,21 @@ export function useOrdemDetalhe(ordemId: string | number) {
     fecharModalAdicionarServico,
     salvarServico,
     removerServico,
+    materiaisDisponiveis,
+    materiaisLoading,
+    modalMaterialAberta,
+    materialIdInput,
+    materialNomeInput,
+    materialValorInput,
+    materialSaving,
+    remocaoMaterialId,
+    abrirModalAdicionarMaterial,
+    fecharModalAdicionarMaterial,
+    selecionarMaterial,
+    setMaterialNomeInput,
+    setMaterialValorInput,
+    salvarMaterial,
+    removerMaterial,
     // Técnicos
     usuariosDisponiveis,
     usuariosLoading,

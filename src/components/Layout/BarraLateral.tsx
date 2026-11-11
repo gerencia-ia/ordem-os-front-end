@@ -64,6 +64,7 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
       children: [
         { href: '/usuarios', label: 'Usuários' },
         { href: '/servicos', label: 'Serviços' },
+        { href: '/materiais', label: 'Materiais' },
         {
           href: '/categorias-servicos',
           label: 'Categorias de Serviço',
