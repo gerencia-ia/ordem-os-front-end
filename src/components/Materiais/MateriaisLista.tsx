@@ -20,22 +20,42 @@ const moeda = (valor: number | string | null) => valor == null || valor === ''
 export function MateriaisLista() {
   const [materiais, setMateriais] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
+  const [versao, setVersao] = useState(0);
   const [modalAberto, setModalAberto] = useState(false);
   const [materialEditando, setMaterialEditando] = useState<Material | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [form, setForm] = useState({ nome: '', descricao: '', valor_referencia: '' });
 
-  const carregar = useCallback(async () => {
-    try {
-      setMateriais(await getMateriais());
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Não foi possível carregar os materiais.');
-    } finally {
-      setLoading(false);
-    }
+  const recarregar = useCallback(() => {
+    setVersao((v) => v + 1);
   }, []);
 
-  useEffect(() => { void carregar(); }, [carregar]);
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregar() {
+      try {
+        const dados = await getMateriais();
+        if (ativo) {
+          setMateriais(dados);
+        }
+      } catch (error) {
+        if (ativo) {
+          toast.error(error instanceof Error ? error.message : 'Não foi possível carregar os materiais.');
+        }
+      } finally {
+        if (ativo) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void carregar();
+
+    return () => {
+      ativo = false;
+    };
+  }, [versao]);
 
   const abrirCadastro = (material?: Material) => {
     setMaterialEditando(material ?? null);
@@ -71,7 +91,7 @@ export function MateriaisLista() {
         toast.success('Material cadastrado.');
       }
       setModalAberto(false);
-      await carregar();
+      recarregar();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Não foi possível salvar o material.');
     } finally {
@@ -84,7 +104,7 @@ export function MateriaisLista() {
     try {
       await deleteMaterial(material.id);
       toast.success('Material removido do catálogo.');
-      await carregar();
+      recarregar();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Não foi possível excluir o material.');
     }
