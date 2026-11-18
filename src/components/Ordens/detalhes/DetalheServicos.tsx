@@ -15,11 +15,13 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from '@/src/components/Ui/empty';
+import { Badge } from '@/src/components/Ui/badge';
 import { Wrench, Plus, Trash2, Clock } from 'lucide-react';
-import type { OsServico } from '@/src/types/ordem';
+import type { OsEquipamentoItem, OsServico } from '@/src/types/ordem';
 
 interface DetalheServicosProps {
   servicos?: OsServico[] | null;
+  equipamentos?: OsEquipamentoItem[] | null;
   statusId?: number;
   podeAlterarServicos: boolean;
   podeVerMetricasFinanceiras: boolean;
@@ -30,6 +32,7 @@ interface DetalheServicosProps {
 
 export function DetalheServicos({
   servicos,
+  equipamentos,
   statusId,
   podeAlterarServicos,
   podeVerMetricasFinanceiras,
@@ -38,6 +41,7 @@ export function DetalheServicos({
   removendoId,
 }: DetalheServicosProps) {
   const lista = servicos || [];
+  const listaEquipamentos = equipamentos || [];
   const concluido = statusId === 3;
 
   const tempoTotalMinutos = lista.reduce(
@@ -77,6 +81,11 @@ export function DetalheServicos({
               {lista.map((servico) => {
                 const qtd = servico.quantidade || 1;
                 const valorTotalItem = Number(servico.valor || 0) * qtd;
+                const equipAssociado = listaEquipamentos.find(
+                  (eq) =>
+                    Number(eq.equipamento_id || eq.id) ===
+                    Number(servico.equipamento_id),
+                );
 
                 return (
                   <div
@@ -84,16 +93,27 @@ export function DetalheServicos({
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 hover:bg-muted/30 transition-colors"
                   >
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium text-sm">
                           {servico.nome}
                         </span>
+                        {servico.andar?.descricao && (
+                          <Badge variant="outline" className="text-[11px] py-0">
+                            {servico.andar.descricao}
+                          </Badge>
+                        )}
                         {qtd > 1 && (
                           <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-semibold">
                             x{qtd}
                           </span>
                         )}
                       </div>
+                      {equipAssociado && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Equipamento: {equipAssociado.marca} (
+                          {equipAssociado.local_instalacao})
+                        </p>
+                      )}
                       {servico.tempo_servico ? (
                         <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <Clock className="size-3" />

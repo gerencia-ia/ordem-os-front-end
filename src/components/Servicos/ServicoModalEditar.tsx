@@ -24,6 +24,7 @@ import { Loader2 } from 'lucide-react';
 import type { Servico } from '@/src/types/servico';
 import type { CategoriaServico } from '@/src/types/categoria';
 import { useServicoForm } from '@/src/hooks/useServicoForm';
+import { ServicoValoresPorAndarCampos } from './ServicoValoresPorAndarCampos';
 
 interface ServicoModalEditarProps {
   aberto: boolean;
@@ -40,8 +41,18 @@ export function ServicoModalEditar({
   categorias,
   onSucesso,
 }: ServicoModalEditarProps) {
-  const { form, salvando, onSubmit } = useServicoForm({
+  const {
+    form,
+    salvando,
+    andares,
+    carregandoAndares,
+    valoresFields,
+    adicionarValorPorAndar,
+    removerValorPorAndar,
+    onSubmit,
+  } = useServicoForm({
     servicoAtual: servico,
+    aberto,
     onSucesso: () => {
       onOpenChange(false);
       onSucesso();
@@ -56,7 +67,7 @@ export function ServicoModalEditar({
 
   return (
     <Dialog open={aberto} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Editar Serviço</DialogTitle>
           <DialogDescription>
@@ -115,45 +126,35 @@ export function ServicoModalEditar({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Valor */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-servico-valor">
-                Valor (R$) <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="edit-servico-valor"
-                type="number"
-                step="0.01"
-                placeholder="Ex: 250.00"
-                {...register('valor')}
-                disabled={salvando}
-              />
-              {errors.valor && (
-                <p className="text-xs text-destructive">
-                  {errors.valor.message}
-                </p>
-              )}
-            </div>
-
-            {/* Tempo */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-servico-tempo">Tempo Estimado (min)</Label>
-              <Input
-                id="edit-servico-tempo"
-                type="number"
-                min="1"
-                placeholder="Ex: 60"
-                {...register('tempo_servico')}
-                disabled={salvando}
-              />
-              {errors.tempo_servico && (
-                <p className="text-xs text-destructive">
-                  {errors.tempo_servico.message}
-                </p>
-              )}
-            </div>
+          {/* Tempo */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="edit-servico-tempo">Tempo Estimado (min)</Label>
+            <Input
+              id="edit-servico-tempo"
+              type="number"
+              min="1"
+              placeholder="Ex: 60"
+              {...register('tempo_servico')}
+              disabled={salvando}
+            />
+            {errors.tempo_servico && (
+              <p className="text-xs text-destructive">
+                {errors.tempo_servico.message}
+              </p>
+            )}
           </div>
+
+          <ServicoValoresPorAndarCampos
+            control={control}
+            register={register}
+            errors={errors}
+            fields={valoresFields}
+            andares={andares}
+            carregandoAndares={carregandoAndares}
+            salvando={salvando}
+            onAdicionar={adicionarValorPorAndar}
+            onRemover={removerValorPorAndar}
+          />
 
           <DialogFooter className="gap-2 sm:gap-0 pt-2">
             <Button

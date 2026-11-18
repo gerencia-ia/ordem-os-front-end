@@ -41,7 +41,7 @@ export function OrdemModalCadastro({
     statusList,
     prioridadesList,
     equipamentos,
-    servicoIdsSelecionados,
+    osServicosSelecionados,
     equipamentoIdsSelecionados,
     tecnicoIdsSelecionados,
     valorTotalServicos,
@@ -50,7 +50,7 @@ export function OrdemModalCadastro({
     adicionarMaterial,
     removerMaterial,
     onClienteChange,
-    toggleServico,
+    toggleServicoEquipamento,
     toggleEquipamento,
     toggleTecnico,
     adicionarNovoEquipamento,
@@ -63,6 +63,9 @@ export function OrdemModalCadastro({
   });
 
   const clienteId = Number(form.watch('cliente_id')) || 0;
+  const equipamentosSelecionados = equipamentos.filter((eq) =>
+    equipamentoIdsSelecionados.includes(Number(eq.id)),
+  );
 
   return (
     <Dialog open={aberto} onOpenChange={onOpenChange}>
@@ -100,10 +103,11 @@ export function OrdemModalCadastro({
           {/* Seção 3: Serviços e Valores */}
           <SecaoServicos
             servicos={servicos}
-            servicoIdsSelecionados={servicoIdsSelecionados}
+            equipamentosSelecionados={equipamentosSelecionados}
+            osServicosSelecionados={osServicosSelecionados}
             valorTotal={valorTotalServicos}
             loadingServicos={loadingDados}
-            onToggleServico={toggleServico}
+            onToggleServicoEquipamento={toggleServicoEquipamento}
           />
 
           <SecaoMateriais

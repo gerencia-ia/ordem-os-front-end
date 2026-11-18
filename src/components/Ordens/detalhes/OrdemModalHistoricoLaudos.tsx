@@ -27,13 +27,14 @@ import {
 } from '@/src/components/Ui/empty';
 import { StatusBadge } from '@/src/components/Ui/status-badge';
 import { History } from 'lucide-react';
-import type { Equipamento, HistoricoLaudo } from '@/src/types/equipamento';
+import type { HistoricoLaudo } from '@/src/types/equipamento';
+import type { OsEquipamentoItem } from '@/src/types/ordem';
 import { formatarDataHoraCurta } from '@/src/utils/date';
 
 interface OrdemModalHistoricoLaudosProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  equipamento: Equipamento | null;
+  equipamento: OsEquipamentoItem | null;
   laudos: HistoricoLaudo[];
   loading: boolean;
 }

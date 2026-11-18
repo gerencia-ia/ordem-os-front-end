@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import type { OrdemServico, Status } from '@/src/types/ordem';
+import type { OrdemServico, OsEquipamentoItem, Status } from '@/src/types/ordem';
 import type { Servico } from '@/src/types/servico';
 import type { Material, MaterialOrdemInput } from '@/src/types/material';
 import type { Usuario } from '@/src/types/usuario';
-import type { Equipamento, HistoricoLaudo } from '@/src/types/equipamento';
+import type { HistoricoLaudo } from '@/src/types/equipamento';
 import {
   getOrdemById,
   updateOrdemStatus,
@@ -53,7 +53,7 @@ export function useOrdemDetalhe(ordemId: string | number) {
   // Modal Laudo
   const [modalLaudoAberta, setModalLaudoAberta] = useState(false);
   const [equipamentoSelecionado, setEquipamentoSelecionado] =
-    useState<Equipamento | null>(null);
+    useState<OsEquipamentoItem | null>(null);
   const [textoLaudo, setTextoLaudo] = useState('');
   const [laudoSaving, setLaudoSaving] = useState(false);
 
@@ -64,6 +64,7 @@ export function useOrdemDetalhe(ordemId: string | number) {
 
   // Modal Adicionar Serviço
   const [modalServicoAberta, setModalServicoAberta] = useState(false);
+  const [equipamentoIdInput, setEquipamentoIdInput] = useState('');
   const [servicoIdInput, setServicoIdInput] = useState('');
   const [quantidadeInput, setQuantidadeInput] = useState('');
   const [servicoSaving, setServicoSaving] = useState(false);
@@ -278,7 +279,7 @@ export function useOrdemDetalhe(ordemId: string | number) {
   };
 
   // Laudos
-  const abrirModalLaudo = (equip: Equipamento) => {
+  const abrirModalLaudo = (equip: OsEquipamentoItem) => {
     setEquipamentoSelecionado(equip);
     setTextoLaudo(equip.laudo || '');
     setModalLaudoAberta(true);
@@ -311,7 +312,7 @@ export function useOrdemDetalhe(ordemId: string | number) {
   };
 
   // Histórico de Laudos
-  const abrirModalHistorico = async (equip: Equipamento) => {
+  const abrirModalHistorico = async (equip: OsEquipamentoItem) => {
     setEquipamentoSelecionado(equip);
     setHistoricoLoading(true);
     setModalHistoricoAberta(true);
@@ -335,6 +336,11 @@ export function useOrdemDetalhe(ordemId: string | number) {
 
   // Serviços
   const abrirModalAdicionarServico = () => {
+    const eqUnico =
+      ordem?.equipamentos.length === 1
+        ? String(ordem.equipamentos[0].equipamento_id || ordem.equipamentos[0].id)
+        : '';
+    setEquipamentoIdInput(eqUnico);
     setServicoIdInput('');
     setQuantidadeInput('');
     void carregarServicos();
@@ -343,16 +349,34 @@ export function useOrdemDetalhe(ordemId: string | number) {
 
   const fecharModalAdicionarServico = () => {
     setModalServicoAberta(false);
+    setEquipamentoIdInput('');
     setServicoIdInput('');
     setQuantidadeInput('');
   };
 
   const salvarServico = async () => {
-    if (!ordem || !servicoIdInput.trim()) return;
+    if (!ordem || !equipamentoIdInput.trim() || !servicoIdInput.trim()) return;
     setServicoSaving(true);
     try {
+      const equipId = Number(equipamentoIdInput);
+      const servicoId = Number(servicoIdInput);
+      const equip = ordem.equipamentos.find(
+        (e) => Number(e.equipamento_id || e.id) === equipId,
+      );
+      const servico = servicosDisponiveis.find((s) => s.id === servicoId);
+      const valorPorAndar =
+        equip?.andar_id !== undefined
+          ? servico?.valores_por_andares?.find(
+              (v) => Number(v.andar_id) === Number(equip.andar_id),
+            )
+          : undefined;
+
       const qtd = quantidadeInput === '' ? undefined : Number(quantidadeInput);
-      await addServicoOrdem(ordem.id, servicoIdInput.trim(), qtd);
+      await addServicoOrdem(ordem.id, {
+        equipamento_id: equipId,
+        ...(valorPorAndar ? { valor_por_andar_id: valorPorAndar.id } : { servico_id: servicoId }),
+        quantidade: qtd,
+      });
       toast.success('Serviço adicionado com sucesso!');
       fecharModalAdicionarServico();
       await carregarOrdem();
@@ -563,6 +587,8 @@ export function useOrdemDetalhe(ordemId: string | number) {
     servicosDisponiveis,
     servicosLoading,
     modalServicoAberta,
+    equipamentoIdInput,
+    setEquipamentoIdInput,
     servicoIdInput,
     setServicoIdInput,
     quantidadeInput,

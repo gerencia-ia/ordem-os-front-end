@@ -142,12 +142,34 @@ export function ServicoTabela({
                   )}
                 </TableCell>
 
-                {/* Valor */}
-                <TableCell className="text-right font-semibold text-sm">
-                  R${' '}
-                  {Number(servico.valor).toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                  })}
+                {/* Valores por Andar */}
+                <TableCell className="text-right">
+                  {servico.valores_por_andares &&
+                  servico.valores_por_andares.length > 0 ? (
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {servico.valores_por_andares.map((v) => (
+                        <Badge
+                          key={v.id}
+                          variant="secondary"
+                          className="text-xs font-normal"
+                        >
+                          {v.andar?.descricao
+                            ? `${v.andar.descricao}: `
+                            : `Andar #${v.andar_id}: `}
+                          <span className="font-semibold ml-1">
+                            R${' '}
+                            {Number(v.valor).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                            })}
+                          </span>
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Sem valores
+                    </span>
+                  )}
                 </TableCell>
 
                 {/* Ações */}

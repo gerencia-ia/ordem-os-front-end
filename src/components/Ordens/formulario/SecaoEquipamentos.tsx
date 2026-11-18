@@ -103,6 +103,11 @@ export function SecaoEquipamentos({
                   <span className="text-[10px] opacity-60">
                     • {eq.local_instalacao}
                   </span>
+                  {eq.andar?.descricao && (
+                    <span className="text-[10px] opacity-75">
+                      • {eq.andar.descricao}
+                    </span>
+                  )}
                 </Badge>
               );
             })}

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@/src/lib/zod-resolver';
+import type { Andar } from '@/src/types/andar';
 import {
   equipamentoFormSchema,
   type EquipamentoFormData,
   type Equipamento,
 } from '@/src/types/equipamento';
+import { getAndares } from '@/src/services/andares.service';
 import { createEquipamento } from '@/src/services/equipamentos.service';
 import {
   Dialog,
@@ -21,6 +23,13 @@ import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
 import { Label } from '@/src/components/Ui/label';
 import { Textarea } from '@/src/components/Ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -38,6 +47,8 @@ export function EquipamentoModalCadastro({
   onSucesso,
 }: EquipamentoModalCadastroProps) {
   const [salvando, setSalvando] = useState(false);
+  const [andares, setAndares] = useState<Andar[]>([]);
+  const [carregandoAndares, setCarregandoAndares] = useState(false);
 
   const form = useForm<EquipamentoFormData>({
     resolver: zodResolver(equipamentoFormSchema),
@@ -47,15 +58,43 @@ export function EquipamentoModalCadastro({
       local_instalacao: '',
       observacao: '',
       cliente_id: clienteId,
+      andar_id: 0,
     },
   });
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = form;
+
+  useEffect(() => {
+    if (!aberto) return;
+    let ativo = true;
+
+    async function carregarAndares() {
+      try {
+        const lista = await getAndares();
+        if (ativo) setAndares(lista);
+      } catch (err) {
+        if (ativo) {
+          const msg =
+            err instanceof Error ? err.message : 'Erro ao carregar andares';
+          toast.error(msg);
+        }
+      } finally {
+        if (ativo) setCarregandoAndares(false);
+      }
+    }
+
+    void carregarAndares();
+
+    return () => {
+      ativo = false;
+    };
+  }, [aberto]);
 
   const onSubmit = async (data: EquipamentoFormData) => {
     try {
@@ -66,10 +105,18 @@ export function EquipamentoModalCadastro({
         local_instalacao: data.local_instalacao.trim(),
         observacao: data.observacao?.trim() || undefined,
         cliente_id: Number(clienteId),
+        andar_id: Number(data.andar_id),
       });
 
       toast.success('Equipamento cadastrado com sucesso!');
-      reset();
+      reset({
+        marca: '',
+        btus: '',
+        local_instalacao: '',
+        observacao: '',
+        cliente_id: clienteId,
+        andar_id: 0,
+      });
       onOpenChange(false);
       onSucesso(novo);
     } catch (err) {
@@ -141,6 +188,45 @@ export function EquipamentoModalCadastro({
                 </p>
               )}
             </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="eq-andar">
+              Andar <span className="text-destructive">*</span>
+            </Label>
+            <Controller
+              control={control}
+              name="andar_id"
+              render={({ field }) => (
+                <Select
+                  value={field.value ? String(field.value) : ''}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  disabled={salvando || carregandoAndares}
+                >
+                  <SelectTrigger id="eq-andar" className="w-full">
+                    <SelectValue
+                      placeholder={
+                        carregandoAndares
+                          ? 'Carregando andares...'
+                          : 'Selecione o andar'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {andares.map((andar) => (
+                      <SelectItem key={andar.id} value={String(andar.id)}>
+                        {andar.descricao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.andar_id && (
+              <p className="text-xs text-destructive">
+                {errors.andar_id.message}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">

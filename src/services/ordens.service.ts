@@ -62,11 +62,25 @@ export async function updateHorarioAtendimento(
 
 export async function addServicoOrdem(
   ordemId: number | string,
-  servicoId: number | string,
-  quantidade?: number,
+  params: {
+    equipamento_id: number;
+    valor_por_andar_id?: number;
+    servico_id?: number;
+    quantidade?: number;
+  },
 ): Promise<OrdemServico> {
-  const payload: Record<string, number | string> = { servico_id: servicoId };
-  if (quantidade !== undefined) payload.quantidade = quantidade;
+  const payload: Record<string, number> = {
+    equipamento_id: params.equipamento_id,
+  };
+  if (params.valor_por_andar_id !== undefined) {
+    payload.valor_por_andar_id = params.valor_por_andar_id;
+  }
+  if (params.servico_id !== undefined) {
+    payload.servico_id = params.servico_id;
+  }
+  if (params.quantidade !== undefined) {
+    payload.quantidade = params.quantidade;
+  }
   return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/servicos`, payload);
 }
 

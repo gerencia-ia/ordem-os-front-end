@@ -17,12 +17,12 @@ import {
   EmptyDescription,
 } from '@/src/components/Ui/empty';
 import { AirVent, History, FileEdit, CheckCircle2 } from 'lucide-react';
-import type { Equipamento } from '@/src/types/equipamento';
+import type { OsEquipamentoItem } from '@/src/types/ordem';
 
 interface DetalheEquipamentosProps {
-  equipamentos?: Equipamento[] | null;
-  onAbrirLaudo: (equipamento: Equipamento) => void;
-  onAbrirHistorico: (equipamento: Equipamento) => void;
+  equipamentos?: OsEquipamentoItem[] | null;
+  onAbrirLaudo: (equipamento: OsEquipamentoItem) => void;
+  onAbrirHistorico: (equipamento: OsEquipamentoItem) => void;
   podePreencherLaudo: boolean;
 }
 
@@ -63,6 +63,11 @@ export function DetalheEquipamentos({
                         <Badge variant="secondary" className="text-xs">
                           {equip.btus} BTUs
                         </Badge>
+                        {equip.andar?.descricao && (
+                          <Badge variant="outline" className="text-xs">
+                            {equip.andar.descricao}
+                          </Badge>
+                        )}
                         {temLaudo && (
                           <Badge
                             variant="outline"

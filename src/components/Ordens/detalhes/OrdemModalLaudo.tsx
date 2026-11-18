@@ -12,12 +12,12 @@ import { Button } from '@/src/components/Ui/button';
 import { Label } from '@/src/components/Ui/label';
 import { Textarea } from '@/src/components/Ui/textarea';
 import { Loader2 } from 'lucide-react';
-import type { Equipamento } from '@/src/types/equipamento';
+import type { OsEquipamentoItem } from '@/src/types/ordem';
 
 interface OrdemModalLaudoProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  equipamento: Equipamento | null;
+  equipamento: OsEquipamentoItem | null;
   textoLaudo: string;
   onTextoLaudoChange: (val: string) => void;
   onSalvar: () => void | Promise<void>;

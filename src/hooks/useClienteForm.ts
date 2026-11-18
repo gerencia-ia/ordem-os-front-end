@@ -207,6 +207,7 @@ export function useClienteForm({
                 btus: eq.btus,
                 local_instalacao: eq.local_instalacao,
                 observacao: eq.observacao,
+                andar_id: eq.andar_id,
               }))
             : undefined,
         };

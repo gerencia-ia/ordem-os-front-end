@@ -69,6 +69,7 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
           href: '/categorias-servicos',
           label: 'Categorias de Serviço',
         },
+        { href: '/andares', label: 'Andares' },
       ],
     },
   ];
