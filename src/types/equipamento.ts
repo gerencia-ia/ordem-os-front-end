@@ -26,6 +26,8 @@ export interface CriarEquipamentoPayload {
   andar_id: number;
 }
 
+export type AtualizarEquipamentoPayload = Partial<CriarEquipamentoPayload>;
+
 export interface OrdemServicoResumida {
   id: number;
   numero_ordem: string;

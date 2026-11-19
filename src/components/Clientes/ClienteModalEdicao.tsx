@@ -8,16 +8,23 @@ import {
   ModalFormularioHeader,
 } from '@/src/components/Ui/modal-formulario';
 import { Button } from '@/src/components/Ui/button';
-import { Badge } from '@/src/components/Ui/badge';
 import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
-import { Skeleton } from '@/src/components/Ui/skeleton';
 import { Spinner } from '@/src/components/Ui/spinner';
 import { useClienteForm } from '@/src/hooks/useClienteForm';
-import { getEquipamentosByCliente } from '@/src/services/equipamentos.service';
+import {
+  deleteEquipamento,
+  getEquipamentosByCliente,
+} from '@/src/services/equipamentos.service';
 import type { Cliente } from '@/src/types/cliente';
 import type { Equipamento } from '@/src/types/equipamento';
+import { toast } from 'sonner';
 import { ClienteModalCampos } from './ClienteModalCampos';
-import { EquipamentoModalCliente } from './EquipamentoModalCliente';
+import { ClienteEquipamentosLista } from './ClienteEquipamentosLista';
+import {
+  EquipamentoModalCliente,
+  type EquipamentoEdicaoInput,
+} from './EquipamentoModalCliente';
+import { EquipamentoModalExcluir } from './EquipamentoModalExcluir';
 import { Cpu, Plus } from 'lucide-react';
 
 interface ClienteModalEdicaoProps {
@@ -40,6 +47,11 @@ function ClienteModalEdicaoForm({
   const [loadingEquipamentos, setLoadingEquipamentos] = useState(true);
   const [versaoEquipamentos, setVersaoEquipamentos] = useState(0);
   const [modalEquipAberto, setModalEquipAberto] = useState(false);
+  const [equipamentoEditando, setEquipamentoEditando] =
+    useState<EquipamentoEdicaoInput | null>(null);
+  const [equipamentoExcluindo, setEquipamentoExcluindo] =
+    useState<Equipamento | null>(null);
+  const [excluindoEquipamento, setExcluindoEquipamento] = useState(false);
 
   const {
     form,
@@ -102,6 +114,48 @@ function ClienteModalEdicaoForm({
     }))
     .filter((item) => !item.destroy);
 
+  const abrirNovoEquipamento = () => {
+    setEquipamentoEditando(null);
+    setModalEquipAberto(true);
+  };
+
+  const abrirEditarEquipamento = (index: number) => {
+    const eq = equipamentos[index];
+    if (!eq) return;
+    setEquipamentoEditando({
+      id: eq.id,
+      marca: eq.marca,
+      btus: eq.btus,
+      local_instalacao: eq.local_instalacao,
+      observacao: eq.observacao ?? '',
+      cliente_id: eq.cliente_id ?? cliente.id,
+      andar_id: eq.andar_id,
+    });
+    setModalEquipAberto(true);
+  };
+
+  const abrirExcluirEquipamento = (index: number) => {
+    const eq = equipamentos[index];
+    if (eq) setEquipamentoExcluindo(eq);
+  };
+
+  const confirmarExclusaoEquipamento = async (eq: Equipamento) => {
+    try {
+      setExcluindoEquipamento(true);
+      await deleteEquipamento(eq.id);
+      toast.success('Equipamento excluído com sucesso!');
+      setEquipamentoExcluindo(null);
+      setLoadingEquipamentos(true);
+      setVersaoEquipamentos((v) => v + 1);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao excluir equipamento';
+      toast.error(msg);
+    } finally {
+      setExcluindoEquipamento(false);
+    }
+  };
+
   return (
     <>
       <form
@@ -147,7 +201,7 @@ function ClienteModalEdicaoForm({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setModalEquipAberto(true)}
+                onClick={abrirNovoEquipamento}
                 className="h-7 gap-1 text-xs"
               >
                 <Plus className="size-3.5" /> Adicionar
@@ -157,30 +211,15 @@ function ClienteModalEdicaoForm({
             className="bg-card/40 border-border/70"
             contentClassName="flex flex-col gap-2.5"
           >
-            {loadingEquipamentos ? (
-              <Skeleton className="h-10 w-full" />
-            ) : equipamentos.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {equipamentos.map((eq) => (
-                  <Badge
-                    key={eq.id}
-                    variant="secondary"
-                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-normal"
-                  >
-                    <span className="font-medium">{eq.marca}</span>
-                    <span>• {eq.btus} BTUs</span>
-                    <span className="text-muted-foreground">
-                      ({eq.local_instalacao}
-                      {eq.andar?.descricao ? ` — ${eq.andar.descricao}` : ''})
-                    </span>
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground/70 text-xs italic">
-                Nenhum equipamento vinculado a este cliente.
-              </p>
-            )}
+            <ClienteEquipamentosLista
+              itens={equipamentos}
+              loading={loadingEquipamentos}
+              excluindoId={
+                excluindoEquipamento ? (equipamentoExcluindo?.id ?? null) : null
+              }
+              onEditar={abrirEditarEquipamento}
+              onExcluir={abrirExcluirEquipamento}
+            />
           </CardColapsavel>
         </ModalFormularioBody>
 
@@ -202,12 +241,26 @@ function ClienteModalEdicaoForm({
 
       <EquipamentoModalCliente
         open={modalEquipAberto}
-        setOpen={setModalEquipAberto}
+        setOpen={(abertoModal) => {
+          setModalEquipAberto(abertoModal);
+          if (!abertoModal) setEquipamentoEditando(null);
+        }}
         clienteId={cliente.id}
+        equipamentoParaEdicao={equipamentoEditando}
         onSucesso={() => {
           setLoadingEquipamentos(true);
           setVersaoEquipamentos((v) => v + 1);
         }}
+      />
+
+      <EquipamentoModalExcluir
+        equipamento={equipamentoExcluindo}
+        aberto={Boolean(equipamentoExcluindo)}
+        onOpenChange={(abertoModal) => {
+          if (!abertoModal) setEquipamentoExcluindo(null);
+        }}
+        onConfirmar={confirmarExclusaoEquipamento}
+        excluindo={excluindoEquipamento}
       />
     </>
   );

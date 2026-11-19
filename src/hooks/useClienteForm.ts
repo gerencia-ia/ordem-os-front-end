@@ -149,6 +149,12 @@ export function useClienteForm({
     setEquipamentos((prev) => [...prev, equip]);
   };
 
+  const editarEquipamento = (index: number, equip: NovoEquipamentoData) => {
+    setEquipamentos((prev) =>
+      prev.map((item, i) => (i === index ? equip : item)),
+    );
+  };
+
   const removerEquipamento = (index: number) => {
     setEquipamentos((prev) => prev.filter((_, i) => i !== index));
   };
@@ -240,6 +246,7 @@ export function useClienteForm({
     removerTelefone,
     removerEndereco,
     adicionarEquipamento,
+    editarEquipamento,
     removerEquipamento,
     onSubmit: form.handleSubmit(onSubmit),
   };

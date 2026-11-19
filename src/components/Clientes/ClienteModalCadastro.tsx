@@ -8,13 +8,16 @@ import {
   ModalFormularioHeader,
 } from '@/src/components/Ui/modal-formulario';
 import { Button } from '@/src/components/Ui/button';
-import { Badge } from '@/src/components/Ui/badge';
 import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
 import { Spinner } from '@/src/components/Ui/spinner';
 import { useClienteForm } from '@/src/hooks/useClienteForm';
-import { EquipamentoModalCliente } from '@/src/components/Clientes/EquipamentoModalCliente';
+import {
+  EquipamentoModalCliente,
+  type NovoEquipamentoData,
+} from '@/src/components/Clientes/EquipamentoModalCliente';
 import { ClienteModalCampos } from './ClienteModalCampos';
-import { Cpu, Plus, Trash2 } from 'lucide-react';
+import { ClienteEquipamentosLista } from './ClienteEquipamentosLista';
+import { Cpu, Plus } from 'lucide-react';
 
 interface ClienteModalCadastroProps {
   aberto: boolean;
@@ -28,6 +31,7 @@ export function ClienteModalCadastro({
   onSucesso,
 }: ClienteModalCadastroProps) {
   const [modalEquipAberto, setModalEquipAberto] = useState(false);
+  const [indiceEditando, setIndiceEditando] = useState<number | null>(null);
 
   const {
     form,
@@ -38,6 +42,7 @@ export function ClienteModalCadastro({
     buscandoCep,
     consultarCep,
     adicionarEquipamento,
+    editarEquipamento,
     removerEquipamento,
     onSubmit,
   } = useClienteForm({
@@ -57,6 +62,28 @@ export function ClienteModalCadastro({
     id: field.fieldKey,
     index,
   }));
+
+  const equipamentoEditando =
+    indiceEditando !== null ? (equipamentos[indiceEditando] ?? null) : null;
+
+  const abrirNovoEquipamento = () => {
+    setIndiceEditando(null);
+    setModalEquipAberto(true);
+  };
+
+  const abrirEditarEquipamento = (index: number) => {
+    setIndiceEditando(index);
+    setModalEquipAberto(true);
+  };
+
+  const handleSalvarEquipamento = (equip: NovoEquipamentoData) => {
+    if (indiceEditando !== null) {
+      editarEquipamento(indiceEditando, equip);
+    } else {
+      adicionarEquipamento(equip);
+    }
+    setIndiceEditando(null);
+  };
 
   return (
     <>
@@ -105,7 +132,7 @@ export function ClienteModalCadastro({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setModalEquipAberto(true)}
+                  onClick={abrirNovoEquipamento}
                   className="h-7 gap-1 text-xs"
                 >
                   <Plus className="size-3.5" /> Adicionar
@@ -119,33 +146,12 @@ export function ClienteModalCadastro({
                 Vincule aparelhos a este cliente agora mesmo.
               </p>
 
-              {equipamentos.length > 0 ? (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {equipamentos.map((eq, idx) => (
-                    <Badge
-                      key={idx}
-                      variant="secondary"
-                      className="flex items-center gap-1.5 py-1 pr-1 pl-2.5 text-xs"
-                    >
-                      <span>
-                        {eq.marca} - {eq.btus} BTUs ({eq.local_instalacao})
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removerEquipamento(idx)}
-                        className="text-muted-foreground hover:text-destructive rounded-xs p-0.5 transition-colors"
-                        aria-label={`Remover equipamento ${eq.marca}`}
-                      >
-                        <Trash2 className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground/70 text-xs italic">
-                  Nenhum equipamento adicionado até o momento.
-                </p>
-              )}
+              <ClienteEquipamentosLista
+                itens={equipamentos}
+                emptyMessage="Nenhum equipamento adicionado até o momento."
+                onEditar={abrirEditarEquipamento}
+                onExcluir={removerEquipamento}
+              />
             </CardColapsavel>
           </ModalFormularioBody>
 
@@ -168,8 +174,12 @@ export function ClienteModalCadastro({
 
       <EquipamentoModalCliente
         open={modalEquipAberto}
-        setOpen={setModalEquipAberto}
-        onSalvarEquipamento={adicionarEquipamento}
+        setOpen={(abertoModal) => {
+          setModalEquipAberto(abertoModal);
+          if (!abertoModal) setIndiceEditando(null);
+        }}
+        equipamentoParaEdicao={equipamentoEditando}
+        onSalvarEquipamento={handleSalvarEquipamento}
       />
     </>
   );
