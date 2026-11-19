@@ -18,8 +18,19 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/src/components/Ui/empty';
-import { Edit, Trash2, Wrench, Clock } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/src/components/Ui/popover';
+import { ChevronDown, Edit, Trash2, Wrench, Clock } from 'lucide-react';
 import type { Servico } from '@/src/types/servico';
+
+const formatarMoeda = (valor: number | string) =>
+  Number(valor || 0).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 
 interface ServicoTabelaProps {
   servicos: Servico[];
@@ -43,7 +54,7 @@ export function ServicoTabela({
               <TableHead>Nome do Serviço</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead className="w-[140px]">Tempo Estimado</TableHead>
-              <TableHead className="w-[140px] text-right">
+              <TableHead className="w-[200px] text-right">
                 Valor Unitário
               </TableHead>
               <TableHead className="w-[120px] text-right">Ações</TableHead>
@@ -103,7 +114,7 @@ export function ServicoTabela({
             <TableHead>Nome do Serviço</TableHead>
             <TableHead>Categoria</TableHead>
             <TableHead className="w-[140px]">Tempo Estimado</TableHead>
-            <TableHead className="w-[140px] text-right">
+            <TableHead className="w-[200px] text-right">
               Valor Unitário
             </TableHead>
             <TableHead className="w-[120px] text-right">Ações</TableHead>
@@ -144,32 +155,83 @@ export function ServicoTabela({
 
                 {/* Valores por Andar */}
                 <TableCell className="text-right">
-                  {servico.valores_por_andares &&
-                  servico.valores_por_andares.length > 0 ? (
-                    <div className="flex flex-wrap justify-end gap-1">
-                      {servico.valores_por_andares.map((v) => (
-                        <Badge
-                          key={v.id}
-                          variant="secondary"
-                          className="text-xs font-normal"
-                        >
-                          {v.andar?.descricao
-                            ? `${v.andar.descricao}: `
-                            : `Andar #${v.andar_id}: `}
-                          <span className="font-semibold ml-1">
-                            R${' '}
-                            {Number(v.valor).toLocaleString('pt-BR', {
-                              minimumFractionDigits: 2,
-                            })}
+                  {(() => {
+                    const valores = servico.valores_por_andares ?? [];
+                    if (valores.length === 0) {
+                      return (
+                        <span className="text-muted-foreground text-xs">
+                          Sem valores
+                        </span>
+                      );
+                    }
+
+                    if (valores.length === 1) {
+                      const unico = valores[0];
+                      return (
+                        <div className="flex flex-col items-end">
+                          <span className="text-sm font-semibold tabular-nums">
+                            {formatarMoeda(unico.valor)}
                           </span>
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">
-                      Sem valores
-                    </span>
-                  )}
+                          <span className="text-muted-foreground text-[11px]">
+                            {unico.andar?.descricao ??
+                              `Andar #${unico.andar_id}`}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    const numericos = valores.map((v) => Number(v.valor) || 0);
+                    const min = Math.min(...numericos);
+                    const max = Math.max(...numericos);
+                    const faixa =
+                      min === max
+                        ? formatarMoeda(min)
+                        : `${formatarMoeda(min)} – ${formatarMoeda(max)}`;
+
+                    return (
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-sm font-semibold tabular-nums">
+                          {faixa}
+                        </span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-muted-foreground hover:text-foreground h-6 gap-1 px-1.5 text-[11px] font-normal"
+                            >
+                              <span>{valores.length} andares</span>
+                              <ChevronDown className="size-3" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent align="end" className="w-60 p-3">
+                            <div className="flex flex-col gap-2">
+                              <p className="text-muted-foreground text-xs font-medium">
+                                Valores por andar
+                              </p>
+                              <div className="divide-y rounded-md border">
+                                {valores.map((v) => (
+                                  <div
+                                    key={v.id}
+                                    className="flex items-center justify-between gap-3 px-2.5 py-1.5 text-xs"
+                                  >
+                                    <span className="text-muted-foreground truncate">
+                                      {v.andar?.descricao ??
+                                        `Andar #${v.andar_id}`}
+                                    </span>
+                                    <span className="font-semibold tabular-nums">
+                                      {formatarMoeda(v.valor)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    );
+                  })()}
                 </TableCell>
 
                 {/* Ações */}
