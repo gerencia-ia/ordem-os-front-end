@@ -46,9 +46,7 @@ export interface EditarServicoPayload {
 export const valorPorAndarFormSchema = z.object({
   id: z.number().optional(),
   andar_id: z.coerce.number().min(1, 'Selecione um andar'),
-  valor: z.coerce
-    .number()
-    .min(0, 'O valor deve ser maior ou igual a zero'),
+  valor: z.coerce.number().min(0, 'O valor deve ser maior ou igual a zero'),
   _destroy: z.boolean().optional(),
 });
 

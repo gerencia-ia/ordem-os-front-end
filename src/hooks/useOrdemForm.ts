@@ -42,7 +42,9 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
   const [prioridadesList, setPrioridadesList] = useState<Prioridade[]>([]);
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
   const [materiais, setMateriais] = useState<Material[]>([]);
-  const [materiaisSelecionados, setMateriaisSelecionados] = useState<MaterialOrdemInput[]>([]);
+  const [materiaisSelecionados, setMateriaisSelecionados] = useState<
+    MaterialOrdemInput[]
+  >([]);
 
   const form = useForm<CriarOrdemFormData>({
     resolver: zodResolver(criarOrdemFormSchema),
@@ -239,14 +241,19 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     }
 
     return osServicosSelecionados.reduce((acc, item) => {
-      const valorUnitario = mapaValores.get(Number(item.valor_por_andar_id)) || 0;
+      const valorUnitario =
+        mapaValores.get(Number(item.valor_por_andar_id)) || 0;
       const qtd = Number(item.quantidade) || 1;
       return acc + valorUnitario * qtd;
     }, 0);
   }, [servicos, osServicosSelecionados]);
 
   const valorTotalMateriais = useMemo(
-    () => materiaisSelecionados.reduce((total, item) => total + Number(item.valor || 0), 0),
+    () =>
+      materiaisSelecionados.reduce(
+        (total, item) => total + Number(item.valor || 0),
+        0,
+      ),
     [materiaisSelecionados],
   );
 
@@ -341,6 +348,76 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     [form],
   );
 
+  const setEquipamentosSelecionados = useCallback(
+    (ids: number[]) => {
+      form.setValue('equipamento_ids', ids, { shouldValidate: true });
+      const servicosAtuais = form.getValues('os_servicos') || [];
+      const filtrados = servicosAtuais.filter((s) =>
+        ids.includes(Number(s.equipamento_id)),
+      );
+      if (filtrados.length !== servicosAtuais.length) {
+        form.setValue('os_servicos', filtrados, { shouldValidate: true });
+      }
+    },
+    [form],
+  );
+
+  const setServicosPorEquipamento = useCallback(
+    (equipamentoId: number, valorPorAndarIds: number[]) => {
+      const atuais = form.getValues('os_servicos') || [];
+      const outrosEquipamentos = atuais.filter(
+        (item) => Number(item.equipamento_id) !== equipamentoId,
+      );
+      const atuaisDoEquipamento = atuais.filter(
+        (item) => Number(item.equipamento_id) === equipamentoId,
+      );
+
+      const novosDoEquipamento = valorPorAndarIds.map((vpaId) => {
+        const existente = atuaisDoEquipamento.find(
+          (item) => Number(item.valor_por_andar_id) === vpaId,
+        );
+        return (
+          existente ?? {
+            equipamento_id: equipamentoId,
+            valor_por_andar_id: vpaId,
+            quantidade: 1,
+          }
+        );
+      });
+
+      form.setValue(
+        'os_servicos',
+        [...outrosEquipamentos, ...novosDoEquipamento],
+        {
+          shouldValidate: true,
+        },
+      );
+    },
+    [form],
+  );
+
+  const atualizarQuantidadeServico = useCallback(
+    (equipamentoId: number, valorPorAndarId: number, quantidade: number) => {
+      const qtdValida = Math.max(1, Math.floor(quantidade) || 1);
+      const atuais = form.getValues('os_servicos') || [];
+      const novos = atuais.map((item) =>
+        Number(item.equipamento_id) === equipamentoId &&
+        Number(item.valor_por_andar_id) === valorPorAndarId
+          ? { ...item, quantidade: qtdValida }
+          : item,
+      );
+      form.setValue('os_servicos', novos, { shouldValidate: true });
+    },
+    [form],
+  );
+
+  const setTecnicosSelecionados = useCallback(
+    (ids: number[]) => {
+      form.setValue('tecnico_ids', ids, { shouldValidate: true });
+    },
+    [form],
+  );
+
   const onSubmit = async (data: CriarOrdemFormData) => {
     try {
       setSalvando(true);
@@ -403,10 +480,15 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     tecnicoIdsSelecionados,
     valorTotalServicos,
     valorTotalMateriais,
+    valorTotalItens,
     onClienteChange,
     toggleServicoEquipamento,
     toggleEquipamento,
     toggleTecnico,
+    setEquipamentosSelecionados,
+    setServicosPorEquipamento,
+    atualizarQuantidadeServico,
+    setTecnicosSelecionados,
     adicionarNovoEquipamento,
     onSubmit: form.handleSubmit(onSubmit),
   };

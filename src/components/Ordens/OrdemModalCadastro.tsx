@@ -1,14 +1,13 @@
 'use client';
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/components/Ui/dialog';
+  ModalFormulario,
+  ModalFormularioBody,
+  ModalFormularioFooter,
+  ModalFormularioHeader,
+} from '@/src/components/Ui/modal-formulario';
 import { Button } from '@/src/components/Ui/button';
+import { Spinner } from '@/src/components/Ui/spinner';
 import { useOrdemForm } from '@/src/hooks/useOrdemForm';
 import { SecaoClienteEndereco } from './formulario/SecaoClienteEndereco';
 import { SecaoEquipamentos } from './formulario/SecaoEquipamentos';
@@ -16,13 +15,19 @@ import { SecaoServicos } from './formulario/SecaoServicos';
 import { SecaoMateriais } from './formulario/SecaoMateriais';
 import { SecaoAgendamentoEquipe } from './formulario/SecaoAgendamentoEquipe';
 import { SecaoDescricao } from './formulario/SecaoDescricao';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 
 interface OrdemModalCadastroProps {
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
   onSucesso: () => void;
 }
+
+const formatarMoeda = (valor: number) =>
+  new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(valor);
 
 export function OrdemModalCadastro({
   aberto,
@@ -45,14 +50,16 @@ export function OrdemModalCadastro({
     equipamentoIdsSelecionados,
     tecnicoIdsSelecionados,
     valorTotalServicos,
+    valorTotalItens,
     materiais,
     materiaisSelecionados,
     adicionarMaterial,
     removerMaterial,
     onClienteChange,
-    toggleServicoEquipamento,
-    toggleEquipamento,
-    toggleTecnico,
+    setEquipamentosSelecionados,
+    setServicosPorEquipamento,
+    atualizarQuantidadeServico,
+    setTecnicosSelecionados,
     adicionarNovoEquipamento,
     onSubmit,
   } = useOrdemForm({
@@ -68,20 +75,18 @@ export function OrdemModalCadastro({
   );
 
   return (
-    <Dialog open={aberto} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <PlusCircle className="size-5 text-primary" />
-            <DialogTitle>Nova Ordem de Serviço</DialogTitle>
-          </div>
-          <DialogDescription>
-            Preencha as informações para registrar e agendar a ordem de serviço.
-          </DialogDescription>
-        </DialogHeader>
+    <ModalFormulario open={aberto} onOpenChange={onOpenChange} tamanho="xl">
+      <ModalFormularioHeader
+        icon={<PlusCircle className="size-5" />}
+        title="Nova Ordem de Serviço"
+        description="Preencha as informações para registrar e agendar a ordem de serviço."
+      />
 
-        <form onSubmit={onSubmit} className="flex flex-col gap-4 py-2">
-          {/* Seção 1: Cliente e Endereço */}
+      <form
+        onSubmit={onSubmit}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+      >
+        <ModalFormularioBody className="flex flex-col gap-4">
           <SecaoClienteEndereco
             form={form}
             clientes={clientes}
@@ -90,24 +95,23 @@ export function OrdemModalCadastro({
             onClienteChange={onClienteChange}
           />
 
-          {/* Seção 2: Equipamentos Vinculados */}
           <SecaoEquipamentos
             clienteId={clienteId}
             equipamentos={equipamentos}
             equipamentoIdsSelecionados={equipamentoIdsSelecionados}
             loadingEquipamentos={loadingEquipamentos}
-            onToggleEquipamento={toggleEquipamento}
+            onChangeEquipamentos={setEquipamentosSelecionados}
             onAdicionarEquipamento={adicionarNovoEquipamento}
           />
 
-          {/* Seção 3: Serviços e Valores */}
           <SecaoServicos
             servicos={servicos}
             equipamentosSelecionados={equipamentosSelecionados}
             osServicosSelecionados={osServicosSelecionados}
             valorTotal={valorTotalServicos}
             loadingServicos={loadingDados}
-            onToggleServicoEquipamento={toggleServicoEquipamento}
+            onChangeServicosEquipamento={setServicosPorEquipamento}
+            onAlterarQuantidade={atualizarQuantidadeServico}
           />
 
           <SecaoMateriais
@@ -118,7 +122,6 @@ export function OrdemModalCadastro({
             onRemover={removerMaterial}
           />
 
-          {/* Seção 4: Agendamento e Técnicos */}
           <SecaoAgendamentoEquipe
             form={form}
             statusList={statusList}
@@ -126,28 +129,38 @@ export function OrdemModalCadastro({
             tecnicos={tecnicos}
             tecnicoIdsSelecionados={tecnicoIdsSelecionados}
             loadingDados={loadingDados}
-            onToggleTecnico={toggleTecnico}
+            onChangeTecnicos={setTecnicosSelecionados}
           />
 
-          {/* Seção 5: Descrição e Observações */}
           <SecaoDescricao form={form} />
+        </ModalFormularioBody>
 
-          <DialogFooter className="pt-4 border-t sticky bottom-0 bg-background/95 backdrop-blur-sm -mx-6 -mb-6 p-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={salvando}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={salvando || loadingDados}>
-              {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Criar Ordem de Serviço
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <ModalFormularioFooter
+          leftSlot={
+            <div className="flex items-baseline gap-2">
+              <span className="text-muted-foreground text-xs font-medium">
+                Total Estimado:
+              </span>
+              <span className="text-success text-base font-bold tabular-nums">
+                {formatarMoeda(valorTotalItens)}
+              </span>
+            </div>
+          }
+        >
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={salvando}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={salvando || loadingDados}>
+            {salvando && <Spinner data-icon="inline-start" />}
+            Criar Ordem de Serviço
+          </Button>
+        </ModalFormularioFooter>
+      </form>
+    </ModalFormulario>
   );
 }

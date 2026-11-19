@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/src/components/Ui/dialog';
+  ModalFormulario,
+  ModalFormularioBody,
+  ModalFormularioFooter,
+  ModalFormularioHeader,
+} from '@/src/components/Ui/modal-formulario';
 import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
-import { Label } from '@/src/components/Ui/label';
+import { Field, FieldGroup, FieldLabel } from '@/src/components/Ui/field';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/src/components/Ui/select';
+import { Spinner } from '@/src/components/Ui/spinner';
 import { toast } from 'sonner';
 import { getAndares } from '@/src/services/andares.service';
 import { createEquipamento } from '@/src/services/equipamentos.service';
@@ -32,6 +32,7 @@ interface EquipamentoModalClienteProps {
   setOpen: (open: boolean) => void;
   clienteId?: number;
   onSalvarEquipamento?: (equip: NovoEquipamentoData) => void;
+  onSucesso?: () => void;
 }
 
 export function EquipamentoModalCliente({
@@ -39,6 +40,7 @@ export function EquipamentoModalCliente({
   setOpen,
   clienteId,
   onSalvarEquipamento,
+  onSucesso,
 }: EquipamentoModalClienteProps) {
   const [savingEquip, setSavingEquip] = useState(false);
   const [andares, setAndares] = useState<Andar[]>([]);
@@ -116,6 +118,7 @@ export function EquipamentoModalCliente({
       toast.success('Equipamento cadastrado com sucesso!');
       resetNovoEquipamento();
       setOpen(false);
+      onSucesso?.();
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : 'Erro ao cadastrar equipamento';
@@ -126,20 +129,17 @@ export function EquipamentoModalCliente({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <DialogTitle>Cadastrar Equipamento</DialogTitle>
-          <DialogDescription>
-            Preencha os dados do equipamento para o cliente
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4 pt-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="equip-marca" className="text-xs">
-                Marca
-              </Label>
+    <ModalFormulario open={open} onOpenChange={setOpen} tamanho="md">
+      <ModalFormularioHeader
+        title="Cadastrar Equipamento"
+        description="Preencha os dados do equipamento para o cliente."
+      />
+
+      <ModalFormularioBody>
+        <FieldGroup className="gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel htmlFor="equip-marca">Marca</FieldLabel>
               <Input
                 id="equip-marca"
                 value={novoEquipamento.marca}
@@ -148,11 +148,10 @@ export function EquipamentoModalCliente({
                 }
                 placeholder="Ex: LG, Daikin, Midea"
               />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="equip-btus" className="text-xs">
-                BTUs
-              </Label>
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="equip-btus">BTUs</FieldLabel>
               <Input
                 id="equip-btus"
                 value={novoEquipamento.btus}
@@ -161,11 +160,10 @@ export function EquipamentoModalCliente({
                 }
                 placeholder="Ex: 9000, 12000"
               />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="equip-local" className="text-xs">
-                Local de Instalação
-              </Label>
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="equip-local">Local de Instalação</FieldLabel>
               <Input
                 id="equip-local"
                 value={novoEquipamento.local_instalacao}
@@ -177,11 +175,12 @@ export function EquipamentoModalCliente({
                 }
                 placeholder="Ex: Sala de Reunião 101"
               />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="equip-andar" className="text-xs">
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="equip-andar">
                 Andar <span className="text-destructive">*</span>
-              </Label>
+              </FieldLabel>
               <Select
                 value={
                   novoEquipamento.andar_id
@@ -206,19 +205,20 @@ export function EquipamentoModalCliente({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {andares.map((andar) => (
-                    <SelectItem key={andar.id} value={String(andar.id)}>
-                      {andar.descricao}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {andares.map((andar) => (
+                      <SelectItem key={andar.id} value={String(andar.id)}>
+                        {andar.descricao}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
-            </div>
+            </Field>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="equip-obs" className="text-xs">
-              Observação
-            </Label>
+
+          <Field>
+            <FieldLabel htmlFor="equip-obs">Observação</FieldLabel>
             <Input
               id="equip-obs"
               value={novoEquipamento.observacao}
@@ -230,26 +230,28 @@ export function EquipamentoModalCliente({
               }
               placeholder="Ex: Condensadora na fachada externa"
             />
-          </div>
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={savingEquip}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              onClick={handleAddEquipamento}
-              disabled={savingEquip}
-            >
-              {savingEquip ? 'Salvando...' : 'Cadastrar Equipamento'}
-            </Button>
-          </DialogFooter>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </Field>
+        </FieldGroup>
+      </ModalFormularioBody>
+
+      <ModalFormularioFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setOpen(false)}
+          disabled={savingEquip}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="button"
+          onClick={handleAddEquipamento}
+          disabled={savingEquip}
+        >
+          {savingEquip && <Spinner data-icon="inline-start" />}
+          {savingEquip ? 'Salvando...' : 'Cadastrar Equipamento'}
+        </Button>
+      </ModalFormularioFooter>
+    </ModalFormulario>
   );
 }

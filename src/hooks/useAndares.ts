@@ -112,8 +112,7 @@ export function useAndares() {
       fecharModalExcluir();
       await carregarAndares();
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : 'Erro ao excluir andar.';
+      const msg = err instanceof Error ? err.message : 'Erro ao excluir andar.';
       toast.error(msg);
     } finally {
       setExcluindo(false);

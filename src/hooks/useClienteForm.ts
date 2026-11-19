@@ -85,11 +85,13 @@ export function useClienteForm({
   const telefonesFieldArray = useFieldArray({
     control: form.control,
     name: 'telefones',
+    keyName: 'fieldKey',
   });
 
   const enderecosFieldArray = useFieldArray({
     control: form.control,
     name: 'enderecos',
+    keyName: 'fieldKey',
   });
 
   const consultarCep = async (index: number) => {
@@ -126,8 +128,8 @@ export function useClienteForm({
   };
 
   const removerTelefone = (index: number) => {
-    const item = telefonesFieldArray.fields[index];
-    if (item.id) {
+    const item = form.getValues(`telefones.${index}`);
+    if (item?.id) {
       telefonesFieldArray.update(index, { ...item, _destroy: true });
     } else {
       telefonesFieldArray.remove(index);
@@ -135,8 +137,8 @@ export function useClienteForm({
   };
 
   const removerEndereco = (index: number) => {
-    const item = enderecosFieldArray.fields[index];
-    if (item.id) {
+    const item = form.getValues(`enderecos.${index}`);
+    if (item?.id) {
       enderecosFieldArray.update(index, { ...item, _destroy: true });
     } else {
       enderecosFieldArray.remove(index);

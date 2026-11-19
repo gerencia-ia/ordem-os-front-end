@@ -106,7 +106,9 @@ export function useServicoForm({
   const adicionarValorPorAndar = () => {
     const atuais = form.getValues('valores_por_andares_attributes') || [];
     const andaresUsados = new Set(
-      atuais.filter((item) => !item._destroy).map((item) => Number(item.andar_id)),
+      atuais
+        .filter((item) => !item._destroy)
+        .map((item) => Number(item.andar_id)),
     );
     const proximoAndar = andares.find((a) => !andaresUsados.has(a.id));
 

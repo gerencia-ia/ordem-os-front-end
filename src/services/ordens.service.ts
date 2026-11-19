@@ -95,7 +95,10 @@ export async function addMaterialOrdem(
   ordemId: number | string,
   material: MaterialOrdemInput,
 ): Promise<OrdemServico> {
-  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/materiais`, material);
+  return apiPost<OrdemServico>(
+    `/ordem_servicos/${ordemId}/materiais`,
+    material,
+  );
 }
 
 export async function removeMaterialOrdem(

@@ -1,19 +1,24 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/src/components/Ui/dialog';
-import { Input } from '@/src/components/Ui/input';
+  ModalFormulario,
+  ModalFormularioBody,
+  ModalFormularioFooter,
+  ModalFormularioHeader,
+} from '@/src/components/Ui/modal-formulario';
 import { Button } from '@/src/components/Ui/button';
-import { Label } from '@/src/components/Ui/label';
+import { Badge } from '@/src/components/Ui/badge';
+import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import { Spinner } from '@/src/components/Ui/spinner';
 import { useClienteForm } from '@/src/hooks/useClienteForm';
+import { getEquipamentosByCliente } from '@/src/services/equipamentos.service';
 import type { Cliente } from '@/src/types/cliente';
-import { Plus, Trash2, Search, Loader2 } from 'lucide-react';
+import type { Equipamento } from '@/src/types/equipamento';
+import { ClienteModalCampos } from './ClienteModalCampos';
+import { EquipamentoModalCliente } from './EquipamentoModalCliente';
+import { Cpu, Plus } from 'lucide-react';
 
 interface ClienteModalEdicaoProps {
   cliente: Cliente | null;
@@ -31,6 +36,11 @@ function ClienteModalEdicaoForm({
   onOpenChange: (aberto: boolean) => void;
   onSucesso: () => void;
 }) {
+  const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
+  const [loadingEquipamentos, setLoadingEquipamentos] = useState(true);
+  const [versaoEquipamentos, setVersaoEquipamentos] = useState(0);
+  const [modalEquipAberto, setModalEquipAberto] = useState(false);
+
   const {
     form,
     telefonesFieldArray,
@@ -49,109 +59,67 @@ function ClienteModalEdicaoForm({
     },
   });
 
-  const {
-    register,
-    formState: { errors },
-  } = form;
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarEquipamentos() {
+      try {
+        const lista = await getEquipamentosByCliente(cliente.id);
+        if (ativo) {
+          setEquipamentos(lista);
+        }
+      } catch {
+        if (ativo) {
+          setEquipamentos([]);
+        }
+      } finally {
+        if (ativo) {
+          setLoadingEquipamentos(false);
+        }
+      }
+    }
+
+    void carregarEquipamentos();
+
+    return () => {
+      ativo = false;
+    };
+  }, [cliente.id, versaoEquipamentos]);
 
   const telefonesAtivos = telefonesFieldArray.fields
-    .map((field, index) => ({ field, index }))
-    .filter(({ field }) => !field._destroy);
+    .map((field, index) => ({
+      id: field.fieldKey,
+      index,
+      destroy: field._destroy,
+    }))
+    .filter((item) => !item.destroy);
 
   const enderecosAtivos = enderecosFieldArray.fields
-    .map((field, index) => ({ field, index }))
-    .filter(({ field }) => !field._destroy);
+    .map((field, index) => ({
+      id: field.fieldKey,
+      index,
+      destroy: field._destroy,
+    }))
+    .filter((item) => !item.destroy);
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6 pt-2">
-      {/* Dados Básicos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1.5 md:col-span-2">
-          <Label htmlFor="edit-nome">
-            Nome Completo <span className="text-destructive">*</span>
-          </Label>
-          <Input id="edit-nome" placeholder="Nome" {...register('nome')} />
-          {errors.nome && (
-            <p className="text-xs text-destructive">{errors.nome.message}</p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="edit-email">Email</Label>
-          <Input
-            id="edit-email"
-            type="email"
-            placeholder="Email"
-            {...register('email')}
-          />
-          {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="edit-data-visita">Data da Última Visita</Label>
-          <Input
-            id="edit-data-visita"
-            type="date"
-            {...register('data_ultima_visita')}
-          />
-        </div>
-      </div>
-
-      {/* Telefones */}
-      <div className="flex flex-col gap-3 border-t pt-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">Telefones</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => telefonesFieldArray.append({ numero: '' })}
-            className="h-7 text-xs gap-1"
-          >
-            <Plus className="size-3.5" /> Adicionar Telefone
-          </Button>
-        </div>
-
-        {telefonesAtivos.map(({ field, index }) => (
-          <div key={field.id} className="flex items-center gap-2">
-            <div className="flex-1">
-              <Input
-                placeholder="(11) 98765-4321"
-                {...register(`telefones.${index}.numero`)}
-              />
-              {errors.telefones?.[index]?.numero && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.telefones[index]?.numero?.message}
-                </p>
-              )}
-            </div>
-            {telefonesAtivos.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removerTelefone(index)}
-                className="size-9 text-muted-foreground hover:text-destructive shrink-0"
-                title="Remover telefone"
-              >
-                <Trash2 className="size-4" />
-              </Button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Endereços */}
-      <div className="flex flex-col gap-4 border-t pt-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">Endereços</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
+    <>
+      <form
+        onSubmit={onSubmit}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+      >
+        <ModalFormularioBody className="flex flex-col gap-6">
+          <ClienteModalCampos
+            form={form}
+            idPrefix="edit-"
+            telefonesAtivos={telefonesAtivos}
+            enderecosAtivos={enderecosAtivos}
+            buscandoCep={buscandoCep}
+            onAdicionarTelefone={() =>
+              telefonesFieldArray.append({ numero: '' })
+            }
+            onRemoverTelefone={removerTelefone}
+            onAdicionarEndereco={() =>
               enderecosFieldArray.append({
                 cep: '',
                 rua: '',
@@ -161,146 +129,87 @@ function ClienteModalEdicaoForm({
                 cidade: '',
               })
             }
-            className="h-7 text-xs gap-1"
-          >
-            <Plus className="size-3.5" /> Adicionar Endereço
-          </Button>
-        </div>
+            onRemoverEndereco={removerEndereco}
+            onConsultarCep={consultarCep}
+          />
 
-        {enderecosAtivos.map(({ field, index }) => (
-          <div
-            key={field.id}
-            className="p-3 border rounded-md bg-muted/20 flex flex-col gap-3 relative"
-          >
-            {enderecosAtivos.length > 1 && (
+          <CardColapsavel
+            titulo="Equipamentos Vinculados"
+            icone={<Cpu className="size-4 text-primary" />}
+            resumo={
+              loadingEquipamentos
+                ? 'Carregando...'
+                : `${equipamentos.length} equipamento(s)`
+            }
+            defaultOpenMobile={false}
+            headerAction={
               <Button
                 type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removerEndereco(index)}
-                className="absolute top-2 right-2 size-7 text-muted-foreground hover:text-destructive"
-                title="Remover endereço"
+                variant="outline"
+                size="sm"
+                onClick={() => setModalEquipAberto(true)}
+                className="h-7 gap-1 text-xs"
               >
-                <Trash2 className="size-3.5" />
+                <Plus className="size-3.5" /> Adicionar
+                <span className="hidden sm:inline">Equipamento</span>
               </Button>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="flex flex-col gap-1">
-                <Label className="text-xs">CEP</Label>
-                <div className="flex gap-1.5">
-                  <Input
-                    placeholder="00000-000"
-                    {...register(`enderecos.${index}.cep`, {
-                      onBlur: () => consultarCep(index),
-                    })}
-                  />
-                  <Button
-                    type="button"
+            }
+            className="bg-card/40 border-border/70"
+            contentClassName="flex flex-col gap-2.5"
+          >
+            {loadingEquipamentos ? (
+              <Skeleton className="h-10 w-full" />
+            ) : equipamentos.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {equipamentos.map((eq) => (
+                  <Badge
+                    key={eq.id}
                     variant="secondary"
-                    size="icon"
-                    onClick={() => consultarCep(index)}
-                    disabled={buscandoCep === index}
-                    className="shrink-0"
-                    title="Buscar CEP"
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-normal"
                   >
-                    {buscandoCep === index ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Search className="size-4" />
-                    )}
-                  </Button>
-                </div>
+                    <span className="font-medium">{eq.marca}</span>
+                    <span>• {eq.btus} BTUs</span>
+                    <span className="text-muted-foreground">
+                      ({eq.local_instalacao}
+                      {eq.andar?.descricao ? ` — ${eq.andar.descricao}` : ''})
+                    </span>
+                  </Badge>
+                ))}
               </div>
+            ) : (
+              <p className="text-muted-foreground/70 text-xs italic">
+                Nenhum equipamento vinculado a este cliente.
+              </p>
+            )}
+          </CardColapsavel>
+        </ModalFormularioBody>
 
-              <div className="flex flex-col gap-1 md:col-span-2">
-                <Label className="text-xs">Rua / Logradouro *</Label>
-                <Input
-                  placeholder="Rua das Flores"
-                  {...register(`enderecos.${index}.rua`)}
-                />
-                {errors.enderecos?.[index]?.rua && (
-                  <p className="text-xs text-destructive">
-                    {errors.enderecos[index]?.rua?.message}
-                  </p>
-                )}
-              </div>
-            </div>
+        <ModalFormularioFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={salvando}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={salvando}>
+            {salvando && <Spinner data-icon="inline-start" />}
+            {salvando ? 'Salvando...' : 'Salvar Alterações'}
+          </Button>
+        </ModalFormularioFooter>
+      </form>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="flex flex-col gap-1">
-                <Label className="text-xs">Número *</Label>
-                <Input
-                  placeholder="123"
-                  {...register(`enderecos.${index}.numero`)}
-                />
-                {errors.enderecos?.[index]?.numero && (
-                  <p className="text-xs text-destructive">
-                    {errors.enderecos[index]?.numero?.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <Label className="text-xs">Bairro *</Label>
-                <Input
-                  placeholder="Centro"
-                  {...register(`enderecos.${index}.bairro`)}
-                />
-                {errors.enderecos?.[index]?.bairro && (
-                  <p className="text-xs text-destructive">
-                    {errors.enderecos[index]?.bairro?.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <Label className="text-xs">Cidade *</Label>
-                <Input
-                  placeholder="São Paulo"
-                  {...register(`enderecos.${index}.cidade`)}
-                />
-                {errors.enderecos?.[index]?.cidade && (
-                  <p className="text-xs text-destructive">
-                    {errors.enderecos[index]?.cidade?.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <Label className="text-xs">Complemento</Label>
-                <Input
-                  placeholder="Apto 101"
-                  {...register(`enderecos.${index}.complemento`)}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Ações */}
-      <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => onOpenChange(false)}
-          disabled={salvando}
-        >
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={salvando}>
-          {salvando ? (
-            <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
-              Salvando...
-            </>
-          ) : (
-            'Salvar Alterações'
-          )}
-        </Button>
-      </DialogFooter>
-    </form>
+      <EquipamentoModalCliente
+        open={modalEquipAberto}
+        setOpen={setModalEquipAberto}
+        clienteId={cliente.id}
+        onSucesso={() => {
+          setLoadingEquipamentos(true);
+          setVersaoEquipamentos((v) => v + 1);
+        }}
+      />
+    </>
   );
 }
 
@@ -313,22 +222,18 @@ export function ClienteModalEdicao({
   if (!cliente) return null;
 
   return (
-    <Dialog open={aberto} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Editar Cliente: {cliente.nome}</DialogTitle>
-          <DialogDescription>
-            Atualize os dados cadastrais, telefones ou endereços do cliente.
-          </DialogDescription>
-        </DialogHeader>
+    <ModalFormulario open={aberto} onOpenChange={onOpenChange} tamanho="lg">
+      <ModalFormularioHeader
+        title={`Editar Cliente: ${cliente.nome}`}
+        description="Atualize os dados cadastrais, telefones, endereços ou equipamentos do cliente."
+      />
 
-        <ClienteModalEdicaoForm
-          key={cliente.id}
-          cliente={cliente}
-          onOpenChange={onOpenChange}
-          onSucesso={onSucesso}
-        />
-      </DialogContent>
-    </Dialog>
+      <ClienteModalEdicaoForm
+        key={cliente.id}
+        cliente={cliente}
+        onOpenChange={onOpenChange}
+        onSucesso={onSucesso}
+      />
+    </ModalFormulario>
   );
 }

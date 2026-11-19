@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import type { OrdemServico, OsEquipamentoItem, Status } from '@/src/types/ordem';
+import type {
+  OrdemServico,
+  OsEquipamentoItem,
+  Status,
+} from '@/src/types/ordem';
 import type { Servico } from '@/src/types/servico';
 import type { Material, MaterialOrdemInput } from '@/src/types/material';
 import type { Usuario } from '@/src/types/usuario';
@@ -73,14 +77,18 @@ export function useOrdemDetalhe(ordemId: string | number) {
   >(null);
 
   // Materiais da OS
-  const [materiaisDisponiveis, setMateriaisDisponiveis] = useState<Material[]>([]);
+  const [materiaisDisponiveis, setMateriaisDisponiveis] = useState<Material[]>(
+    [],
+  );
   const [materiaisLoading, setMateriaisLoading] = useState(false);
   const [modalMaterialAberta, setModalMaterialAberta] = useState(false);
   const [materialIdInput, setMaterialIdInput] = useState('avulso');
   const [materialNomeInput, setMaterialNomeInput] = useState('');
   const [materialValorInput, setMaterialValorInput] = useState('');
   const [materialSaving, setMaterialSaving] = useState(false);
-  const [remocaoMaterialId, setRemocaoMaterialId] = useState<number | null>(null);
+  const [remocaoMaterialId, setRemocaoMaterialId] = useState<number | null>(
+    null,
+  );
 
   // Modal Técnico
   const [modalTecnicoAberta, setModalTecnicoAberta] = useState(false);
@@ -338,7 +346,9 @@ export function useOrdemDetalhe(ordemId: string | number) {
   const abrirModalAdicionarServico = () => {
     const eqUnico =
       ordem?.equipamentos.length === 1
-        ? String(ordem.equipamentos[0].equipamento_id || ordem.equipamentos[0].id)
+        ? String(
+            ordem.equipamentos[0].equipamento_id || ordem.equipamentos[0].id,
+          )
         : '';
     setEquipamentoIdInput(eqUnico);
     setServicoIdInput('');
@@ -374,7 +384,9 @@ export function useOrdemDetalhe(ordemId: string | number) {
       const qtd = quantidadeInput === '' ? undefined : Number(quantidadeInput);
       await addServicoOrdem(ordem.id, {
         equipamento_id: equipId,
-        ...(valorPorAndar ? { valor_por_andar_id: valorPorAndar.id } : { servico_id: servicoId }),
+        ...(valorPorAndar
+          ? { valor_por_andar_id: valorPorAndar.id }
+          : { servico_id: servicoId }),
         quantidade: qtd,
       });
       toast.success('Serviço adicionado com sucesso!');
@@ -412,16 +424,25 @@ export function useOrdemDetalhe(ordemId: string | number) {
     setModalMaterialAberta(true);
     if (materiaisDisponiveis.length > 0) return;
     setMateriaisLoading(true);
-    void getMateriais().then(setMateriaisDisponiveis).catch(() => {
-      toast.error('Não foi possível carregar o catálogo de materiais.');
-    }).finally(() => setMateriaisLoading(false));
+    void getMateriais()
+      .then(setMateriaisDisponiveis)
+      .catch(() => {
+        toast.error('Não foi possível carregar o catálogo de materiais.');
+      })
+      .finally(() => setMateriaisLoading(false));
   };
 
   const selecionarMaterial = (id: string) => {
     setMaterialIdInput(id);
-    const material = materiaisDisponiveis.find((item) => String(item.id) === id);
+    const material = materiaisDisponiveis.find(
+      (item) => String(item.id) === id,
+    );
     setMaterialNomeInput(material?.nome ?? '');
-    setMaterialValorInput(material?.valor_referencia == null ? '' : String(material.valor_referencia));
+    setMaterialValorInput(
+      material?.valor_referencia == null
+        ? ''
+        : String(material.valor_referencia),
+    );
   };
 
   const fecharModalAdicionarMaterial = () => {
@@ -432,11 +453,13 @@ export function useOrdemDetalhe(ordemId: string | number) {
   };
 
   const salvarMaterial = async () => {
-    if (!ordem || !materialNomeInput.trim() || materialValorInput.trim() === '') return;
+    if (!ordem || !materialNomeInput.trim() || materialValorInput.trim() === '')
+      return;
     const valor = Number(materialValorInput);
     if (!Number.isFinite(valor) || valor < 0) return;
     const input: MaterialOrdemInput = {
-      material_id: materialIdInput === 'avulso' ? null : Number(materialIdInput),
+      material_id:
+        materialIdInput === 'avulso' ? null : Number(materialIdInput),
       nome_material: materialNomeInput.trim(),
       valor,
     };
@@ -447,7 +470,9 @@ export function useOrdemDetalhe(ordemId: string | number) {
       fecharModalAdicionarMaterial();
       await carregarOrdem();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao lançar material.');
+      toast.error(
+        err instanceof Error ? err.message : 'Erro ao lançar material.',
+      );
     } finally {
       setMaterialSaving(false);
     }
@@ -461,7 +486,9 @@ export function useOrdemDetalhe(ordemId: string | number) {
       toast.success('Material removido da ordem de serviço.');
       await carregarOrdem();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao remover material.');
+      toast.error(
+        err instanceof Error ? err.message : 'Erro ao remover material.',
+      );
     } finally {
       setRemocaoMaterialId(null);
     }

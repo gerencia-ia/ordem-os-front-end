@@ -1,16 +1,27 @@
 'use client';
 
-import { Controller, type Control, type FieldErrors, type UseFormRegister } from 'react-hook-form';
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+} from 'react-hook-form';
 import { Button } from '@/src/components/Ui/button';
 import { Input } from '@/src/components/Ui/input';
-import { Label } from '@/src/components/Ui/label';
+import { FieldLabel } from '@/src/components/Ui/field';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/src/components/Ui/select';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+} from '@/src/components/Ui/empty';
 import { Plus, Trash2, Layers } from 'lucide-react';
 import type { Andar } from '@/src/types/andar';
 import type { ServicoFormData } from '@/src/types/servico';
@@ -50,35 +61,43 @@ export function ServicoValoresPorAndarCampos({
 
   return (
     <div className="flex flex-col gap-2.5 pt-1">
-      <div className="flex items-center justify-between">
-        <Label className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <FieldLabel className="flex items-center gap-1.5">
           <Layers className="size-3.5 text-muted-foreground" />
-          Valores por Andar
-        </Label>
+          <span>Valores por Andar</span>
+        </FieldLabel>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={onAdicionar}
           disabled={salvando || carregandoAndares || andares.length === 0}
-          className="h-7 text-xs gap-1"
+          className="h-7 gap-1 text-xs"
         >
           <Plus className="size-3.5" /> Adicionar Andar
         </Button>
       </div>
 
       {andares.length === 0 && !carregandoAndares ? (
-        <p className="text-xs text-muted-foreground italic border rounded-md p-3">
-          Nenhum andar cadastrado. Cadastre andares em Configurações &gt;
-          Andares para definir preços.
-        </p>
+        <Empty className="gap-2 border p-4 md:p-4">
+          <EmptyHeader>
+            <EmptyDescription className="text-xs">
+              Nenhum andar cadastrado. Cadastre andares em Configurações &gt;
+              Andares para definir preços.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : itensAtivos.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic border border-dashed rounded-md p-3 text-center">
-          Nenhum valor por andar configurado. Clique em &quot;Adicionar
-          Andar&quot; para definir o preço deste serviço por pavimento.
-        </p>
+        <Empty className="gap-2 border p-4 md:p-4">
+          <EmptyHeader>
+            <EmptyDescription className="text-xs">
+              Nenhum valor por andar configurado. Clique em &quot;Adicionar
+              Andar&quot; para definir o preço deste serviço por pavimento.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
-        <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1">
+        <div className="flex max-h-56 flex-col gap-2 overflow-y-auto overscroll-contain pr-1">
           {fields.map((field, index) => {
             if (field._destroy) return null;
 
@@ -87,9 +106,9 @@ export function ServicoValoresPorAndarCampos({
             return (
               <div
                 key={field.fieldKey}
-                className="flex flex-col gap-1 border rounded-md p-2.5 bg-muted/20"
+                className="bg-muted/20 flex flex-col gap-1.5 rounded-md border p-2.5"
               >
-                <div className="flex items-start gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <div className="flex-1">
                     <Controller
                       control={control}
@@ -104,53 +123,57 @@ export function ServicoValoresPorAndarCampos({
                           }
                           disabled={salvando || carregandoAndares}
                         >
-                          <SelectTrigger className="w-full h-9 text-xs">
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Selecione o andar" />
                           </SelectTrigger>
                           <SelectContent>
-                            {andares.map((andar) => (
-                              <SelectItem
-                                key={andar.id}
-                                value={String(andar.id)}
-                              >
-                                {andar.descricao}
-                              </SelectItem>
-                            ))}
+                            <SelectGroup>
+                              {andares.map((andar) => (
+                                <SelectItem
+                                  key={andar.id}
+                                  value={String(andar.id)}
+                                >
+                                  {andar.descricao}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
                           </SelectContent>
                         </Select>
                       )}
                     />
                   </div>
 
-                  <div className="w-32">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="R$ 0,00"
-                      className="h-9 text-xs"
-                      {...register(
-                        `valores_por_andares_attributes.${index}.valor`,
-                      )}
-                      disabled={salvando}
-                    />
-                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 sm:w-32 sm:flex-none">
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        placeholder="R$ 0,00"
+                        {...register(
+                          `valores_por_andares_attributes.${index}.valor`,
+                        )}
+                        disabled={salvando}
+                      />
+                    </div>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-9 text-muted-foreground hover:text-destructive shrink-0"
-                    onClick={() => onRemover(index)}
-                    disabled={salvando}
-                    aria-label="Remover valor do andar"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive shrink-0"
+                      onClick={() => onRemover(index)}
+                      disabled={salvando}
+                      aria-label="Remover valor do andar"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 {(erroItem?.andar_id || erroItem?.valor) && (
-                  <p className="text-xs text-destructive">
+                  <p className="text-destructive text-xs">
                     {erroItem?.andar_id?.message || erroItem?.valor?.message}
                   </p>
                 )}

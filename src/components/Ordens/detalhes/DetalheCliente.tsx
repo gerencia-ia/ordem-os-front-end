@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/Ui/card';
+import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
 import { Button } from '@/src/components/Ui/button';
 import { User, Phone, MapPin, MessageCircle } from 'lucide-react';
 import type { Cliente } from '@/src/types/cliente';
@@ -27,66 +22,62 @@ export function DetalheCliente({
   const enderecoPrincipal = endereco || cliente?.enderecos?.[0];
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <User className="size-5 text-muted-foreground" />
-          Cliente
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3">
-          <div>
-            <span className="text-xs text-muted-foreground block">Nome</span>
-            <p className="font-semibold text-sm">
-              {cliente?.nome || 'Não informado'}
-            </p>
-          </div>
-
-          <div>
-            <span className="text-xs text-muted-foreground block">
-              Telefone
-            </span>
-            <p className="font-medium text-sm flex items-center gap-1.5 mt-0.5">
-              <Phone className="size-3.5 text-muted-foreground" />
-              {telefone ? formatarTelefone(telefone) : '—'}
-            </p>
-          </div>
-
-          <div>
-            <span className="text-xs text-muted-foreground block">
-              Endereço do Atendimento
-            </span>
-            <p className="font-medium text-sm flex items-start gap-1.5 mt-0.5 text-muted-foreground">
-              <MapPin className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
-              <span>
-                {enderecoPrincipal
-                  ? `${enderecoPrincipal.rua}, ${enderecoPrincipal.numero}${
-                      enderecoPrincipal.complemento
-                        ? ` (${enderecoPrincipal.complemento})`
-                        : ''
-                    } - ${enderecoPrincipal.bairro}${
-                      enderecoPrincipal.cidade
-                        ? `, ${enderecoPrincipal.cidade}`
-                        : ''
-                    }`
-                  : '—'}
-              </span>
-            </p>
-          </div>
+    <CardColapsavel
+      titulo={<span className="text-base sm:text-lg">Cliente</span>}
+      icone={<User className="text-muted-foreground size-5" />}
+      resumo={cliente?.nome || 'Não informado'}
+      defaultOpenMobile={false}
+      contentClassName="flex flex-col gap-4"
+    >
+      <div className="flex flex-col gap-3">
+        <div>
+          <span className="text-xs text-muted-foreground block">Nome</span>
+          <p className="font-semibold text-sm">
+            {cliente?.nome || 'Não informado'}
+          </p>
         </div>
 
-        <Button
-          type="button"
-          className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-          onClick={onContatarWhatsApp}
-          disabled={!telefone}
-        >
-          <MessageCircle className="size-4" />
-          Contatar via WhatsApp
-        </Button>
-      </CardContent>
-    </Card>
+        <div>
+          <span className="text-xs text-muted-foreground block">Telefone</span>
+          <p className="font-medium text-sm flex items-center gap-1.5 mt-0.5">
+            <Phone className="size-3.5 text-muted-foreground" />
+            {telefone ? formatarTelefone(telefone) : '—'}
+          </p>
+        </div>
+
+        <div>
+          <span className="text-xs text-muted-foreground block">
+            Endereço do Atendimento
+          </span>
+          <p className="font-medium text-sm flex items-start gap-1.5 mt-0.5 text-muted-foreground">
+            <MapPin className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
+            <span>
+              {enderecoPrincipal
+                ? `${enderecoPrincipal.rua}, ${enderecoPrincipal.numero}${
+                    enderecoPrincipal.complemento
+                      ? ` (${enderecoPrincipal.complemento})`
+                      : ''
+                  } - ${enderecoPrincipal.bairro}${
+                    enderecoPrincipal.cidade
+                      ? `, ${enderecoPrincipal.cidade}`
+                      : ''
+                  }`
+                : '—'}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <Button
+        type="button"
+        variant="success"
+        className="w-full gap-2"
+        onClick={onContatarWhatsApp}
+        disabled={!telefone}
+      >
+        <MessageCircle className="size-4" />
+        Contatar via WhatsApp
+      </Button>
+    </CardColapsavel>
   );
 }

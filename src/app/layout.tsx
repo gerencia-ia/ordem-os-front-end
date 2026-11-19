@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { Providers } from '@/src/providers';
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   title: 'OSControl - Ordem de Serviço',
   description: 'Sistema profissional de gerenciamento de ordens de serviço',
   generator: 'v0.app',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({

@@ -12,26 +12,30 @@ import {
 import { getAndares } from '@/src/services/andares.service';
 import { createEquipamento } from '@/src/services/equipamentos.service';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/components/Ui/dialog';
+  ModalFormulario,
+  ModalFormularioBody,
+  ModalFormularioFooter,
+  ModalFormularioHeader,
+} from '@/src/components/Ui/modal-formulario';
 import { Input } from '@/src/components/Ui/input';
 import { Button } from '@/src/components/Ui/button';
-import { Label } from '@/src/components/Ui/label';
 import { Textarea } from '@/src/components/Ui/textarea';
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/src/components/Ui/field';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/src/components/Ui/select';
+import { Spinner } from '@/src/components/Ui/spinner';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
 
 interface EquipamentoModalCadastroProps {
   aberto: boolean;
@@ -129,132 +133,128 @@ export function EquipamentoModalCadastro({
   };
 
   return (
-    <Dialog open={aberto} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Novo Equipamento</DialogTitle>
-          <DialogDescription>
-            Cadastre um equipamento para vinculá-lo a esta ordem de serviço.
-          </DialogDescription>
-        </DialogHeader>
+    <ModalFormulario open={aberto} onOpenChange={onOpenChange} tamanho="sm">
+      <ModalFormularioHeader
+        title="Novo Equipamento"
+        description="Cadastre um equipamento para vinculá-lo a esta ordem de serviço."
+      />
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 py-2"
-        >
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="eq-marca">
-              Marca / Modelo <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="eq-marca"
-              placeholder="Ex: LG Dual Inverter"
-              {...register('marca')}
-            />
-            {errors.marca && (
-              <p className="text-xs text-destructive">{errors.marca.message}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="eq-btus">
-                Capacidade / BTUs <span className="text-destructive">*</span>
-              </Label>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+      >
+        <ModalFormularioBody>
+          <FieldGroup className="gap-4">
+            <Field data-invalid={Boolean(errors.marca)}>
+              <FieldLabel htmlFor="eq-marca">
+                Marca / Modelo <span className="text-destructive">*</span>
+              </FieldLabel>
               <Input
-                id="eq-btus"
-                placeholder="Ex: 12.000 BTUs"
-                {...register('btus')}
+                id="eq-marca"
+                placeholder="Ex: LG Dual Inverter"
+                aria-invalid={Boolean(errors.marca)}
+                {...register('marca')}
               />
-              {errors.btus && (
-                <p className="text-xs text-destructive">
-                  {errors.btus.message}
-                </p>
-              )}
+              <FieldError errors={[errors.marca]} />
+            </Field>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field data-invalid={Boolean(errors.btus)}>
+                <FieldLabel htmlFor="eq-btus">
+                  Capacidade / BTUs <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="eq-btus"
+                  placeholder="Ex: 12.000 BTUs"
+                  aria-invalid={Boolean(errors.btus)}
+                  {...register('btus')}
+                />
+                <FieldError errors={[errors.btus]} />
+              </Field>
+
+              <Field data-invalid={Boolean(errors.local_instalacao)}>
+                <FieldLabel htmlFor="eq-local">
+                  Local de Instalação{' '}
+                  <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="eq-local"
+                  placeholder="Ex: Sala de Reunião"
+                  aria-invalid={Boolean(errors.local_instalacao)}
+                  {...register('local_instalacao')}
+                />
+                <FieldError errors={[errors.local_instalacao]} />
+              </Field>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="eq-local">
-                Local de Instalação <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="eq-local"
-                placeholder="Ex: Sala de Reunião"
-                {...register('local_instalacao')}
+            <Field data-invalid={Boolean(errors.andar_id)}>
+              <FieldLabel htmlFor="eq-andar">
+                Andar <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Controller
+                control={control}
+                name="andar_id"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ? String(field.value) : ''}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    disabled={salvando || carregandoAndares}
+                  >
+                    <SelectTrigger
+                      id="eq-andar"
+                      className="w-full"
+                      aria-invalid={Boolean(errors.andar_id)}
+                    >
+                      <SelectValue
+                        placeholder={
+                          carregandoAndares
+                            ? 'Carregando andares...'
+                            : 'Selecione o andar'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {andares.map((andar) => (
+                          <SelectItem key={andar.id} value={String(andar.id)}>
+                            {andar.descricao}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
               />
-              {errors.local_instalacao && (
-                <p className="text-xs text-destructive">
-                  {errors.local_instalacao.message}
-                </p>
-              )}
-            </div>
-          </div>
+              <FieldError errors={[errors.andar_id]} />
+            </Field>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="eq-andar">
-              Andar <span className="text-destructive">*</span>
-            </Label>
-            <Controller
-              control={control}
-              name="andar_id"
-              render={({ field }) => (
-                <Select
-                  value={field.value ? String(field.value) : ''}
-                  onValueChange={(val) => field.onChange(Number(val))}
-                  disabled={salvando || carregandoAndares}
-                >
-                  <SelectTrigger id="eq-andar" className="w-full">
-                    <SelectValue
-                      placeholder={
-                        carregandoAndares
-                          ? 'Carregando andares...'
-                          : 'Selecione o andar'
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {andares.map((andar) => (
-                      <SelectItem key={andar.id} value={String(andar.id)}>
-                        {andar.descricao}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.andar_id && (
-              <p className="text-xs text-destructive">
-                {errors.andar_id.message}
-              </p>
-            )}
-          </div>
+            <Field>
+              <FieldLabel htmlFor="eq-obs">Observações Adicionais</FieldLabel>
+              <Textarea
+                id="eq-obs"
+                placeholder="Ex: Unidade condensadora no telhado"
+                rows={2}
+                {...register('observacao')}
+              />
+            </Field>
+          </FieldGroup>
+        </ModalFormularioBody>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="eq-obs">Observações Adicionais</Label>
-            <Textarea
-              id="eq-obs"
-              placeholder="Ex: Unidade condensadora no telhado"
-              rows={2}
-              {...register('observacao')}
-            />
-          </div>
-
-          <DialogFooter className="pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={salvando}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={salvando}>
-              {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Adicionar Equipamento
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <ModalFormularioFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={salvando}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={salvando}>
+            {salvando && <Spinner data-icon="inline-start" />}
+            Adicionar Equipamento
+          </Button>
+        </ModalFormularioFooter>
+      </form>
+    </ModalFormulario>
   );
 }

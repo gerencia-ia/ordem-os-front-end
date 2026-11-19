@@ -1,13 +1,11 @@
 'use client';
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/components/Ui/dialog';
+  ModalFormulario,
+  ModalFormularioBody,
+  ModalFormularioFooter,
+  ModalFormularioHeader,
+} from '@/src/components/Ui/modal-formulario';
 import { Button } from '@/src/components/Ui/button';
 import {
   Table,
@@ -47,24 +45,19 @@ export function OrdemModalHistoricoLaudos({
   loading,
 }: OrdemModalHistoricoLaudosProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Histórico de Laudos do Equipamento</DialogTitle>
-          <DialogDescription>
-            {equipamento ? (
-              <span>
-                {equipamento.marca} ({equipamento.btus} BTUs) —{' '}
-                {equipamento.local_instalacao}
-              </span>
-            ) : (
-              'Selecione um equipamento.'
-            )}
-          </DialogDescription>
-        </DialogHeader>
+    <ModalFormulario open={open} onOpenChange={onOpenChange} tamanho="2xl">
+      <ModalFormularioHeader
+        title="Histórico de Laudos do Equipamento"
+        description={
+          equipamento
+            ? `${equipamento.marca} (${equipamento.btus} BTUs) — ${equipamento.local_instalacao}`
+            : 'Selecione um equipamento.'
+        }
+      />
 
+      <ModalFormularioBody>
         {loading ? (
-          <div className="rounded-md border overflow-hidden mt-4">
+          <div className="overflow-hidden rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
@@ -95,51 +88,82 @@ export function OrdemModalHistoricoLaudos({
             </Table>
           </div>
         ) : laudos.length > 0 ? (
-          <div className="mt-4 rounded-md border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="w-[140px]">Data Fechamento</TableHead>
-                  <TableHead>Parecer do Laudo</TableHead>
-                  <TableHead className="w-[80px]">OS</TableHead>
-                  <TableHead className="w-[120px]">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {laudos.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-muted/30">
-                    <TableCell className="text-xs font-mono text-muted-foreground whitespace-nowrap">
-                      {item.ordem_servico?.data_fechamento
-                        ? formatarDataHoraCurta(
-                            item.ordem_servico.data_fechamento,
-                          )
-                        : formatarDataHoraCurta(item.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-xs leading-relaxed line-clamp-3">
-                        {item.laudo}
-                      </p>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      <span className="text-xs font-semibold">
-                        #{item.ordem_servico?.id || '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      <StatusBadge
-                        status={item.ordem_servico?.status || 'Registrado'}
-                        className="text-xs"
-                      />
-                    </TableCell>
+          <>
+            {/* Cards empilhados no mobile */}
+            <div className="flex flex-col gap-3 md:hidden">
+              {laudos.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-card/60 flex flex-col gap-2 rounded-lg border p-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold">
+                      OS #{item.ordem_servico?.id || '-'}
+                    </span>
+                    <StatusBadge
+                      status={item.ordem_servico?.status || 'Registrado'}
+                      className="text-xs"
+                    />
+                  </div>
+                  <p className="text-xs leading-relaxed">{item.laudo}</p>
+                  <span className="text-muted-foreground font-mono text-[11px]">
+                    {item.ordem_servico?.data_fechamento
+                      ? formatarDataHoraCurta(
+                          item.ordem_servico.data_fechamento,
+                        )
+                      : formatarDataHoraCurta(item.created_at)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Tabela no desktop */}
+            <div className="hidden overflow-hidden rounded-md border md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-[140px]">Data Fechamento</TableHead>
+                    <TableHead>Parecer do Laudo</TableHead>
+                    <TableHead className="w-[80px]">OS</TableHead>
+                    <TableHead className="w-[120px]">Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {laudos.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-muted/30">
+                      <TableCell className="text-muted-foreground font-mono text-xs whitespace-nowrap">
+                        {item.ordem_servico?.data_fechamento
+                          ? formatarDataHoraCurta(
+                              item.ordem_servico.data_fechamento,
+                            )
+                          : formatarDataHoraCurta(item.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <p className="line-clamp-3 text-xs leading-relaxed">
+                          {item.laudo}
+                        </p>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <span className="text-xs font-semibold">
+                          #{item.ordem_servico?.id || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <StatusBadge
+                          status={item.ordem_servico?.status || 'Registrado'}
+                          className="text-xs"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         ) : (
-          <Empty className="border rounded-lg bg-card/40 my-4">
+          <Empty className="bg-card/40 rounded-lg border">
             <EmptyMedia variant="icon">
-              <History className="size-5 text-muted-foreground" />
+              <History className="text-muted-foreground size-5" />
             </EmptyMedia>
             <EmptyHeader>
               <EmptyTitle>Nenhum laudo anterior</EmptyTitle>
@@ -149,17 +173,17 @@ export function OrdemModalHistoricoLaudos({
             </EmptyHeader>
           </Empty>
         )}
+      </ModalFormularioBody>
 
-        <DialogFooter className="mt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Fechar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <ModalFormularioFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+        >
+          Fechar
+        </Button>
+      </ModalFormularioFooter>
+    </ModalFormulario>
   );
 }
