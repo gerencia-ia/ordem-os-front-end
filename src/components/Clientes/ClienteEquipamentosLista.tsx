@@ -76,7 +76,10 @@ export function ClienteEquipamentosLista({
         return (
           <Fragment key={eq.id ?? `equip-mem-${index}`}>
             {index > 0 && <ItemSeparator />}
-            <Item size="sm" className="flex-nowrap items-center gap-3 px-3 py-2.5">
+            <Item
+              size="sm"
+              className="flex-nowrap items-center gap-3 px-3 py-2.5"
+            >
               <ItemMedia variant="icon" className="text-primary">
                 <AirVent />
               </ItemMedia>

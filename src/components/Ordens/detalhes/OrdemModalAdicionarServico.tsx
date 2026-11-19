@@ -31,6 +31,7 @@ import {
 import { Spinner } from '@/src/components/Ui/spinner';
 import type { OsEquipamentoItem } from '@/src/types/ordem';
 import type { Servico } from '@/src/types/servico';
+import { formatarDuracaoHHMM } from '@/src/utils/date';
 
 interface OrdemModalAdicionarServicoProps {
   open: boolean;
@@ -101,7 +102,7 @@ export function OrdemModalAdicionarServico({
               })}`
             : undefined;
         const tempoTexto = s.tempo_servico
-          ? `${s.tempo_servico} min`
+          ? formatarDuracaoHHMM(s.tempo_servico)
           : undefined;
         const meta = [precoTexto, tempoTexto].filter(Boolean).join(' • ');
 

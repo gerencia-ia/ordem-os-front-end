@@ -25,6 +25,7 @@ import {
 } from '@/src/components/Ui/popover';
 import { ChevronDown, Edit, Trash2, Wrench, Clock } from 'lucide-react';
 import type { Servico } from '@/src/types/servico';
+import { formatarDuracaoHHMM } from '@/src/utils/date';
 
 const formatarMoeda = (valor: number | string) =>
   Number(valor || 0).toLocaleString('pt-BR', {
@@ -144,9 +145,9 @@ export function ServicoTabela({
                 {/* Tempo */}
                 <TableCell>
                   {servico.tempo_servico ? (
-                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <span className="text-muted-foreground flex items-center gap-1.5 text-xs tabular-nums">
                       <Clock className="h-3.5 w-3.5" />
-                      {servico.tempo_servico} min
+                      {formatarDuracaoHHMM(servico.tempo_servico)}
                     </span>
                   ) : (
                     <span className="text-xs text-muted-foreground">—</span>

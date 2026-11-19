@@ -11,6 +11,7 @@ import {
 import type { Equipamento } from '@/src/types/equipamento';
 import type { OsServicoInput } from '@/src/types/ordem';
 import type { Servico } from '@/src/types/servico';
+import { formatarDuracaoHHMM } from '@/src/utils/date';
 import { Cpu, Minus, Plus, Trash2, Wrench } from 'lucide-react';
 
 interface SecaoServicosProps {
@@ -103,7 +104,7 @@ export function SecaoServicos({
               }
 
               const tempo = servico.tempo_servico
-                ? ` • ${servico.tempo_servico} min`
+                ? ` • ${formatarDuracaoHHMM(servico.tempo_servico)}`
                 : '';
 
               return {
@@ -183,7 +184,7 @@ export function SecaoServicos({
                             <p className="text-muted-foreground tabular-nums">
                               {formatarMoeda(valorUnit)} un.
                               {servico?.tempo_servico
-                                ? ` • ${servico.tempo_servico} min`
+                                ? ` • ${formatarDuracaoHHMM(servico.tempo_servico)}`
                                 : ''}
                             </p>
                           </div>

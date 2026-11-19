@@ -1,6 +1,6 @@
 'use client';
 
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import {
   ModalFormulario,
   ModalFormularioBody,
@@ -11,6 +11,7 @@ import { Button } from '@/src/components/Ui/button';
 import { Input } from '@/src/components/Ui/input';
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -27,6 +28,7 @@ import { Spinner } from '@/src/components/Ui/spinner';
 import type { Servico } from '@/src/types/servico';
 import type { CategoriaServico } from '@/src/types/categoria';
 import { useServicoForm } from '@/src/hooks/useServicoForm';
+import { formatarDuracaoHHMM } from '@/src/utils/date';
 import { ServicoValoresPorAndarCampos } from './ServicoValoresPorAndarCampos';
 
 interface ServicoModalFormProps {
@@ -69,6 +71,9 @@ export function ServicoModalForm({
     control,
     formState: { errors },
   } = form;
+
+  const tempoObservado = useWatch({ control, name: 'tempo_servico' });
+  const tempoFormatado = formatarDuracaoHHMM(tempoObservado);
 
   return (
     <ModalFormulario open={aberto} onOpenChange={onOpenChange} tamanho="md">
@@ -149,6 +154,11 @@ export function ServicoModalForm({
                   {...register('tempo_servico')}
                   disabled={salvando}
                 />
+                {tempoFormatado !== '—' && (
+                  <FieldDescription className="text-xs tabular-nums">
+                    Equivale a {tempoFormatado} (hh:mm)
+                  </FieldDescription>
+                )}
                 <FieldError errors={[errors.tempo_servico]} />
               </Field>
             </div>

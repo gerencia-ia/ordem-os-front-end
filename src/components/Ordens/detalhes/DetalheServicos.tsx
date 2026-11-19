@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/src/components/Ui/badge';
 import { Wrench, Plus, Trash2, Clock } from 'lucide-react';
 import type { OsEquipamentoItem, OsServico } from '@/src/types/ordem';
+import { formatarDuracaoHHMM } from '@/src/utils/date';
 
 interface DetalheServicosProps {
   servicos?: OsServico[] | null;
@@ -117,12 +118,12 @@ export function DetalheServicos({
                       </p>
                     )}
                     {servico.tempo_servico ? (
-                      <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                      <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs tabular-nums">
                         <Clock className="size-3" />
                         <span>
-                          {servico.tempo_servico} min
+                          {formatarDuracaoHHMM(servico.tempo_servico)}
                           {qtd > 1 &&
-                            ` (${servico.tempo_servico * qtd} min total)`}
+                            ` (${formatarDuracaoHHMM(servico.tempo_servico * qtd)} total)`}
                         </span>
                       </div>
                     ) : null}
@@ -174,8 +175,8 @@ export function DetalheServicos({
               <div className="text-muted-foreground flex items-center gap-1.5">
                 <Clock className="size-4" />
                 <span>Tempo total estimado:</span>
-                <span className="font-medium text-foreground">
-                  {tempoTotalMinutos > 0 ? `${tempoTotalMinutos} min` : '—'}
+                <span className="text-foreground font-medium tabular-nums">
+                  {formatarDuracaoHHMM(tempoTotalMinutos)}
                 </span>
               </div>
 
