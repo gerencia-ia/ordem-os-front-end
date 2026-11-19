@@ -1,23 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { Pencil, Plus, Trash2, Package } from 'lucide-react';
+import { Package, Plus } from 'lucide-react';
 import { Button } from '@/src/components/Ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/Ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/src/components/Ui/table';
+import { Card, CardContent, CardHeader } from '@/src/components/Ui/card';
 import type { Material, MaterialPayload } from '@/src/types/material';
 import {
   createMaterial,
@@ -27,17 +14,12 @@ import {
 } from '@/src/services/materiais.service';
 import { MaterialModalForm } from './MaterialModalForm';
 import { MaterialModalExcluir } from './MaterialModalExcluir';
-
-const moeda = (valor: number | string | null) =>
-  valor == null || valor === ''
-    ? '—'
-    : Number(valor).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      });
+import { MaterialFiltros } from './MaterialFiltros';
+import { MaterialTabela } from './MaterialTabela';
 
 export function MateriaisLista() {
   const [materiais, setMateriais] = useState<Material[]>([]);
+  const [busca, setBusca] = useState('');
   const [loading, setLoading] = useState(true);
   const [versao, setVersao] = useState(0);
   const [modalAberto, setModalAberto] = useState(false);
@@ -166,81 +148,52 @@ export function MateriaisLista() {
     }
   };
 
+  const materiaisFiltrados = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    if (!termo) return materiais;
+    return materiais.filter(
+      (m) =>
+        m.nome.toLowerCase().includes(termo) ||
+        (m.descricao ?? '').toLowerCase().includes(termo),
+    );
+  }, [materiais, busca]);
+
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Cabeçalho */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold">
-            <Package className="size-6 text-primary" /> Cadastro de Materiais
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Package className="size-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">Materiais</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Cadastre materiais de referência. O valor pode ser ajustado em cada
             ordem de serviço.
           </p>
         </div>
-        <Button onClick={() => abrirCadastro()} className="gap-2">
-          <Plus className="size-4" /> Novo material
+
+        <Button onClick={() => abrirCadastro()} className="gap-1.5 shadow-sm">
+          <Plus className="size-4" /> Novo Material
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            Materiais cadastrados ({materiais.length})
-          </CardTitle>
+      {/* Card Principal com Filtros e Tabela */}
+      <Card className="shadow-sm border-border/60">
+        <CardHeader className="pb-4">
+          <MaterialFiltros
+            busca={busca}
+            onBuscaChange={setBusca}
+            totalMateriais={materiaisFiltrados.length}
+          />
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Carregando materiais...
-            </p>
-          ) : materiais.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Nenhum material cadastrado.
-            </p>
-          ) : (
-            <div className="overflow-x-auto rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Material</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Valor de referência</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {materiais.map((material) => (
-                    <TableRow key={material.id}>
-                      <TableCell className="font-medium">
-                        {material.nome}
-                      </TableCell>
-                      <TableCell>{material.descricao || '—'}</TableCell>
-                      <TableCell>{moeda(material.valor_referencia)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => abrirCadastro(material)}
-                          aria-label={`Editar ${material.nome}`}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setMaterialExcluindo(material)}
-                          aria-label={`Excluir ${material.nome}`}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <MaterialTabela
+            materiais={materiaisFiltrados}
+            loading={loading}
+            onEditar={abrirCadastro}
+            onExcluir={setMaterialExcluindo}
+          />
         </CardContent>
       </Card>
 
