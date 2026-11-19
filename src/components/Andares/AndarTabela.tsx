@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/src/components/Ui/table';
-import { Badge } from '@/src/components/Ui/badge';
 import { Button } from '@/src/components/Ui/button';
 import { Skeleton } from '@/src/components/Ui/skeleton';
 import {
@@ -40,7 +39,6 @@ export function AndarTabela({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40">
-              <TableHead className="w-[100px]">ID</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead className="w-[120px] text-right">Ações</TableHead>
             </TableRow>
@@ -48,9 +46,6 @@ export function AndarTabela({
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={i}>
-                <TableCell>
-                  <Skeleton className="h-4 w-12" />
-                </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-48" />
                 </TableCell>
@@ -89,7 +84,6 @@ export function AndarTabela({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40">
-            <TableHead className="w-[100px]">ID</TableHead>
             <TableHead>Descrição</TableHead>
             <TableHead className="w-[120px] text-right">Ações</TableHead>
           </TableRow>
@@ -97,14 +91,7 @@ export function AndarTabela({
         <TableBody>
           {andares.map((andar) => (
             <TableRow key={andar.id} className="hover:bg-muted/30">
-              <TableCell className="font-mono text-xs text-muted-foreground">
-                #{andar.id}
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="font-medium text-xs">
-                  {andar.descricao}
-                </Badge>
-              </TableCell>
+              <TableCell className="font-medium">{andar.descricao}</TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
                   <Button
