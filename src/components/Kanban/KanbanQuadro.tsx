@@ -81,6 +81,8 @@ export function KanbanQuadro() {
     ordens,
     colunasStatus,
     loading,
+    filtroAno,
+    setFiltroAno,
     filtroMes,
     setFiltroMes,
     busca,
@@ -148,6 +150,8 @@ export function KanbanQuadro() {
 
       {/* Barra de Filtros */}
       <KanbanFiltros
+        filtroAno={filtroAno}
+        onFiltroAnoChange={setFiltroAno}
         filtroMes={filtroMes}
         onFiltroMesChange={setFiltroMes}
         busca={busca}

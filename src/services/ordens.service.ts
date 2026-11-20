@@ -6,11 +6,13 @@ export async function getOrdens(
   mes?: number,
   ano?: number,
 ): Promise<OrdemServico[]> {
-  let url = '/ordem_servicos';
-  if (mes && ano) {
-    url += `?mes=${mes}&ano=${ano}`;
-  }
-  return apiGet<OrdemServico[]>(url);
+  const params = new URLSearchParams();
+  if (mes) params.set('mes', String(mes));
+  if (ano) params.set('ano', String(ano));
+  const query = params.toString();
+  return apiGet<OrdemServico[]>(
+    query ? `/ordem_servicos?${query}` : '/ordem_servicos',
+  );
 }
 
 export async function getOrdemById(id: number | string): Promise<OrdemServico> {

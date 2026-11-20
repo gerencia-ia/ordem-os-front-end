@@ -19,19 +19,20 @@ export function usePainel() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
-  const [filtroMes, setFiltroMes] = useState<string>(() => {
-    const hoje = new Date();
-    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
-  });
+  const [filtroAno, setFiltroAno] = useState<number>(() =>
+    new Date().getFullYear(),
+  );
+  const [filtroMes, setFiltroMes] = useState<string>(() =>
+    String(new Date().getMonth() + 1),
+  );
 
   const carregarOrdens = useCallback(async () => {
     try {
       setErro(null);
-      const [anoStr, mesStr] = filtroMes.split('-');
-      const ano = parseInt(anoStr, 10);
-      const mes = parseInt(mesStr, 10);
+      const mesParam =
+        filtroMes === 'todos' ? undefined : parseInt(filtroMes, 10);
 
-      const data = await getOrdens(mes, ano);
+      const data = await getOrdens(mesParam, filtroAno);
       setOrdens(data);
     } catch (err) {
       const msg =
@@ -43,7 +44,7 @@ export function usePainel() {
     } finally {
       setLoading(false);
     }
-  }, [filtroMes]);
+  }, [filtroAno, filtroMes]);
 
   useEffect(() => {
     let ativo = true;
@@ -51,11 +52,10 @@ export function usePainel() {
     async function inicializar() {
       try {
         setLoading(true);
-        const [anoStr, mesStr] = filtroMes.split('-');
-        const ano = parseInt(anoStr, 10);
-        const mes = parseInt(mesStr, 10);
+        const mesParam =
+          filtroMes === 'todos' ? undefined : parseInt(filtroMes, 10);
 
-        const data = await getOrdens(mes, ano);
+        const data = await getOrdens(mesParam, filtroAno);
         if (ativo) {
           setOrdens(data);
         }
@@ -80,7 +80,18 @@ export function usePainel() {
     return () => {
       ativo = false;
     };
-  }, [filtroMes]);
+  }, [filtroAno, filtroMes]);
+
+  const ordensFiltradas = useMemo(() => {
+    if (filtroMes !== 'todos') return ordens;
+    return ordens.filter((o) => {
+      const ref = o.data_agendamento || o.created_at;
+      if (!ref) return true;
+      const d = new Date(ref);
+      if (isNaN(d.getTime())) return true;
+      return d.getFullYear() === filtroAno;
+    });
+  }, [ordens, filtroAno, filtroMes]);
 
   const podeVerMetricasFinanceiras = perfil
     ? pode.verMetricasFinanceiras(perfil)
@@ -88,7 +99,7 @@ export function usePainel() {
 
   // Cálculos de métricas
   const metricas = useMemo(() => {
-    const total = ordens.length;
+    const total = ordensFiltradas.length;
 
     let agendadas = 0;
     let emProgresso = 0;
@@ -96,7 +107,7 @@ export function usePainel() {
     let canceladas = 0;
     let valorTotal = 0;
 
-    for (const o of ordens) {
+    for (const o of ordensFiltradas) {
       const sId = Number(o.status?.id || o.status_id || 0);
       const sNome = normalizar(o.status?.nome || o.status_descricao);
 
@@ -131,7 +142,7 @@ export function usePainel() {
       valorTotal,
       taxaConclusao,
     };
-  }, [ordens]);
+  }, [ordensFiltradas]);
 
   // Gráfico de Pizza por Status
   const dadosStatusPie = useMemo(() => {
@@ -150,7 +161,7 @@ export function usePainel() {
     let media = 0;
     let baixa = 0;
 
-    for (const o of ordens) {
+    for (const o of ordensFiltradas) {
       const pNome = normalizar(
         o.prioridade?.descricao || o.prioridade_descricao,
       );
@@ -172,12 +183,14 @@ export function usePainel() {
       { prioridade: 'Média', total: media, fill: '#F59E0B' },
       { prioridade: 'Baixa', total: baixa, fill: '#3B82F6' },
     ];
-  }, [ordens]);
+  }, [ordensFiltradas]);
 
   return {
-    ordens,
+    ordens: ordensFiltradas,
     loading,
     erro,
+    filtroAno,
+    setFiltroAno,
     filtroMes,
     setFiltroMes,
     recarregar: carregarOrdens,

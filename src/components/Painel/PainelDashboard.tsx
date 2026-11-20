@@ -32,6 +32,8 @@ export function PainelDashboard() {
   const {
     loading,
     erro,
+    filtroAno,
+    setFiltroAno,
     filtroMes,
     setFiltroMes,
     recarregar,
@@ -59,6 +61,8 @@ export function PainelDashboard() {
         </div>
 
         <PainelFiltros
+          filtroAno={filtroAno}
+          onFiltroAnoChange={setFiltroAno}
           filtroMes={filtroMes}
           onFiltroMesChange={setFiltroMes}
           onRecarregar={recarregar}
