@@ -8,6 +8,7 @@ export interface NovoEquipamentoData {
   local_instalacao: string;
   observacao?: string;
   cliente_id?: number;
+  andar_id?: number;
 }
 
 export interface Cliente {
@@ -37,6 +38,7 @@ export interface NovoClientePayload {
     btus?: string;
     local_instalacao?: string;
     observacao?: string;
+    andar_id?: number;
   }>;
 }
 
@@ -64,6 +66,7 @@ export interface AtualizarClientePayload {
     btus?: string;
     local_instalacao?: string;
     observacao?: string;
+    andar_id?: number;
   }>;
 }
 

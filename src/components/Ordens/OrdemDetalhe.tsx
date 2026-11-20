@@ -66,6 +66,8 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
     servicosDisponiveis,
     servicosLoading,
     modalServicoAberta,
+    equipamentoIdInput,
+    setEquipamentoIdInput,
     servicoIdInput,
     setServicoIdInput,
     quantidadeInput,
@@ -177,6 +179,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
 
           <DetalheServicos
             servicos={ordem.servicos}
+            equipamentos={ordem.equipamentos}
             statusId={statusIdAtual}
             podeAlterarServicos={podeAlterarServicos}
             podeVerMetricasFinanceiras={podeVerMetricasFinanceiras}
@@ -252,6 +255,9 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
         onOpenChange={(aberta) => {
           if (!aberta) fecharModalAdicionarServico();
         }}
+        equipamentos={ordem.equipamentos}
+        equipamentoId={equipamentoIdInput}
+        onEquipamentoIdChange={setEquipamentoIdInput}
         servicos={servicosDisponiveis}
         loadingServicos={servicosLoading}
         servicoId={servicoIdInput}

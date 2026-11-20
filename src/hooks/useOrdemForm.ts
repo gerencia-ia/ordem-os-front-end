@@ -42,7 +42,9 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
   const [prioridadesList, setPrioridadesList] = useState<Prioridade[]>([]);
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
   const [materiais, setMateriais] = useState<Material[]>([]);
-  const [materiaisSelecionados, setMateriaisSelecionados] = useState<MaterialOrdemInput[]>([]);
+  const [materiaisSelecionados, setMateriaisSelecionados] = useState<
+    MaterialOrdemInput[]
+  >([]);
 
   const form = useForm<CriarOrdemFormData>({
     resolver: zodResolver(criarOrdemFormSchema),
@@ -55,7 +57,7 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
       data_vencimento: '',
       descricao: '',
       observacao: '',
-      servico_ids: [],
+      os_servicos: [],
       equipamento_ids: [],
       tecnico_ids: [],
       custo_estimado: 0,
@@ -67,13 +69,13 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     name: 'cliente_id',
   });
 
-  const watchedServicoIds = useWatch({
+  const watchedOsServicos = useWatch({
     control: form.control,
-    name: 'servico_ids',
+    name: 'os_servicos',
   });
-  const servicoIdsSelecionados = useMemo(
-    () => watchedServicoIds || [],
-    [watchedServicoIds],
+  const osServicosSelecionados = useMemo(
+    () => watchedOsServicos || [],
+    [watchedOsServicos],
   );
 
   const watchedEquipamentoIds = useWatch({
@@ -227,16 +229,31 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     };
   }, [clienteIdSelecionado]);
 
-  // Cálculo do total de serviços em tempo real
+  // Cálculo do total de serviços em tempo real baseado em valor_por_andar_id
   const valorTotalServicos = useMemo(() => {
-    if (!servicoIdsSelecionados.length) return 0;
-    return servicos
-      .filter((s) => servicoIdsSelecionados.includes(s.id))
-      .reduce((acc, curr) => acc + (Number(curr.valor) || 0), 0);
-  }, [servicos, servicoIdsSelecionados]);
+    if (!osServicosSelecionados.length) return 0;
+
+    const mapaValores = new Map<number, number>();
+    for (const servico of servicos) {
+      for (const vpa of servico.valores_por_andares || []) {
+        mapaValores.set(Number(vpa.id), Number(vpa.valor) || 0);
+      }
+    }
+
+    return osServicosSelecionados.reduce((acc, item) => {
+      const valorUnitario =
+        mapaValores.get(Number(item.valor_por_andar_id)) || 0;
+      const qtd = Number(item.quantidade) || 1;
+      return acc + valorUnitario * qtd;
+    }, 0);
+  }, [servicos, osServicosSelecionados]);
 
   const valorTotalMateriais = useMemo(
-    () => materiaisSelecionados.reduce((total, item) => total + Number(item.valor || 0), 0),
+    () =>
+      materiaisSelecionados.reduce(
+        (total, item) => total + Number(item.valor || 0),
+        0,
+      ),
     [materiaisSelecionados],
   );
 
@@ -256,13 +273,31 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
   }, []);
 
   // Ações de alternância de IDs
-  const toggleServico = useCallback(
-    (servicoId: number) => {
-      const atuais = form.getValues('servico_ids') || [];
-      const novos = atuais.includes(servicoId)
-        ? atuais.filter((id) => id !== servicoId)
-        : [...atuais, servicoId];
-      form.setValue('servico_ids', novos, { shouldValidate: true });
+  const toggleServicoEquipamento = useCallback(
+    (equipamentoId: number, valorPorAndarId: number) => {
+      const atuais = form.getValues('os_servicos') || [];
+      const existe = atuais.some(
+        (item) =>
+          item.equipamento_id === equipamentoId &&
+          item.valor_por_andar_id === valorPorAndarId,
+      );
+      const novos = existe
+        ? atuais.filter(
+            (item) =>
+              !(
+                item.equipamento_id === equipamentoId &&
+                item.valor_por_andar_id === valorPorAndarId
+              ),
+          )
+        : [
+            ...atuais,
+            {
+              equipamento_id: equipamentoId,
+              valor_por_andar_id: valorPorAndarId,
+              quantidade: 1,
+            },
+          ];
+      form.setValue('os_servicos', novos, { shouldValidate: true });
     },
     [form],
   );
@@ -270,10 +305,20 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
   const toggleEquipamento = useCallback(
     (equipamentoId: number) => {
       const atuais = form.getValues('equipamento_ids') || [];
-      const novos = atuais.includes(equipamentoId)
+      const removendo = atuais.includes(equipamentoId);
+      const novos = removendo
         ? atuais.filter((id) => id !== equipamentoId)
         : [...atuais, equipamentoId];
       form.setValue('equipamento_ids', novos, { shouldValidate: true });
+
+      if (removendo) {
+        const servicosAtuais = form.getValues('os_servicos') || [];
+        form.setValue(
+          'os_servicos',
+          servicosAtuais.filter((s) => s.equipamento_id !== equipamentoId),
+          { shouldValidate: true },
+        );
+      }
     },
     [form],
   );
@@ -303,6 +348,76 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     [form],
   );
 
+  const setEquipamentosSelecionados = useCallback(
+    (ids: number[]) => {
+      form.setValue('equipamento_ids', ids, { shouldValidate: true });
+      const servicosAtuais = form.getValues('os_servicos') || [];
+      const filtrados = servicosAtuais.filter((s) =>
+        ids.includes(Number(s.equipamento_id)),
+      );
+      if (filtrados.length !== servicosAtuais.length) {
+        form.setValue('os_servicos', filtrados, { shouldValidate: true });
+      }
+    },
+    [form],
+  );
+
+  const setServicosPorEquipamento = useCallback(
+    (equipamentoId: number, valorPorAndarIds: number[]) => {
+      const atuais = form.getValues('os_servicos') || [];
+      const outrosEquipamentos = atuais.filter(
+        (item) => Number(item.equipamento_id) !== equipamentoId,
+      );
+      const atuaisDoEquipamento = atuais.filter(
+        (item) => Number(item.equipamento_id) === equipamentoId,
+      );
+
+      const novosDoEquipamento = valorPorAndarIds.map((vpaId) => {
+        const existente = atuaisDoEquipamento.find(
+          (item) => Number(item.valor_por_andar_id) === vpaId,
+        );
+        return (
+          existente ?? {
+            equipamento_id: equipamentoId,
+            valor_por_andar_id: vpaId,
+            quantidade: 1,
+          }
+        );
+      });
+
+      form.setValue(
+        'os_servicos',
+        [...outrosEquipamentos, ...novosDoEquipamento],
+        {
+          shouldValidate: true,
+        },
+      );
+    },
+    [form],
+  );
+
+  const atualizarQuantidadeServico = useCallback(
+    (equipamentoId: number, valorPorAndarId: number, quantidade: number) => {
+      const qtdValida = Math.max(1, Math.floor(quantidade) || 1);
+      const atuais = form.getValues('os_servicos') || [];
+      const novos = atuais.map((item) =>
+        Number(item.equipamento_id) === equipamentoId &&
+        Number(item.valor_por_andar_id) === valorPorAndarId
+          ? { ...item, quantidade: qtdValida }
+          : item,
+      );
+      form.setValue('os_servicos', novos, { shouldValidate: true });
+    },
+    [form],
+  );
+
+  const setTecnicosSelecionados = useCallback(
+    (ids: number[]) => {
+      form.setValue('tecnico_ids', ids, { shouldValidate: true });
+    },
+    [form],
+  );
+
   const onSubmit = async (data: CriarOrdemFormData) => {
     try {
       setSalvando(true);
@@ -314,7 +429,11 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
           user_ids: data.tecnico_ids.map(Number),
           tecnico_ids: data.tecnico_ids.map(Number),
           equipamento_ids: data.equipamento_ids.map(Number),
-          servico_ids: data.servico_ids.map(Number),
+          os_servicos_attributes: data.os_servicos.map((s) => ({
+            equipamento_id: Number(s.equipamento_id),
+            valor_por_andar_id: Number(s.valor_por_andar_id),
+            quantidade: Number(s.quantidade) || 1,
+          })),
           descricao: data.descricao?.trim() || undefined,
           observacao: data.observacao?.trim() || undefined,
           status_id: Number(data.status_id),
@@ -356,15 +475,20 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     materiaisSelecionados,
     adicionarMaterial,
     removerMaterial,
-    servicoIdsSelecionados,
+    osServicosSelecionados,
     equipamentoIdsSelecionados,
     tecnicoIdsSelecionados,
     valorTotalServicos,
     valorTotalMateriais,
+    valorTotalItens,
     onClienteChange,
-    toggleServico,
+    toggleServicoEquipamento,
     toggleEquipamento,
     toggleTecnico,
+    setEquipamentosSelecionados,
+    setServicosPorEquipamento,
+    atualizarQuantidadeServico,
+    setTecnicosSelecionados,
     adicionarNovoEquipamento,
     onSubmit: form.handleSubmit(onSubmit),
   };

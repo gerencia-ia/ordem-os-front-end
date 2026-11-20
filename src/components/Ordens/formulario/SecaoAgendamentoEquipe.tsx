@@ -1,26 +1,31 @@
 'use client';
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/src/components/Ui/card';
+import { useMemo } from 'react';
+import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
 import { Separator } from '@/src/components/Ui/separator';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/src/components/Ui/select';
 import { Input } from '@/src/components/Ui/input';
-import { Label } from '@/src/components/Ui/label';
-import { Badge } from '@/src/components/Ui/badge';
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/src/components/Ui/field';
+import {
+  ComboboxMultiple,
+  type ComboboxOption,
+} from '@/src/components/Ui/combobox';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CriarOrdemFormData, Status, Prioridade } from '@/src/types/ordem';
 import type { Usuario } from '@/src/types/usuario';
-import { Check, Clock, UserCheck } from 'lucide-react';
+import { Clock, UserCheck } from 'lucide-react';
 
 interface SecaoAgendamentoEquipeProps {
   form: UseFormReturn<CriarOrdemFormData>;
@@ -29,7 +34,7 @@ interface SecaoAgendamentoEquipeProps {
   tecnicos: Usuario[];
   tecnicoIdsSelecionados: number[];
   loadingDados: boolean;
-  onToggleTecnico: (id: number) => void;
+  onChangeTecnicos: (ids: number[]) => void;
 }
 
 export function SecaoAgendamentoEquipe({
@@ -39,7 +44,7 @@ export function SecaoAgendamentoEquipe({
   tecnicos,
   tecnicoIdsSelecionados,
   loadingDados,
-  onToggleTecnico,
+  onChangeTecnicos,
 }: SecaoAgendamentoEquipeProps) {
   const {
     watch,
@@ -51,134 +56,134 @@ export function SecaoAgendamentoEquipe({
   const statusId = watch('status_id');
   const prioridadeId = watch('prioridade_id');
 
-  return (
-    <Card className="bg-card/40 border-border/70 py-4 gap-4">
-      <CardHeader className="px-4 pb-2 border-b">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <Clock className="size-4 text-primary" />
-          <span>4. Planejamento, Agendamento e Equipe</span>
-        </CardTitle>
-      </CardHeader>
+  const tecnicosOptions: ComboboxOption[] = useMemo(
+    () =>
+      tecnicos.map((tec) => ({
+        value: String(tec.id),
+        label: tec.nome,
+        meta: tec.telefone || undefined,
+      })),
+    [tecnicos],
+  );
 
-      <CardContent className="px-4 flex flex-col gap-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {/* Status */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="os-status">
-              Status Inicial <span className="text-destructive">*</span>
-            </Label>
-            <Select
-              value={statusId ? String(statusId) : ''}
-              onValueChange={(val) => {
-                setValue('status_id', Number(val), { shouldValidate: true });
-              }}
-              disabled={loadingDados}
+  const tecnicosSelecionadosStrings = useMemo(
+    () => tecnicoIdsSelecionados.map(String),
+    [tecnicoIdsSelecionados],
+  );
+
+  return (
+    <CardColapsavel
+      titulo="5. Planejamento, Agendamento e Equipe"
+      icone={<Clock className="size-4 text-primary" />}
+      resumo={`${tecnicoIdsSelecionados.length} técnico(s)`}
+      defaultOpenMobile={false}
+      hasError={Boolean(errors.status_id || errors.prioridade_id)}
+      className="bg-card/40 border-border/70"
+      contentClassName="flex flex-col gap-4"
+    >
+      <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Field data-invalid={Boolean(errors.status_id)}>
+          <FieldLabel htmlFor="os-status">
+            Status Inicial <span className="text-destructive">*</span>
+          </FieldLabel>
+          <Select
+            value={statusId ? String(statusId) : ''}
+            onValueChange={(val) => {
+              setValue('status_id', Number(val), { shouldValidate: true });
+            }}
+            disabled={loadingDados}
+          >
+            <SelectTrigger
+              id="os-status"
+              className="w-full"
+              aria-invalid={Boolean(errors.status_id)}
             >
-              <SelectTrigger id="os-status" className="w-full">
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent>
+              <SelectValue placeholder="Selecione o status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
                 {statusList.map((st) => (
                   <SelectItem key={st.id} value={String(st.id)}>
                     {st.nome}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-            {errors.status_id && (
-              <p className="text-xs text-destructive">
-                {errors.status_id.message}
-              </p>
-            )}
-          </div>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <FieldError errors={[errors.status_id]} />
+        </Field>
 
-          {/* Prioridade */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="os-prioridade">
-              Prioridade <span className="text-destructive">*</span>
-            </Label>
-            <Select
-              value={prioridadeId ? String(prioridadeId) : ''}
-              onValueChange={(val) => {
-                setValue('prioridade_id', Number(val), {
-                  shouldValidate: true,
-                });
-              }}
-              disabled={loadingDados}
+        <Field data-invalid={Boolean(errors.prioridade_id)}>
+          <FieldLabel htmlFor="os-prioridade">
+            Prioridade <span className="text-destructive">*</span>
+          </FieldLabel>
+          <Select
+            value={prioridadeId ? String(prioridadeId) : ''}
+            onValueChange={(val) => {
+              setValue('prioridade_id', Number(val), {
+                shouldValidate: true,
+              });
+            }}
+            disabled={loadingDados}
+          >
+            <SelectTrigger
+              id="os-prioridade"
+              className="w-full"
+              aria-invalid={Boolean(errors.prioridade_id)}
             >
-              <SelectTrigger id="os-prioridade" className="w-full">
-                <SelectValue placeholder="Selecione a prioridade" />
-              </SelectTrigger>
-              <SelectContent>
+              <SelectValue placeholder="Selecione a prioridade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
                 {prioridadesList.map((pr) => (
                   <SelectItem key={pr.id} value={String(pr.id)}>
                     {pr.descricao}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-            {errors.prioridade_id && (
-              <p className="text-xs text-destructive">
-                {errors.prioridade_id.message}
-              </p>
-            )}
-          </div>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <FieldError errors={[errors.prioridade_id]} />
+        </Field>
 
-          {/* Data de Agendamento */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="os-data">Data de Agendamento</Label>
-            <div className="relative">
-              <Input
-                id="os-data"
-                type="datetime-local"
-                {...register('data_agendamento')}
-                className="text-xs"
-              />
-            </div>
-          </div>
-        </div>
+        <Field>
+          <FieldLabel htmlFor="os-data">Data de Agendamento</FieldLabel>
+          <Input
+            id="os-data"
+            type="datetime-local"
+            {...register('data_agendamento')}
+          />
+        </Field>
+      </FieldGroup>
 
-        {/* Técnicos Atribuídos */}
-        <div className="flex flex-col gap-2 pt-1">
-          <Separator />
-          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground pt-1">
-            <UserCheck className="size-3.5 text-primary" />
-            <span>Técnicos Atribuídos</span>
-            <span className="text-[11px] text-muted-foreground font-normal">
-              ({tecnicoIdsSelecionados.length} selecionado(s))
-            </span>
-          </div>
+      <Separator />
 
-          {tecnicos.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">
-              Nenhum técnico cadastrado no sistema.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2 pt-0.5">
-              {tecnicos.map((tec) => {
-                const tecId = Number(tec.id);
-                const selecionado = tecnicoIdsSelecionados.includes(tecId);
-                return (
-                  <Badge
-                    key={tec.id}
-                    variant={selecionado ? 'default' : 'outline'}
-                    className="cursor-pointer gap-1.5 py-1 px-2.5 text-xs font-normal transition-all hover:border-primary"
-                    onClick={() => onToggleTecnico(tecId)}
-                  >
-                    {selecionado && <Check className="size-3" />}
-                    <span>{tec.nome}</span>
-                    {tec.telefone && (
-                      <span className="text-[10px] opacity-60">
-                        • {tec.telefone}
-                      </span>
-                    )}
-                  </Badge>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      <Field>
+        <FieldLabel htmlFor="os-tecnicos" className="flex items-center gap-1.5">
+          <UserCheck className="size-3.5 text-primary" />
+          <span>Técnicos Atribuídos</span>
+          <span className="text-muted-foreground text-xs font-normal">
+            ({tecnicoIdsSelecionados.length} selecionado(s))
+          </span>
+        </FieldLabel>
+
+        {tecnicos.length === 0 ? (
+          <p className="text-muted-foreground text-xs italic">
+            Nenhum técnico cadastrado no sistema.
+          </p>
+        ) : (
+          <ComboboxMultiple
+            id="os-tecnicos"
+            options={tecnicosOptions}
+            value={tecnicosSelecionadosStrings}
+            onValueChange={(vals) => onChangeTecnicos(vals.map(Number))}
+            placeholder="Selecione um ou mais técnicos..."
+            searchPlaceholder="Buscar técnico por nome ou telefone..."
+            emptyMessage="Nenhum técnico encontrado."
+            disabled={loadingDados}
+          />
+        )}
+      </Field>
+    </CardColapsavel>
   );
 }

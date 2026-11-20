@@ -28,16 +28,29 @@ const PainelGraficoPrioridades = dynamic(
   },
 );
 
+const PainelGraficoEvolucao = dynamic(
+  () => import('./PainelGraficoEvolucao').then((m) => m.PainelGraficoEvolucao),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="h-[340px] w-full rounded-xl lg:col-span-2" />
+    ),
+  },
+);
+
 export function PainelDashboard() {
   const {
     loading,
     erro,
+    filtroAno,
+    setFiltroAno,
     filtroMes,
     setFiltroMes,
     recarregar,
     metricas,
     dadosStatusPie,
     dadosPrioridadeBar,
+    dadosEvolucaoPeriodo,
     podeVerMetricasFinanceiras,
   } = usePainel();
 
@@ -59,6 +72,8 @@ export function PainelDashboard() {
         </div>
 
         <PainelFiltros
+          filtroAno={filtroAno}
+          onFiltroAnoChange={setFiltroAno}
           filtroMes={filtroMes}
           onFiltroMesChange={setFiltroMes}
           onRecarregar={recarregar}
@@ -115,9 +130,18 @@ export function PainelDashboard() {
           />
 
           {/* Gráficos Analíticos */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PainelGraficoStatus dados={dadosStatusPie} />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <PainelGraficoStatus
+              dados={dadosStatusPie}
+              totalOrdens={metricas.total}
+            />
             <PainelGraficoPrioridades dados={dadosPrioridadeBar} />
+            <PainelGraficoEvolucao
+              dados={dadosEvolucaoPeriodo}
+              filtroAno={filtroAno}
+              filtroMes={filtroMes}
+              podeVerMetricasFinanceiras={podeVerMetricasFinanceiras}
+            />
           </div>
         </>
       )}

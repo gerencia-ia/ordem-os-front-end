@@ -64,10 +64,12 @@ export function useKanban() {
   const [erro, setErro] = useState<string | null>(null);
 
   // Filtros
-  const [filtroMes, setFiltroMes] = useState<string>(() => {
-    const hoje = new Date();
-    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
-  });
+  const [filtroAno, setFiltroAno] = useState<number>(() =>
+    new Date().getFullYear(),
+  );
+  const [filtroMes, setFiltroMes] = useState<string>(() =>
+    String(new Date().getMonth() + 1),
+  );
   const [busca, setBusca] = useState('');
 
   // Drag and Drop
@@ -96,11 +98,10 @@ export function useKanban() {
   const carregarOrdens = useCallback(async () => {
     try {
       setErro(null);
-      const [anoStr, mesStr] = filtroMes.split('-');
-      const ano = parseInt(anoStr, 10);
-      const mes = parseInt(mesStr, 10);
+      const mesParam =
+        filtroMes === 'todos' ? undefined : parseInt(filtroMes, 10);
 
-      const data = await getOrdens(mes, ano);
+      const data = await getOrdens(mesParam, filtroAno);
       setOrdens(data);
     } catch (err) {
       const msg =
@@ -112,7 +113,7 @@ export function useKanban() {
     } finally {
       setLoading(false);
     }
-  }, [filtroMes]);
+  }, [filtroAno, filtroMes]);
 
   useEffect(() => {
     let ativo = true;
@@ -120,12 +121,11 @@ export function useKanban() {
     async function inicializar() {
       try {
         setLoading(true);
-        const [anoStr, mesStr] = filtroMes.split('-');
-        const ano = parseInt(anoStr, 10);
-        const mes = parseInt(mesStr, 10);
+        const mesParam =
+          filtroMes === 'todos' ? undefined : parseInt(filtroMes, 10);
 
         const [ordensData, statusData] = await Promise.allSettled([
-          getOrdens(mes, ano),
+          getOrdens(mesParam, filtroAno),
           getStatus(),
         ]);
 
@@ -164,14 +164,25 @@ export function useKanban() {
     return () => {
       ativo = false;
     };
-  }, [filtroMes]);
+  }, [filtroAno, filtroMes]);
 
-  // Filtro por texto
+  // Filtro defensivo por ano (quando "todos") + filtro por texto
   const ordensFiltradas = useMemo(() => {
-    const termo = normalizar(busca);
-    if (!termo) return ordens;
+    const porAno =
+      filtroMes === 'todos'
+        ? ordens.filter((o) => {
+            const ref = o.data_agendamento || o.created_at;
+            if (!ref) return true;
+            const d = new Date(ref);
+            if (isNaN(d.getTime())) return true;
+            return d.getFullYear() === filtroAno;
+          })
+        : ordens;
 
-    return ordens.filter((o) => {
+    const termo = normalizar(busca);
+    if (!termo) return porAno;
+
+    return porAno.filter((o) => {
       const matchNumero =
         String(o.id).includes(termo) ||
         normalizar(o.numero_ordem).includes(termo);
@@ -179,7 +190,7 @@ export function useKanban() {
       const matchDesc = normalizar(o.descricao).includes(termo);
       return matchNumero || matchCliente || matchDesc;
     });
-  }, [ordens, busca]);
+  }, [ordens, filtroAno, filtroMes, busca]);
 
   // Transição otimista de status via drag-and-drop
   const moverOrdem = async (ordemId: number, novoStatusId: number) => {
@@ -244,6 +255,8 @@ export function useKanban() {
     colunasStatus,
     loading,
     erro,
+    filtroAno,
+    setFiltroAno,
     filtroMes,
     setFiltroMes,
     busca,

@@ -7,27 +7,69 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/Ui/card';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/src/components/Ui/chart';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
+import { Label, Pie, PieChart } from 'recharts';
 import { PieChart as PieIcon } from 'lucide-react';
 
-interface DadoStatusPie {
-  name: string;
+export interface DadoStatusPie {
+  status: string;
+  label: string;
   value: number;
-  color: string;
+  fill: string;
 }
 
 interface PainelGraficoStatusProps {
   dados: DadoStatusPie[];
+  totalOrdens: number;
 }
 
-export function PainelGraficoStatus({ dados }: PainelGraficoStatusProps) {
+const chartConfig = {
+  value: {
+    label: 'Ordens',
+  },
+  agendadas: {
+    label: 'Agendadas',
+    color: 'var(--status-pending)',
+  },
+  em_progresso: {
+    label: 'Em Progresso',
+    color: 'var(--status-in-progress)',
+  },
+  concluidas: {
+    label: 'Concluídas',
+    color: 'var(--status-completed)',
+  },
+  canceladas: {
+    label: 'Canceladas',
+    color: 'var(--status-cancelled)',
+  },
+} satisfies ChartConfig;
+
+export function PainelGraficoStatus({
+  dados,
+  totalOrdens,
+}: PainelGraficoStatusProps) {
   const temDados = dados.length > 0;
 
   return (
     <Card className="flex flex-col">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <PieIcon className="size-4 text-muted-foreground" />
+        <CardTitle className="flex items-center gap-2 text-base">
+          <PieIcon className="text-muted-foreground size-4" />
           Distribuição por Status
         </CardTitle>
         <CardDescription>
@@ -35,62 +77,79 @@ export function PainelGraficoStatus({ dados }: PainelGraficoStatusProps) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col justify-center">
+      <CardContent className="flex flex-1 flex-col justify-center">
         {temDados ? (
-          <div className="flex flex-col gap-4">
-            <ResponsiveContainer width="100%" height={230}>
-              <PieChart>
-                <Pie
-                  data={dados}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {dados.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value: unknown) => [
-                    `${typeof value === 'number' || typeof value === 'string' ? value : 0} ordem(ns)`,
-                    'Quantidade',
-                  ]}
-                  contentStyle={{
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    border: '1px solid hsl(var(--border))',
-                    backgroundColor: 'hsl(var(--card))',
-                    color: 'hsl(var(--foreground))',
+          <ChartContainer
+            config={chartConfig}
+            className="mx-auto aspect-square max-h-[280px] w-full"
+          >
+            <PieChart>
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel nameKey="status" />}
+              />
+              <Pie
+                data={dados}
+                dataKey="value"
+                nameKey="status"
+                innerRadius={62}
+                outerRadius={92}
+                strokeWidth={4}
+                paddingAngle={2}
+              >
+                <Label
+                  content={({ viewBox }) => {
+                    if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                      return (
+                        <text
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                        >
+                          <tspan
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            className="fill-foreground text-3xl font-bold tabular-nums"
+                          >
+                            {totalOrdens.toLocaleString('pt-BR')}
+                          </tspan>
+                          <tspan
+                            x={viewBox.cx}
+                            y={(viewBox.cy || 0) + 22}
+                            className="fill-muted-foreground text-xs"
+                          >
+                            Ordens
+                          </tspan>
+                        </text>
+                      );
+                    }
+                    return null;
                   }}
                 />
-              </PieChart>
-            </ResponsiveContainer>
-
-            {/* Legenda Customizada */}
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-border/40">
-              {dados.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ backgroundColor: item.color }}
+              </Pie>
+              <ChartLegend
+                content={
+                  <ChartLegendContent
+                    nameKey="status"
+                    className="-translate-y-1 flex-wrap gap-3 [&>*]:basis-auto"
                   />
-                  <span>
-                    {item.name}: <strong>{item.value}</strong>
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+                }
+              />
+            </PieChart>
+          </ChartContainer>
         ) : (
-          <div className="flex flex-col items-center justify-center h-[240px] text-xs text-muted-foreground italic border border-dashed rounded-lg">
-            Nenhuma ordem registrada para este período.
-          </div>
+          <Empty className="min-h-[240px] border">
+            <EmptyMedia variant="icon">
+              <PieIcon className="text-muted-foreground size-5" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle className="text-sm">Sem ordens no período</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                Nenhuma ordem registrada para o filtro selecionado.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </CardContent>
     </Card>

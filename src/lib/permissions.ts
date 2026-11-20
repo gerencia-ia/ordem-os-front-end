@@ -37,6 +37,7 @@ export const ROTAS_PERMITIDAS: Record<Perfil, string[]> = {
     '/servicos',
     '/materiais',
     '/categorias-servicos',
+    '/andares',
   ],
   secretaria: [
     '/painel',
@@ -48,6 +49,7 @@ export const ROTAS_PERMITIDAS: Record<Perfil, string[]> = {
     '/servicos',
     '/materiais',
     '/categorias-servicos',
+    '/andares',
   ],
   tecnico: ['/painel', '/kanban', '/ordens'],
 };
@@ -100,4 +102,5 @@ export const CAPACIDADES = {
   gerenciarServicos: (p: Perfil) => p === 'admin' || p === 'secretaria',
   gerenciarMateriais: (p: Perfil) => p === 'admin' || p === 'secretaria',
   gerenciarCategorias: (p: Perfil) => p === 'admin' || p === 'secretaria',
+  gerenciarAndares: (p: Perfil) => p === 'admin',
 };
