@@ -8,18 +8,31 @@ import {
   CardTitle,
 } from '@/src/components/Ui/card';
 import {
-  BarChart,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/src/components/Ui/chart';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
+import { useIsMobile } from '@/src/hooks/use-mobile';
+import {
   Bar,
-  Cell,
+  BarChart,
+  CartesianGrid,
+  LabelList,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 import { BarChart3 } from 'lucide-react';
 
-interface DadoPrioridadeBar {
+export interface DadoPrioridadeBar {
+  nivel: string;
   prioridade: string;
   total: number;
   fill: string;
@@ -29,16 +42,39 @@ interface PainelGraficoPrioridadesProps {
   dados: DadoPrioridadeBar[];
 }
 
+const chartConfig = {
+  total: {
+    label: 'Ordens',
+  },
+  critica: {
+    label: 'Crítica',
+    color: 'var(--destructive)',
+  },
+  alta: {
+    label: 'Alta',
+    color: 'var(--chart-4)',
+  },
+  media: {
+    label: 'Média',
+    color: 'var(--chart-2)',
+  },
+  baixa: {
+    label: 'Baixa',
+    color: 'var(--chart-1)',
+  },
+} satisfies ChartConfig;
+
 export function PainelGraficoPrioridades({
   dados,
 }: PainelGraficoPrioridadesProps) {
+  const isMobile = useIsMobile();
   const temDados = dados.some((item) => item.total > 0);
 
   return (
     <Card className="flex flex-col">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <BarChart3 className="size-4 text-muted-foreground" />
+        <CardTitle className="flex items-center gap-2 text-base">
+          <BarChart3 className="text-muted-foreground size-4" />
           Ordens por Prioridade
         </CardTitle>
         <CardDescription>
@@ -46,76 +82,91 @@ export function PainelGraficoPrioridades({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col justify-center">
+      <CardContent className="flex flex-1 flex-col justify-center">
         {temDados ? (
-          <div className="flex flex-col gap-4">
-            <ResponsiveContainer width="100%" height={230}>
+          <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+            {isMobile ? (
               <BarChart
+                accessibilityLayer
                 data={dados}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                layout="vertical"
+                margin={{ left: 4, right: 28, top: 8, bottom: 8 }}
               >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="hsl(var(--border) / 0.5)"
-                />
-                <XAxis
-                  dataKey="prioridade"
-                  tickLine={false}
-                  axisLine={false}
-                  fontSize={12}
-                  stroke="hsl(var(--muted-foreground))"
-                />
+                <CartesianGrid horizontal={false} />
                 <YAxis
-                  allowDecimals={false}
+                  dataKey="nivel"
+                  type="category"
                   tickLine={false}
+                  tickMargin={8}
                   axisLine={false}
-                  fontSize={12}
-                  stroke="hsl(var(--muted-foreground))"
+                  width={56}
+                  tickFormatter={(value) =>
+                    String(
+                      chartConfig[value as keyof typeof chartConfig]?.label ??
+                        value,
+                    )
+                  }
                 />
-                <Tooltip
-                  formatter={(value: unknown) => [
-                    `${typeof value === 'number' || typeof value === 'string' ? value : 0} ordem(ns)`,
-                    'Quantidade',
-                  ]}
-                  contentStyle={{
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    border: '1px solid hsl(var(--border))',
-                    backgroundColor: 'hsl(var(--card))',
-                    color: 'hsl(var(--foreground))',
-                  }}
+                <XAxis dataKey="total" type="number" hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
                 />
-                <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                  {dados.map((entry, index) => (
-                    <Cell key={`cell-bar-${index}`} fill={entry.fill} />
-                  ))}
+                <Bar dataKey="total" radius={6}>
+                  <LabelList
+                    dataKey="total"
+                    position="right"
+                    offset={8}
+                    className="fill-foreground text-xs font-semibold tabular-nums"
+                  />
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
-
-            {/* Resumo por Prioridade */}
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2 border-t border-border/40">
-              {dados.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ backgroundColor: item.fill }}
+            ) : (
+              <BarChart
+                accessibilityLayer
+                data={dados}
+                margin={{ top: 24, right: 12, left: 12, bottom: 4 }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="nivel"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) =>
+                    String(
+                      chartConfig[value as keyof typeof chartConfig]?.label ??
+                        value,
+                    )
+                  }
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                <Bar dataKey="total" radius={8}>
+                  <LabelList
+                    dataKey="total"
+                    position="top"
+                    offset={10}
+                    className="fill-foreground text-xs font-semibold tabular-nums"
                   />
-                  <span>
-                    {item.prioridade}: <strong>{item.total}</strong>
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+                </Bar>
+              </BarChart>
+            )}
+          </ChartContainer>
         ) : (
-          <div className="flex flex-col items-center justify-center h-[240px] text-xs text-muted-foreground italic border border-dashed rounded-lg">
-            Nenhuma ordem registrada para este período.
-          </div>
+          <Empty className="min-h-[240px] border">
+            <EmptyMedia variant="icon">
+              <BarChart3 className="text-muted-foreground size-5" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle className="text-sm">Sem ordens no período</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                Nenhuma ordem registrada para o filtro selecionado.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </CardContent>
     </Card>
