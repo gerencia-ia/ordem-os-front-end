@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Andar } from './andar';
 import type { Cliente } from './cliente';
 import type { Endereco } from './endereco';
 import type { Usuario } from './usuario';
@@ -16,6 +17,9 @@ export interface Prioridade {
 
 export interface OsServicoItem {
   id: number;
+  servico_id?: number | null;
+  equipamento_id: number;
+  valor_por_andar_id: number;
   nome: string;
   valor: string | number;
   tempo_servico: number; // Em minutos inteiros
@@ -24,17 +28,29 @@ export interface OsServicoItem {
     id: number;
     descricao: string;
   } | null;
+  andar?: Andar | null;
 }
 
 // Alias para compatibilidade com importações existentes
 export type OsServico = OsServicoItem;
 
+export interface OsServicoInput {
+  id?: number;
+  equipamento_id: number;
+  valor_por_andar_id: number;
+  quantidade?: number;
+  _destroy?: boolean;
+}
+
 export interface OsEquipamentoItem {
   id: number | string;
+  equipamento_id?: number;
   marca: string;
   btus: string;
   local_instalacao: string;
   observacao?: string | null;
+  andar_id?: number;
+  andar?: Andar | null;
   laudo?: string | null; // Laudo técnico preenchido nesta OS
 }
 
@@ -86,7 +102,7 @@ export interface CriarOrdemServicoPayload {
     user_ids?: number[];
     tecnico_ids?: number[];
     equipamento_ids?: number[];
-    servico_ids?: number[];
+    os_servicos_attributes?: OsServicoInput[];
     os_materiais_attributes?: MaterialOrdemInput[];
     descricao?: string;
     status_id: number;
@@ -102,6 +118,12 @@ export interface AtualizarStatusPayload {
   status_id: number;
 }
 
+export const osServicoFormSchema = z.object({
+  equipamento_id: z.coerce.number().min(1, 'Selecione o equipamento'),
+  valor_por_andar_id: z.coerce.number().min(1, 'Selecione o serviço'),
+  quantidade: z.coerce.number().int().min(1),
+});
+
 export const criarOrdemFormSchema = z
   .object({
     cliente_id: z.coerce.number().min(1, 'Selecione um cliente'),
@@ -110,14 +132,14 @@ export const criarOrdemFormSchema = z
       .min(1, 'Selecione o endereço de atendimento'),
     status_id: z.coerce.number().min(1, 'Selecione o status inicial'),
     prioridade_id: z.coerce.number().min(1, 'Selecione a prioridade'),
-    data_agendamento: z.string().optional().default(''),
-    data_vencimento: z.string().optional().default(''),
-    descricao: z.string().optional().default(''),
-    observacao: z.string().optional().default(''),
-    servico_ids: z.array(z.number()).default([]),
-    equipamento_ids: z.array(z.number()).default([]),
-    tecnico_ids: z.array(z.number()).default([]),
-    custo_estimado: z.number().optional().default(0),
+    data_agendamento: z.string().optional(),
+    data_vencimento: z.string().optional(),
+    descricao: z.string().optional(),
+    observacao: z.string().optional(),
+    os_servicos: z.array(osServicoFormSchema),
+    equipamento_ids: z.array(z.number()),
+    tecnico_ids: z.array(z.number()),
+    custo_estimado: z.number().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.data_agendamento && data.data_vencimento) {

@@ -1,24 +1,20 @@
 'use client';
 
+import { useMemo } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/src/components/Ui/dialog';
+  ModalFormulario,
+  ModalFormularioBody,
+  ModalFormularioFooter,
+  ModalFormularioHeader,
+} from '@/src/components/Ui/modal-formulario';
 import { Button } from '@/src/components/Ui/button';
-import { Label } from '@/src/components/Ui/label';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import { Field, FieldGroup, FieldLabel } from '@/src/components/Ui/field';
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/src/components/Ui/select';
-import { Loader2 } from 'lucide-react';
+  ComboboxSingle,
+  type ComboboxOption,
+} from '@/src/components/Ui/combobox';
+import { Spinner } from '@/src/components/Ui/spinner';
 import type { Usuario } from '@/src/types/usuario';
 
 interface OrdemModalAdicionarTecnicoProps {
@@ -42,86 +38,84 @@ export function OrdemModalAdicionarTecnico({
   onSalvar,
   salvando,
 }: OrdemModalAdicionarTecnicoProps) {
-  // Filtra estritamente usuários com perfil de técnico
-  const listaTecnicos = tecnicos.filter((u) => {
-    const perfilNorm = (u.role?.nome || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase();
-    return perfilNorm === 'tecnico' || u.role_id === 2;
-  });
+  const listaTecnicos = useMemo(
+    () =>
+      tecnicos.filter((u) => {
+        const perfilNorm = (u.role?.nome || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase();
+        return perfilNorm === 'tecnico' || u.role_id === 2;
+      }),
+    [tecnicos],
+  );
+
+  const opcoesTecnico: ComboboxOption[] = useMemo(
+    () =>
+      listaTecnicos.map((tec) => ({
+        value: String(tec.id),
+        label: tec.nome,
+        meta: tec.telefone || undefined,
+      })),
+    [listaTecnicos],
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Atribuir Técnico à Ordem</DialogTitle>
-          <DialogDescription>
-            Selecione o profissional que será responsável pela execução dos
-            serviços.
-          </DialogDescription>
-        </DialogHeader>
+    <ModalFormulario open={open} onOpenChange={onOpenChange} tamanho="sm">
+      <ModalFormularioHeader
+        title="Atribuir Técnico à Ordem"
+        description="Selecione o profissional que será responsável pela execução dos serviços."
+      />
 
-        <div className="flex flex-col gap-4 py-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="select-tecnico">Técnico</Label>
+      <ModalFormularioBody>
+        <FieldGroup className="gap-4">
+          <Field>
+            <FieldLabel htmlFor="select-tecnico">Técnico</FieldLabel>
             {loadingTecnicos ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                <Loader2 className="size-4 animate-spin text-primary" />
-                <span>Carregando técnicos...</span>
-              </div>
+              <Skeleton className="h-9 w-full" />
             ) : listaTecnicos.length > 0 ? (
-              <Select
+              <ComboboxSingle
+                id="select-tecnico"
+                options={opcoesTecnico}
                 value={tecnicoId}
                 onValueChange={onTecnicoIdChange}
+                placeholder="Selecione um técnico"
+                searchPlaceholder="Buscar técnico por nome ou telefone..."
+                emptyMessage="Nenhum técnico encontrado."
                 disabled={salvando}
-              >
-                <SelectTrigger id="select-tecnico" className="w-full">
-                  <SelectValue placeholder="Selecione um técnico" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {listaTecnicos.map((tec) => (
-                      <SelectItem key={tec.id} value={String(tec.id)}>
-                        {tec.nome}
-                        {tec.telefone ? ` — (${tec.telefone})` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              />
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Nenhum técnico disponível no momento.
               </p>
             )}
-          </div>
-        </div>
+          </Field>
+        </FieldGroup>
+      </ModalFormularioBody>
 
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={salvando}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="button"
-            onClick={() => void onSalvar()}
-            disabled={
-              !tecnicoId.trim() ||
-              salvando ||
-              loadingTecnicos ||
-              listaTecnicos.length === 0
-            }
-          >
-            {salvando && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {salvando ? 'Atribuindo...' : 'Salvar Atribuição'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <ModalFormularioFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={salvando}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="button"
+          onClick={() => void onSalvar()}
+          disabled={
+            !tecnicoId.trim() ||
+            salvando ||
+            loadingTecnicos ||
+            listaTecnicos.length === 0
+          }
+        >
+          {salvando && <Spinner data-icon="inline-start" />}
+          {salvando ? 'Atribuindo...' : 'Salvar Atribuição'}
+        </Button>
+      </ModalFormularioFooter>
+    </ModalFormulario>
   );
 }

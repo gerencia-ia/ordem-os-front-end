@@ -1,46 +1,96 @@
 'use client';
 
-import { Input } from '@/src/components/Ui/input';
+import { useMemo } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/Ui/select';
 import { Button } from '@/src/components/Ui/button';
 import { Calendar, RefreshCw } from 'lucide-react';
+import { MESES, gerarAnosDisponiveis } from '@/src/lib/constants';
+import { cn } from '@/src/lib/utils';
 
 interface PainelFiltrosProps {
+  filtroAno: number;
+  onFiltroAnoChange: (ano: number) => void;
   filtroMes: string;
-  onFiltroMesChange: (val: string) => void;
+  onFiltroMesChange: (mes: string) => void;
   onRecarregar: () => void;
   loading: boolean;
 }
 
 export function PainelFiltros({
+  filtroAno,
+  onFiltroAnoChange,
   filtroMes,
   onFiltroMesChange,
   onRecarregar,
   loading,
 }: PainelFiltrosProps) {
-  return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-      <div className="flex items-center gap-3">
-        <div className="relative w-48">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-          <Input
-            type="month"
-            value={filtroMes}
-            onChange={(e) => onFiltroMesChange(e.target.value)}
-            className="pl-9 text-xs"
-            aria-label="Filtrar métricas por mês"
-          />
-        </div>
+  const anosDisponiveis = useMemo(() => gerarAnosDisponiveis(), []);
 
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onRecarregar}
-          disabled={loading}
-          aria-label="Recarregar métricas"
+  return (
+    <div className="grid grid-cols-[110px_1fr_auto] items-center gap-2.5 sm:flex sm:items-center">
+      <Select
+        value={String(filtroAno)}
+        onValueChange={(val) => onFiltroAnoChange(Number(val))}
+        disabled={loading}
+      >
+        <SelectTrigger
+          className="w-full sm:w-[110px]"
+          aria-label="Filtrar métricas por ano"
         >
-          <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+          <SelectValue placeholder="Ano" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {anosDisponiveis.map((ano) => (
+              <SelectItem key={ano} value={String(ano)}>
+                {ano}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={filtroMes}
+        onValueChange={onFiltroMesChange}
+        disabled={loading}
+      >
+        <SelectTrigger
+          className="w-full sm:w-[170px]"
+          aria-label="Filtrar métricas por mês"
+        >
+          <span className="flex items-center gap-2 truncate">
+            <Calendar className="text-muted-foreground size-4 shrink-0" />
+            <SelectValue placeholder="Mês" />
+          </span>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {MESES.map((m) => (
+              <SelectItem key={m.value} value={m.value}>
+                {m.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={onRecarregar}
+        disabled={loading}
+        aria-label="Recarregar métricas"
+      >
+        <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
+      </Button>
     </div>
   );
 }

@@ -1,13 +1,8 @@
 'use client';
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/src/components/Ui/card';
-import { Label } from '@/src/components/Ui/label';
+import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
 import { Textarea } from '@/src/components/Ui/textarea';
+import { Field, FieldGroup, FieldLabel } from '@/src/components/Ui/field';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CriarOrdemFormData } from '@/src/types/ordem';
 import { FileText } from 'lucide-react';
@@ -20,39 +15,36 @@ export function SecaoDescricao({ form }: SecaoDescricaoProps) {
   const { register } = form;
 
   return (
-    <Card className="bg-card/40 border-border/70 py-4 gap-4">
-      <CardHeader className="px-4 pb-2 border-b">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <FileText className="size-4 text-primary" />
-          <span>5. Detalhes e Observações</span>
-        </CardTitle>
-      </CardHeader>
+    <CardColapsavel
+      titulo="6. Detalhes e Observações"
+      icone={<FileText className="size-4 text-primary" />}
+      resumo="Descrição e observações internas"
+      defaultOpenMobile={false}
+      className="bg-card/40 border-border/70"
+    >
+      <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Field>
+          <FieldLabel htmlFor="os-descricao">
+            Descrição do Problema / Serviço
+          </FieldLabel>
+          <Textarea
+            id="os-descricao"
+            placeholder="Descreva a solicitação do cliente..."
+            rows={3}
+            {...register('descricao')}
+          />
+        </Field>
 
-      <CardContent className="px-4 flex flex-col gap-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="os-descricao">
-              Descrição do Problema / Serviço
-            </Label>
-            <Textarea
-              id="os-descricao"
-              placeholder="Descreva a solicitação do cliente..."
-              rows={3}
-              {...register('descricao')}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="os-observacao">Observações Internas</Label>
-            <Textarea
-              id="os-observacao"
-              placeholder="Instruções de acesso, ferramentas especiais, etc."
-              rows={3}
-              {...register('observacao')}
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        <Field>
+          <FieldLabel htmlFor="os-observacao">Observações Internas</FieldLabel>
+          <Textarea
+            id="os-observacao"
+            placeholder="Instruções de acesso, ferramentas especiais, etc."
+            rows={3}
+            {...register('observacao')}
+          />
+        </Field>
+      </FieldGroup>
+    </CardColapsavel>
   );
 }

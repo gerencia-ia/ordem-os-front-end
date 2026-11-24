@@ -6,11 +6,13 @@ export async function getOrdens(
   mes?: number,
   ano?: number,
 ): Promise<OrdemServico[]> {
-  let url = '/ordem_servicos';
-  if (mes && ano) {
-    url += `?mes=${mes}&ano=${ano}`;
-  }
-  return apiGet<OrdemServico[]>(url);
+  const params = new URLSearchParams();
+  if (mes) params.set('mes', String(mes));
+  if (ano) params.set('ano', String(ano));
+  const query = params.toString();
+  return apiGet<OrdemServico[]>(
+    query ? `/ordem_servicos?${query}` : '/ordem_servicos',
+  );
 }
 
 export async function getOrdemById(id: number | string): Promise<OrdemServico> {
@@ -62,11 +64,25 @@ export async function updateHorarioAtendimento(
 
 export async function addServicoOrdem(
   ordemId: number | string,
-  servicoId: number | string,
-  quantidade?: number,
+  params: {
+    equipamento_id: number;
+    valor_por_andar_id?: number;
+    servico_id?: number;
+    quantidade?: number;
+  },
 ): Promise<OrdemServico> {
-  const payload: Record<string, number | string> = { servico_id: servicoId };
-  if (quantidade !== undefined) payload.quantidade = quantidade;
+  const payload: Record<string, number> = {
+    equipamento_id: params.equipamento_id,
+  };
+  if (params.valor_por_andar_id !== undefined) {
+    payload.valor_por_andar_id = params.valor_por_andar_id;
+  }
+  if (params.servico_id !== undefined) {
+    payload.servico_id = params.servico_id;
+  }
+  if (params.quantidade !== undefined) {
+    payload.quantidade = params.quantidade;
+  }
   return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/servicos`, payload);
 }
 
@@ -81,7 +97,10 @@ export async function addMaterialOrdem(
   ordemId: number | string,
   material: MaterialOrdemInput,
 ): Promise<OrdemServico> {
-  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/materiais`, material);
+  return apiPost<OrdemServico>(
+    `/ordem_servicos/${ordemId}/materiais`,
+    material,
+  );
 }
 
 export async function removeMaterialOrdem(

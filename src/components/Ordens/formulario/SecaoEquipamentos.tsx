@@ -1,25 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardAction,
-  CardContent,
-} from '@/src/components/Ui/card';
+import { useMemo, useState } from 'react';
+import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
 import { Button } from '@/src/components/Ui/button';
-import { Badge } from '@/src/components/Ui/badge';
+import { Skeleton } from '@/src/components/Ui/skeleton';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/src/components/Ui/empty';
+import { Field, FieldLabel } from '@/src/components/Ui/field';
+import {
+  ComboboxMultiple,
+  type ComboboxOption,
+} from '@/src/components/Ui/combobox';
 import type { Equipamento } from '@/src/types/equipamento';
 import { EquipamentoModalCadastro } from '../EquipamentoModalCadastro';
-import { Cpu, Plus, Check, Loader2 } from 'lucide-react';
+import { Cpu, Plus } from 'lucide-react';
 
 interface SecaoEquipamentosProps {
   clienteId: number;
   equipamentos: Equipamento[];
   equipamentoIdsSelecionados: number[];
   loadingEquipamentos: boolean;
-  onToggleEquipamento: (id: number) => void;
+  onChangeEquipamentos: (ids: number[]) => void;
   onAdicionarEquipamento: (equipamento: Equipamento) => void;
 }
 
@@ -28,97 +34,112 @@ export function SecaoEquipamentos({
   equipamentos,
   equipamentoIdsSelecionados,
   loadingEquipamentos,
-  onToggleEquipamento,
+  onChangeEquipamentos,
   onAdicionarEquipamento,
 }: SecaoEquipamentosProps) {
   const [modalNovoEquipamentoAberto, setModalNovoEquipamentoAberto] =
     useState(false);
 
+  const equipamentosOptions: ComboboxOption[] = useMemo(
+    () =>
+      equipamentos.map((eq) => ({
+        value: String(eq.id),
+        label: `${eq.marca} (${eq.btus})`,
+        description: eq.local_instalacao,
+        meta: eq.andar?.descricao || undefined,
+      })),
+    [equipamentos],
+  );
+
+  const selectedValues = useMemo(
+    () => equipamentoIdsSelecionados.map(String),
+    [equipamentoIdsSelecionados],
+  );
+
   return (
-    <Card className="bg-card/40 border-border/70 py-4 gap-4">
-      <CardHeader className="px-4 pb-2 border-b">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <Cpu className="size-4 text-primary" />
+    <CardColapsavel
+      titulo={
+        <span className="flex items-center gap-2">
           <span>2. Equipamentos Vinculados</span>
-          <span className="text-xs text-muted-foreground font-normal">
+          <span className="text-muted-foreground hidden text-xs font-normal sm:inline">
             ({equipamentoIdsSelecionados.length} selecionado(s))
           </span>
-        </CardTitle>
-
-        {clienteId > 0 && (
-          <CardAction>
+        </span>
+      }
+      icone={<Cpu className="size-4 text-primary" />}
+      resumo={`${equipamentoIdsSelecionados.length} selecionado(s)`}
+      defaultOpenMobile={false}
+      headerAction={
+        clienteId > 0 ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setModalNovoEquipamentoAberto(true)}
+            className="h-7 gap-1 border-dashed text-xs"
+          >
+            <Plus className="size-3.5" /> Novo
+            <span className="hidden sm:inline">Equipamento</span>
+          </Button>
+        ) : undefined
+      }
+      className="bg-card/40 border-border/70"
+      contentClassName="flex flex-col gap-3"
+    >
+      {!clienteId ? (
+        <p className="text-muted-foreground py-2 text-xs italic">
+          Selecione um cliente acima para visualizar e vincular equipamentos.
+        </p>
+      ) : loadingEquipamentos ? (
+        <Skeleton className="h-10 w-full" />
+      ) : equipamentos.length === 0 ? (
+        <Empty className="gap-3 border py-5 md:p-6">
+          <EmptyHeader>
+            <EmptyTitle className="text-sm">
+              Nenhum equipamento cadastrado
+            </EmptyTitle>
+            <EmptyDescription className="text-xs">
+              Este cliente ainda não possui aparelhos vinculados.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setModalNovoEquipamentoAberto(true)}
-              className="h-7 text-xs gap-1 border-dashed"
+              className="gap-1.5"
             >
-              <Plus className="size-3.5" /> Novo Equipamento
+              <Plus className="size-3.5" />
+              Cadastrar primeiro equipamento
             </Button>
-          </CardAction>
-        )}
-      </CardHeader>
-
-      <CardContent className="px-4 flex flex-col gap-3">
-        {!clienteId ? (
-          <p className="text-xs text-muted-foreground italic py-2">
-            Selecione um cliente acima para visualizar e vincular equipamentos.
-          </p>
-        ) : loadingEquipamentos ? (
-          <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
-            <Loader2 className="size-4 animate-spin text-primary" />
-            Carregando equipamentos do cliente...
-          </div>
-        ) : equipamentos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-4 text-center">
-            <p className="text-xs text-muted-foreground">
-              Nenhum equipamento cadastrado para este cliente.
-            </p>
-            <Button
-              type="button"
-              variant="link"
-              size="sm"
-              onClick={() => setModalNovoEquipamentoAberto(true)}
-              className="h-7 text-xs mt-1"
-            >
-              + Cadastrar primeiro equipamento
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {equipamentos.map((eq) => {
-              const eqId = Number(eq.id);
-              const selecionado = equipamentoIdsSelecionados.includes(eqId);
-              return (
-                <Badge
-                  key={eq.id}
-                  variant={selecionado ? 'default' : 'outline'}
-                  className="cursor-pointer gap-1.5 py-1 px-2.5 text-xs font-normal transition-all hover:border-primary"
-                  onClick={() => onToggleEquipamento(eqId)}
-                >
-                  {selecionado && <Check className="size-3" />}
-                  <span className="font-medium">{eq.marca}</span>
-                  <span className="opacity-80">({eq.btus})</span>
-                  <span className="text-[10px] opacity-60">
-                    • {eq.local_instalacao}
-                  </span>
-                </Badge>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Modal Desacoplado para Cadastro Rápido de Equipamento */}
-        {clienteId > 0 && (
-          <EquipamentoModalCadastro
-            aberto={modalNovoEquipamentoAberto}
-            onOpenChange={setModalNovoEquipamentoAberto}
-            clienteId={clienteId}
-            onSucesso={onAdicionarEquipamento}
+          </EmptyContent>
+        </Empty>
+      ) : (
+        <Field>
+          <FieldLabel htmlFor="os-equipamentos" className="sr-only">
+            Equipamentos vinculados
+          </FieldLabel>
+          <ComboboxMultiple
+            id="os-equipamentos"
+            options={equipamentosOptions}
+            value={selectedValues}
+            onValueChange={(vals) => onChangeEquipamentos(vals.map(Number))}
+            placeholder="Selecione um ou mais equipamentos..."
+            searchPlaceholder="Buscar por marca, BTUs, local ou andar..."
+            emptyMessage="Nenhum equipamento encontrado."
           />
-        )}
-      </CardContent>
-    </Card>
+        </Field>
+      )}
+
+      {clienteId > 0 && (
+        <EquipamentoModalCadastro
+          aberto={modalNovoEquipamentoAberto}
+          onOpenChange={setModalNovoEquipamentoAberto}
+          clienteId={clienteId}
+          onSucesso={onAdicionarEquipamento}
+        />
+      )}
+    </CardColapsavel>
   );
 }

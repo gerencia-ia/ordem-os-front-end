@@ -16,14 +16,14 @@ export async function getServicoById(id: string | number): Promise<Servico> {
 export async function createServico(
   payload: CriarServicoPayload,
 ): Promise<Servico> {
-  return apiPost<Servico>('/servicos', payload);
+  return apiPost<Servico>('/servicos', { servico: payload });
 }
 
 export async function updateServico(
   id: string | number,
   payload: EditarServicoPayload,
 ): Promise<Servico> {
-  return apiPut<Servico>(`/servicos/${id}`, payload);
+  return apiPut<Servico>(`/servicos/${id}`, { servico: payload });
 }
 
 export async function deleteServico(id: string | number): Promise<void> {

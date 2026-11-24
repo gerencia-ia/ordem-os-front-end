@@ -5,7 +5,9 @@ export async function getMateriais(): Promise<Material[]> {
   return apiGet<Material[]>('/materiais', { cache: 'no-store' });
 }
 
-export async function createMaterial(payload: MaterialPayload): Promise<Material> {
+export async function createMaterial(
+  payload: MaterialPayload,
+): Promise<Material> {
   return apiPost<Material>('/materiais', payload);
 }
 
