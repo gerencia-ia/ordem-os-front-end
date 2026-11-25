@@ -11,23 +11,43 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from '@/src/components/Ui/empty';
-import { AirVent, History, FileEdit, CheckCircle2 } from 'lucide-react';
+import {
+  AirVent,
+  History,
+  FileEdit,
+  CheckCircle2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import type { OsEquipamentoItem } from '@/src/types/ordem';
 
 interface DetalheEquipamentosProps {
   equipamentos?: OsEquipamentoItem[] | null;
+  statusId?: number;
   onAbrirLaudo: (equipamento: OsEquipamentoItem) => void;
   onAbrirHistorico: (equipamento: OsEquipamentoItem) => void;
   podePreencherLaudo: boolean;
+  podeAdicionarEquipamento?: boolean;
+  onAdicionarEquipamento?: () => void;
+  onRemoverEquipamento?: (
+    equipamentoId: number | string,
+  ) => void | Promise<void>;
+  removendoEquipamentoId?: number | string | null;
 }
 
 export function DetalheEquipamentos({
   equipamentos,
+  statusId,
   onAbrirLaudo,
   onAbrirHistorico,
   podePreencherLaudo,
+  podeAdicionarEquipamento = false,
+  onAdicionarEquipamento,
+  onRemoverEquipamento,
+  removendoEquipamentoId,
 }: DetalheEquipamentosProps) {
   const lista = equipamentos || [];
+  const concluido = statusId === 3;
 
   return (
     <CardColapsavel
@@ -39,6 +59,20 @@ export function DetalheEquipamentos({
       icone={<AirVent className="text-muted-foreground size-5" />}
       resumo={`${lista.length} aparelho(s) vinculado(s)`}
       defaultOpenMobile={false}
+      headerAction={
+        !concluido && podeAdicionarEquipamento && onAdicionarEquipamento ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onAdicionarEquipamento}
+            className="gap-1.5"
+          >
+            <Plus className="size-4" />
+            <span className="hidden sm:inline">Adicionar Equipamento</span>
+            <span className="sm:hidden">Adicionar</span>
+          </Button>
+        ) : undefined
+      }
       contentClassName="flex flex-col gap-4"
     >
       {lista.length > 0 ? (
@@ -104,6 +138,29 @@ export function DetalheEquipamentos({
                         {temLaudo ? 'Editar Laudo' : 'Adicionar Laudo'}
                       </Button>
                     )}
+
+                    {!concluido &&
+                      podeAdicionarEquipamento &&
+                      onRemoverEquipamento && (
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() =>
+                            onRemoverEquipamento(
+                              equip.equipamento_id || equip.id,
+                            )
+                          }
+                          disabled={
+                            removendoEquipamentoId ===
+                            (equip.equipamento_id || equip.id)
+                          }
+                          aria-label={`Remover equipamento ${equip.marca}`}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
                   </div>
                 </div>
 

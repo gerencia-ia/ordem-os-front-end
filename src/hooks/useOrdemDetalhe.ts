@@ -10,7 +10,7 @@ import type {
 import type { Servico } from '@/src/types/servico';
 import type { Material, MaterialOrdemInput } from '@/src/types/material';
 import type { Usuario } from '@/src/types/usuario';
-import type { HistoricoLaudo } from '@/src/types/equipamento';
+import type { Equipamento, HistoricoLaudo } from '@/src/types/equipamento';
 import {
   getOrdemById,
   updateOrdemStatus,
@@ -23,8 +23,13 @@ import {
   removeMaterialOrdem,
   addTecnicoOrdem,
   removeTecnicoOrdem,
+  addEquipamentoOrdem,
+  removeEquipamentoOrdem,
 } from '@/src/services/ordens.service';
-import { getHistoricoLaudos } from '@/src/services/equipamentos.service';
+import {
+  getEquipamentosByCliente,
+  getHistoricoLaudos,
+} from '@/src/services/equipamentos.service';
 import { getServicos } from '@/src/services/servicos.service';
 import { getMateriais } from '@/src/services/materiais.service';
 import { getUsuarios } from '@/src/services/usuarios.service';
@@ -96,6 +101,19 @@ export function useOrdemDetalhe(ordemId: string | number) {
   const [tecnicoAtualSubstituir, setTecnicoAtualSubstituir] =
     useState<Usuario | null>(null);
   const [tecnicoSaving, setTecnicoSaving] = useState(false);
+
+  // Modal Adicionar Equipamento
+  const [modalEquipamentoAberta, setModalEquipamentoAberta] = useState(false);
+  const [equipamentosCliente, setEquipamentosCliente] = useState<Equipamento[]>(
+    [],
+  );
+  const [equipamentosClienteLoading, setEquipamentosClienteLoading] =
+    useState(false);
+  const [equipamentoAdicionarId, setEquipamentoAdicionarId] = useState('');
+  const [equipamentoSaving, setEquipamentoSaving] = useState(false);
+  const [remocaoEquipamentoId, setRemocaoEquipamentoId] = useState<
+    number | string | null
+  >(null);
 
   // Modal Finalizar Atendimento
   const [modalFinalizarAberta, setModalFinalizarAberta] = useState(false);
@@ -556,6 +574,72 @@ export function useOrdemDetalhe(ordemId: string | number) {
     }
   };
 
+  // Equipamentos da OS
+  const abrirModalAdicionarEquipamento = () => {
+    setEquipamentoAdicionarId('');
+    setModalEquipamentoAberta(true);
+    const clienteId = ordem?.cliente?.id;
+    if (!clienteId) {
+      setEquipamentosCliente([]);
+      return;
+    }
+    setEquipamentosClienteLoading(true);
+    void getEquipamentosByCliente(clienteId)
+      .then(setEquipamentosCliente)
+      .catch(() => {
+        toast.error('Não foi possível carregar os equipamentos do cliente.');
+        setEquipamentosCliente([]);
+      })
+      .finally(() => setEquipamentosClienteLoading(false));
+  };
+
+  const fecharModalAdicionarEquipamento = () => {
+    setModalEquipamentoAberta(false);
+    setEquipamentoAdicionarId('');
+  };
+
+  const salvarEquipamento = async (equipamentoIdOverride?: number | string) => {
+    if (!ordem) return;
+    const targetId = equipamentoIdOverride ?? equipamentoAdicionarId;
+    const novoId = Number(targetId);
+    if (!Number.isFinite(novoId) || novoId <= 0) return;
+
+    setEquipamentoSaving(true);
+    try {
+      await addEquipamentoOrdem(ordem.id, novoId);
+      toast.success('Equipamento vinculado à ordem de serviço!');
+      fecharModalAdicionarEquipamento();
+      await carregarOrdem();
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao vincular equipamento.';
+      toast.error(msg);
+    } finally {
+      setEquipamentoSaving(false);
+    }
+  };
+
+  const removerEquipamento = async (equipamentoId: number | string) => {
+    if (!ordem) return;
+    setRemocaoEquipamentoId(equipamentoId);
+    try {
+      await removeEquipamentoOrdem(ordem.id, equipamentoId);
+      toast.success('Equipamento removido da ordem de serviço!');
+      await carregarOrdem();
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao remover equipamento.';
+      toast.error(msg);
+    } finally {
+      setRemocaoEquipamentoId(null);
+    }
+  };
+
+  const aoCadastrarNovoEquipamento = async (novoEquipamento: Equipamento) => {
+    setEquipamentosCliente((prev) => [...prev, novoEquipamento]);
+    await salvarEquipamento(novoEquipamento.id);
+  };
+
   // Contato WhatsApp
   const contatarClienteWhatsApp = () => {
     if (!ordem?.cliente) return;
@@ -652,6 +736,19 @@ export function useOrdemDetalhe(ordemId: string | number) {
     fecharModalTecnico,
     salvarTecnico,
     removerTecnico,
+    // Equipamentos
+    modalEquipamentoAberta,
+    equipamentosCliente,
+    equipamentosClienteLoading,
+    equipamentoAdicionarId,
+    setEquipamentoAdicionarId,
+    equipamentoSaving,
+    remocaoEquipamentoId,
+    abrirModalAdicionarEquipamento,
+    fecharModalAdicionarEquipamento,
+    salvarEquipamento,
+    removerEquipamento,
+    aoCadastrarNovoEquipamento,
     // Contato
     contatarClienteWhatsApp,
   };

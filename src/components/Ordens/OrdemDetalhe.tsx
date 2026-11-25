@@ -19,6 +19,7 @@ import { OrdemModalHistoricoLaudos } from './detalhes/OrdemModalHistoricoLaudos'
 import { OrdemModalAdicionarServico } from './detalhes/OrdemModalAdicionarServico';
 import { OrdemModalAdicionarMaterial } from './detalhes/OrdemModalAdicionarMaterial';
 import { OrdemModalAdicionarTecnico } from './detalhes/OrdemModalAdicionarTecnico';
+import { OrdemModalAdicionarEquipamento } from './detalhes/OrdemModalAdicionarEquipamento';
 import { OrdemModalFinalizar } from './detalhes/OrdemModalFinalizar';
 
 interface OrdemDetalheProps {
@@ -104,6 +105,19 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
     fecharModalTecnico,
     salvarTecnico,
     removerTecnico,
+    // Equipamentos
+    modalEquipamentoAberta,
+    equipamentosCliente,
+    equipamentosClienteLoading,
+    equipamentoAdicionarId,
+    setEquipamentoAdicionarId,
+    equipamentoSaving,
+    remocaoEquipamentoId,
+    abrirModalAdicionarEquipamento,
+    fecharModalAdicionarEquipamento,
+    salvarEquipamento,
+    removerEquipamento,
+    aoCadastrarNovoEquipamento,
     // Contato
     contatarClienteWhatsApp,
   } = useOrdemDetalhe(ordemId);
@@ -200,9 +214,14 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
 
           <DetalheEquipamentos
             equipamentos={ordem.equipamentos}
+            statusId={statusIdAtual}
             onAbrirLaudo={abrirModalLaudo}
             onAbrirHistorico={abrirModalHistorico}
             podePreencherLaudo={podePreencherLaudo}
+            podeAdicionarEquipamento={podeAlterarServicos}
+            onAdicionarEquipamento={abrirModalAdicionarEquipamento}
+            onRemoverEquipamento={removerEquipamento}
+            removendoEquipamentoId={remocaoEquipamentoId}
           />
         </div>
 
@@ -297,6 +316,22 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
         onTecnicoIdChange={setTecnicoIdInput}
         onSalvar={salvarTecnico}
         salvando={tecnicoSaving}
+      />
+
+      <OrdemModalAdicionarEquipamento
+        open={modalEquipamentoAberta}
+        onOpenChange={(aberta) => {
+          if (!aberta) fecharModalAdicionarEquipamento();
+        }}
+        clienteId={ordem.cliente?.id}
+        equipamentosCliente={equipamentosCliente}
+        equipamentosVinculados={ordem.equipamentos || []}
+        loading={equipamentosClienteLoading}
+        equipamentoId={equipamentoAdicionarId}
+        onEquipamentoIdChange={setEquipamentoAdicionarId}
+        onSalvar={salvarEquipamento}
+        onNovoEquipamentoCadastrado={aoCadastrarNovoEquipamento}
+        salvando={equipamentoSaving}
       />
 
       <OrdemModalFinalizar

@@ -121,6 +121,24 @@ export async function addTecnicoOrdem(
   });
 }
 
+export async function addEquipamentoOrdem(
+  ordemId: number | string,
+  equipamentoId: number | string,
+): Promise<OrdemServico> {
+  return apiPost<OrdemServico>(`/ordem_servicos/${ordemId}/equipamentos`, {
+    equipamento_id: Number(equipamentoId),
+  });
+}
+
+export async function removeEquipamentoOrdem(
+  ordemId: number | string,
+  equipamentoId: number | string,
+): Promise<void> {
+  return apiDelete<void>(
+    `/ordem_servicos/${ordemId}/equipamentos/${equipamentoId}`,
+  );
+}
+
 export async function removeTecnicoOrdem(
   ordemId: number | string,
   tecnicoId: number | string,
