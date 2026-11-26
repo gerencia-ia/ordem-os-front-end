@@ -19,7 +19,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
-import type { OsEquipamentoItem } from '@/src/types/ordem';
+import { isOrdemEncerrada, type OsEquipamentoItem } from '@/src/types/ordem';
 
 interface DetalheEquipamentosProps {
   equipamentos?: OsEquipamentoItem[] | null;
@@ -47,7 +47,7 @@ export function DetalheEquipamentos({
   removendoEquipamentoId,
 }: DetalheEquipamentosProps) {
   const lista = equipamentos || [];
-  const concluido = statusId === 3;
+  const concluido = isOrdemEncerrada(statusId);
 
   return (
     <CardColapsavel
@@ -126,7 +126,7 @@ export function DetalheEquipamentos({
                       Histórico
                     </Button>
 
-                    {podePreencherLaudo && (
+                    {!concluido && podePreencherLaudo && (
                       <Button
                         type="button"
                         variant={temLaudo ? 'secondary' : 'default'}

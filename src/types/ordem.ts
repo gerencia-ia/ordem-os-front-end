@@ -10,6 +10,11 @@ export interface Status {
   nome: string;
 }
 
+export function isOrdemEncerrada(statusId?: number | string | null): boolean {
+  const id = Number(statusId);
+  return id === 3 || id === 4;
+}
+
 export interface Prioridade {
   id: string | number;
   descricao: string;

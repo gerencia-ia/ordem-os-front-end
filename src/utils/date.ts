@@ -51,3 +51,24 @@ export function formatarDuracaoHHMM(minutos?: number | string | null): string {
   const mins = total % 60;
   return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
 }
+
+/**
+ * Converte uma data ISO/Date para o formato esperado por <input type="datetime-local"> (YYYY-MM-DDTHH:mm) no fuso local.
+ */
+export function formatarParaInputDateTimeLocal(
+  data?: string | Date | null,
+): string {
+  if (!data) return '';
+  try {
+    const d = new Date(data);
+    if (isNaN(d.getTime())) return '';
+    const ano = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    const hora = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}T${hora}:${min}`;
+  } catch {
+    return '';
+  }
+}

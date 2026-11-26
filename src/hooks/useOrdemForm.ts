@@ -348,6 +348,38 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     [form],
   );
 
+  const adicionarNovoCliente = useCallback(
+    async (novoCliente?: Cliente) => {
+      if (novoCliente?.id) {
+        const novoId = Number(novoCliente.id);
+        setClientes((prev) => [
+          novoCliente,
+          ...prev.filter((c) => c.id !== novoId),
+        ]);
+        form.setValue('cliente_id', novoId, { shouldValidate: true });
+
+        const enderecos = novoCliente.enderecos || [];
+        if (enderecos.length === 1 && enderecos[0].id) {
+          form.setValue('endereco_id', Number(enderecos[0].id), {
+            shouldValidate: true,
+          });
+        } else {
+          form.setValue('endereco_id', 0);
+        }
+        form.setValue('equipamento_ids', []);
+        return;
+      }
+
+      try {
+        const lista = await getClientes();
+        setClientes(lista);
+      } catch {
+        // Silencioso: lista será mantida caso falhe
+      }
+    },
+    [form],
+  );
+
   const setEquipamentosSelecionados = useCallback(
     (ids: number[]) => {
       form.setValue('equipamento_ids', ids, { shouldValidate: true });
@@ -490,6 +522,7 @@ export function useOrdemForm({ onSuccess }: UseOrdemFormProps = {}) {
     atualizarQuantidadeServico,
     setTecnicosSelecionados,
     adicionarNovoEquipamento,
+    adicionarNovoCliente,
     onSubmit: form.handleSubmit(onSubmit),
   };
 }

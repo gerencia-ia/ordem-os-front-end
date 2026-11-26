@@ -87,6 +87,7 @@ export const CAPACIDADES = {
 
   // Ordens de Serviço
   criarOrdem: (p: Perfil) => p === 'admin' || p === 'secretaria',
+  editarOrdem: (p: Perfil) => p === 'admin' || p === 'secretaria',
   excluirOrdem: (p: Perfil) => p === 'admin' || p === 'secretaria',
   alterarPrecosEServicos: (p: Perfil) => p === 'admin' || p === 'secretaria',
   atribuirTecnicos: (p: Perfil) => p === 'admin' || p === 'secretaria',

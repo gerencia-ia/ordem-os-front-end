@@ -30,7 +30,9 @@ interface OrdemModalAdicionarEquipamentoProps {
   equipamentoId: string;
   onEquipamentoIdChange: (val: string) => void;
   onSalvar: (equipamentoIdOverride?: number | string) => void | Promise<void>;
-  onNovoEquipamentoCadastrado: (equipamento: Equipamento) => void | Promise<void>;
+  onNovoEquipamentoCadastrado: (
+    equipamento: Equipamento,
+  ) => void | Promise<void>;
   salvando: boolean;
 }
 

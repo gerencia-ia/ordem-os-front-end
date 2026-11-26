@@ -20,6 +20,7 @@ import { OrdemModalAdicionarServico } from './detalhes/OrdemModalAdicionarServic
 import { OrdemModalAdicionarMaterial } from './detalhes/OrdemModalAdicionarMaterial';
 import { OrdemModalAdicionarTecnico } from './detalhes/OrdemModalAdicionarTecnico';
 import { OrdemModalAdicionarEquipamento } from './detalhes/OrdemModalAdicionarEquipamento';
+import { OrdemModalEditarInfoGeral } from './detalhes/OrdemModalEditarInfoGeral';
 import { OrdemModalFinalizar } from './detalhes/OrdemModalFinalizar';
 
 interface OrdemDetalheProps {
@@ -118,6 +119,18 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
     salvarEquipamento,
     removerEquipamento,
     aoCadastrarNovoEquipamento,
+    // Informações Gerais
+    modalInfoGeralAberta,
+    infoGeralDataAgendamento,
+    setInfoGeralDataAgendamento,
+    infoGeralDescricao,
+    setInfoGeralDescricao,
+    infoGeralObservacao,
+    setInfoGeralObservacao,
+    infoGeralSaving,
+    abrirModalInfoGeral,
+    fecharModalInfoGeral,
+    salvarInfoGeral,
     // Contato
     contatarClienteWhatsApp,
   } = useOrdemDetalhe(ordemId);
@@ -134,6 +147,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
   const podeAlterarStatus = perfil
     ? pode.alterarStatusOperacional(perfil)
     : false;
+  const podeEditarOrdem = perfil ? pode.editarOrdem(perfil) : false;
 
   if (loading) {
     return (
@@ -188,7 +202,10 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
         <div className="lg:col-span-2 flex flex-col gap-6">
           <DetalheInfoGeral
             ordem={ordem}
+            statusId={statusIdAtual}
             podeVerMetricasFinanceiras={podeVerMetricasFinanceiras}
+            podeEditar={podeEditarOrdem}
+            onEditar={abrirModalInfoGeral}
           />
 
           <DetalheServicos
@@ -236,6 +253,7 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
           <DetalheTecnicos
             tecnicos={ordem.tecnicos}
             tecnicoResponsavel={ordem.tecnico_responsavel}
+            statusId={statusIdAtual}
             podeAtribuirTecnicos={podeAtribuirTecnicos}
             onAtribuirTecnico={abrirModalTecnico}
             onRemoverTecnico={removerTecnico}
@@ -332,6 +350,21 @@ export function OrdemDetalhe({ ordemId }: OrdemDetalheProps) {
         onSalvar={salvarEquipamento}
         onNovoEquipamentoCadastrado={aoCadastrarNovoEquipamento}
         salvando={equipamentoSaving}
+      />
+
+      <OrdemModalEditarInfoGeral
+        open={modalInfoGeralAberta}
+        onOpenChange={(aberta) => {
+          if (!aberta) fecharModalInfoGeral();
+        }}
+        dataAgendamento={infoGeralDataAgendamento}
+        onDataAgendamentoChange={setInfoGeralDataAgendamento}
+        descricao={infoGeralDescricao}
+        onDescricaoChange={setInfoGeralDescricao}
+        observacao={infoGeralObservacao}
+        onObservacaoChange={setInfoGeralObservacao}
+        onSalvar={salvarInfoGeral}
+        salvando={infoGeralSaving}
       />
 
       <OrdemModalFinalizar

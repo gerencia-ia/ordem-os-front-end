@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 
 interface UseClienteFormProps {
   clienteParaEdicao?: Cliente | null;
-  onSuccess?: () => void;
+  onSuccess?: (cliente?: Cliente) => void;
 }
 
 export function useClienteForm({
@@ -163,6 +163,8 @@ export function useClienteForm({
     try {
       setSalvando(true);
 
+      let clienteSalvo: Cliente | undefined;
+
       if (clienteParaEdicao) {
         const payload: AtualizarClientePayload = {
           nome: data.nome,
@@ -189,7 +191,7 @@ export function useClienteForm({
             })),
         };
 
-        await updateCliente(clienteParaEdicao.id, payload);
+        clienteSalvo = await updateCliente(clienteParaEdicao.id, payload);
         toast.success('Cliente atualizado com sucesso!');
       } else {
         const payload: NovoClientePayload = {
@@ -220,13 +222,13 @@ export function useClienteForm({
             : undefined,
         };
 
-        await createCliente(payload);
+        clienteSalvo = await createCliente(payload);
         toast.success('Cliente cadastrado com sucesso!');
       }
 
       form.reset();
       setEquipamentos([]);
-      onSuccess?.();
+      onSuccess?.(clienteSalvo);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao salvar cliente';
       toast.error(msg);

@@ -12,7 +12,11 @@ import {
 } from '@/src/components/Ui/empty';
 import { Badge } from '@/src/components/Ui/badge';
 import { Wrench, Plus, Trash2, Clock } from 'lucide-react';
-import type { OsEquipamentoItem, OsServico } from '@/src/types/ordem';
+import {
+  isOrdemEncerrada,
+  type OsEquipamentoItem,
+  type OsServico,
+} from '@/src/types/ordem';
 import { formatarDuracaoHHMM } from '@/src/utils/date';
 
 interface DetalheServicosProps {
@@ -38,7 +42,7 @@ export function DetalheServicos({
 }: DetalheServicosProps) {
   const lista = servicos || [];
   const listaEquipamentos = equipamentos || [];
-  const concluido = statusId === 3;
+  const concluido = isOrdemEncerrada(statusId);
 
   const tempoTotalMinutos = lista.reduce(
     (sum, s) => sum + (s.tempo_servico || 0) * (s.quantidade || 1),

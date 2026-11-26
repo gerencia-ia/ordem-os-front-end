@@ -11,6 +11,7 @@ import {
   EmptyTitle,
 } from '@/src/components/Ui/empty';
 import type { OsMaterialItem } from '@/src/types/material';
+import { isOrdemEncerrada } from '@/src/types/ordem';
 
 interface Props {
   materiais?: OsMaterialItem[] | null;
@@ -32,6 +33,7 @@ export function DetalheMateriais({
   removendoId,
 }: Props) {
   const lista = materiais ?? [];
+  const encerrada = isOrdemEncerrada(statusId);
   const formatar = (valor: number | string) =>
     Number(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
   const subtotal = lista.reduce(
@@ -51,7 +53,7 @@ export function DetalheMateriais({
       }
       defaultOpenMobile={false}
       headerAction={
-        statusId !== 3 && podeAlterarMateriais ? (
+        !encerrada && podeAlterarMateriais ? (
           <Button
             size="sm"
             variant="outline"
@@ -86,7 +88,7 @@ export function DetalheMateriais({
                     R$ {formatar(item.valor)}
                   </span>
                 )}
-                {statusId !== 3 && podeAlterarMateriais && (
+                {!encerrada && podeAlterarMateriais && (
                   <Button
                     size="icon"
                     variant="ghost"

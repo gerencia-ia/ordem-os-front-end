@@ -97,10 +97,16 @@ export function PainelGraficoEvolucao({
                 }
               }}
             >
-              <ToggleGroupItem value="ordens" className="w-auto flex-none px-3 text-xs">
+              <ToggleGroupItem
+                value="ordens"
+                className="w-auto flex-none px-3 text-xs"
+              >
                 Ordens
               </ToggleGroupItem>
-              <ToggleGroupItem value="faturamento" className="w-auto flex-none px-3 text-xs">
+              <ToggleGroupItem
+                value="faturamento"
+                className="w-auto flex-none px-3 text-xs"
+              >
                 Faturamento
               </ToggleGroupItem>
             </ToggleGroup>

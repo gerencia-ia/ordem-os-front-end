@@ -1,26 +1,56 @@
 'use client';
 
 import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
+import { Button } from '@/src/components/Ui/button';
 import { Separator } from '@/src/components/Ui/separator';
-import type { OrdemServico } from '@/src/types/ordem';
+import { isOrdemEncerrada, type OrdemServico } from '@/src/types/ordem';
 import { formatarDataHoraCurta } from '@/src/utils/date';
-import { Calendar, FileText, DollarSign, MessageSquare } from 'lucide-react';
+import {
+  Calendar,
+  FileText,
+  DollarSign,
+  MessageSquare,
+  Pencil,
+} from 'lucide-react';
 
 interface DetalheInfoGeralProps {
   ordem: OrdemServico;
+  statusId?: number;
   podeVerMetricasFinanceiras: boolean;
+  podeEditar?: boolean;
+  onEditar?: () => void;
 }
 
 export function DetalheInfoGeral({
   ordem,
+  statusId,
   podeVerMetricasFinanceiras,
+  podeEditar = false,
+  onEditar,
 }: DetalheInfoGeralProps) {
+  const encerrada = isOrdemEncerrada(
+    statusId ?? (ordem.status?.id || ordem.status_id),
+  );
+
   return (
     <CardColapsavel
       titulo={<span className="text-base sm:text-lg">Informações Gerais</span>}
       icone={<FileText className="text-muted-foreground size-5" />}
       resumo={formatarDataHoraCurta(ordem.data_agendamento)}
       defaultOpenMobile={true}
+      headerAction={
+        !encerrada && podeEditar && onEditar ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onEditar}
+            className="gap-1.5"
+          >
+            <Pencil className="size-3.5" />
+            <span className="hidden sm:inline">Editar</span>
+          </Button>
+        ) : undefined
+      }
       contentClassName="flex flex-col gap-5"
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

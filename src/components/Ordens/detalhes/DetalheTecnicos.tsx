@@ -14,11 +14,13 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/src/components/Ui/badge';
 import type { Usuario } from '@/src/types/usuario';
+import { isOrdemEncerrada } from '@/src/types/ordem';
 import { formatarTelefone } from '@/src/utils/phone';
 
 interface DetalheTecnicosProps {
   tecnicos?: Usuario[] | null;
   tecnicoResponsavel?: Usuario | null;
+  statusId?: number;
   podeAtribuirTecnicos: boolean;
   onAtribuirTecnico: (tecnicoAtual?: Usuario | null) => void;
   onRemoverTecnico: (tecnicoId?: number | string) => void | Promise<void>;
@@ -28,11 +30,15 @@ interface DetalheTecnicosProps {
 export function DetalheTecnicos({
   tecnicos,
   tecnicoResponsavel,
+  statusId,
   podeAtribuirTecnicos,
   onAtribuirTecnico,
   onRemoverTecnico,
   salvando,
 }: DetalheTecnicosProps) {
+  const concluido = isOrdemEncerrada(statusId);
+  const podeGerenciarTecnicos = !concluido && podeAtribuirTecnicos;
+
   // Normaliza lista de técnicos (sempre array no Rails 8)
   const lista: Usuario[] = Array.isArray(tecnicos)
     ? tecnicos
@@ -55,7 +61,7 @@ export function DetalheTecnicos({
       }
       defaultOpenMobile={false}
       headerAction={
-        podeAtribuirTecnicos && lista.length === 0 ? (
+        podeGerenciarTecnicos && lista.length === 0 ? (
           <Button
             size="sm"
             variant="outline"
@@ -106,7 +112,7 @@ export function DetalheTecnicos({
                   </div>
                 </div>
 
-                {podeAtribuirTecnicos && (
+                {podeGerenciarTecnicos && (
                   <div className="flex flex-col gap-2 pt-1">
                     <Separator />
                     <div className="flex items-center gap-2 pt-1">
@@ -139,7 +145,7 @@ export function DetalheTecnicos({
             );
           })}
 
-          {podeAtribuirTecnicos && (
+          {podeGerenciarTecnicos && (
             <Button
               type="button"
               variant="outline"
@@ -156,7 +162,7 @@ export function DetalheTecnicos({
       ) : (
         <div className="py-6 text-center text-sm text-muted-foreground">
           <p>Nenhum técnico vinculado a esta ordem.</p>
-          {podeAtribuirTecnicos && (
+          {podeGerenciarTecnicos && (
             <Button
               type="button"
               variant="link"

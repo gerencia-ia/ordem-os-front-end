@@ -15,6 +15,7 @@ import {
   EquipamentoModalCliente,
   type NovoEquipamentoData,
 } from '@/src/components/Clientes/EquipamentoModalCliente';
+import type { Cliente } from '@/src/types/cliente';
 import { ClienteModalCampos } from './ClienteModalCampos';
 import { ClienteEquipamentosLista } from './ClienteEquipamentosLista';
 import { Cpu, Plus } from 'lucide-react';
@@ -22,7 +23,7 @@ import { Cpu, Plus } from 'lucide-react';
 interface ClienteModalCadastroProps {
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
-  onSucesso: () => void;
+  onSucesso: (cliente?: Cliente) => void;
 }
 
 export function ClienteModalCadastro({
@@ -47,9 +48,9 @@ export function ClienteModalCadastro({
     onSubmit,
   } = useClienteForm({
     clienteParaEdicao: null,
-    onSuccess: () => {
+    onSuccess: (cliente) => {
       onOpenChange(false);
-      onSucesso();
+      onSucesso(cliente);
     },
   });
 

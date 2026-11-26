@@ -25,7 +25,9 @@ import {
   removeTecnicoOrdem,
   addEquipamentoOrdem,
   removeEquipamentoOrdem,
+  updateOrdem,
 } from '@/src/services/ordens.service';
+import { formatarParaInputDateTimeLocal } from '@/src/utils/date';
 import {
   getEquipamentosByCliente,
   getHistoricoLaudos,
@@ -120,6 +122,13 @@ export function useOrdemDetalhe(ordemId: string | number) {
   const [valorFinal, setValorFinal] = useState('');
   const [observacaoFinal, setObservacaoFinal] = useState('');
   const [finalizandoSalvo, setFinalizandoSalvo] = useState(false);
+
+  // Modal Editar Informações Gerais
+  const [modalInfoGeralAberta, setModalInfoGeralAberta] = useState(false);
+  const [infoGeralDataAgendamento, setInfoGeralDataAgendamento] = useState('');
+  const [infoGeralDescricao, setInfoGeralDescricao] = useState('');
+  const [infoGeralObservacao, setInfoGeralObservacao] = useState('');
+  const [infoGeralSaving, setInfoGeralSaving] = useState(false);
 
   // Carregar dados principais da ordem após ações do usuário
   const carregarOrdem = useCallback(async () => {
@@ -640,6 +649,44 @@ export function useOrdemDetalhe(ordemId: string | number) {
     await salvarEquipamento(novoEquipamento.id);
   };
 
+  // Editar Informações Gerais
+  const abrirModalInfoGeral = () => {
+    if (!ordem) return;
+    setInfoGeralDataAgendamento(
+      formatarParaInputDateTimeLocal(ordem.data_agendamento),
+    );
+    setInfoGeralDescricao(ordem.descricao || '');
+    setInfoGeralObservacao(ordem.observacao || '');
+    setModalInfoGeralAberta(true);
+  };
+
+  const fecharModalInfoGeral = () => {
+    setModalInfoGeralAberta(false);
+  };
+
+  const salvarInfoGeral = async () => {
+    if (!ordem) return;
+    setInfoGeralSaving(true);
+    try {
+      await updateOrdem(ordem.id, {
+        data_agendamento: infoGeralDataAgendamento || null,
+        descricao: infoGeralDescricao.trim(),
+        observacao: infoGeralObservacao.trim(),
+      });
+      toast.success('Informações gerais atualizadas com sucesso!');
+      fecharModalInfoGeral();
+      await carregarOrdem();
+    } catch (err) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Erro ao atualizar informações gerais.';
+      toast.error(msg);
+    } finally {
+      setInfoGeralSaving(false);
+    }
+  };
+
   // Contato WhatsApp
   const contatarClienteWhatsApp = () => {
     if (!ordem?.cliente) return;
@@ -749,6 +796,18 @@ export function useOrdemDetalhe(ordemId: string | number) {
     salvarEquipamento,
     removerEquipamento,
     aoCadastrarNovoEquipamento,
+    // Informações Gerais
+    modalInfoGeralAberta,
+    infoGeralDataAgendamento,
+    setInfoGeralDataAgendamento,
+    infoGeralDescricao,
+    setInfoGeralDescricao,
+    infoGeralObservacao,
+    setInfoGeralObservacao,
+    infoGeralSaving,
+    abrirModalInfoGeral,
+    fecharModalInfoGeral,
+    salvarInfoGeral,
     // Contato
     contatarClienteWhatsApp,
   };

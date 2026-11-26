@@ -17,6 +17,7 @@ import {
   CheckCircle,
   PlayCircle,
   Loader2,
+  XCircle,
 } from 'lucide-react';
 import type { OrdemServico, Status } from '@/src/types/ordem';
 
@@ -49,6 +50,7 @@ export function DetalheCabecalho({
 
   const emAtendimento = statusIdAtual === 2 || statusIdAtual === 6;
   const concluido = statusIdAtual === 3;
+  const cancelado = statusIdAtual === 4;
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b">
@@ -111,6 +113,11 @@ export function DetalheCabecalho({
           <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 rounded-md text-sm font-medium">
             <CheckCircle className="size-4" />
             <span>Atendimento Concluído</span>
+          </div>
+        ) : cancelado ? (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-destructive/10 text-destructive rounded-md text-sm font-medium">
+            <XCircle className="size-4" />
+            <span>Ordem Cancelada</span>
           </div>
         ) : (
           <div className="flex items-center gap-2">

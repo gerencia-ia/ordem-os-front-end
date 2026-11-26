@@ -61,6 +61,7 @@ export function OrdemModalCadastro({
     atualizarQuantidadeServico,
     setTecnicosSelecionados,
     adicionarNovoEquipamento,
+    adicionarNovoCliente,
     onSubmit,
   } = useOrdemForm({
     onSuccess: () => {
@@ -93,6 +94,7 @@ export function OrdemModalCadastro({
             clienteAtual={clienteAtual}
             loadingClientes={loadingDados}
             onClienteChange={onClienteChange}
+            onAdicionarCliente={adicionarNovoCliente}
           />
 
           <SecaoEquipamentos

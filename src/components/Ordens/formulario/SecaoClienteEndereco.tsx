@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { CardColapsavel } from '@/src/components/Ui/card-colapsavel';
+import { Button } from '@/src/components/Ui/button';
 import {
   Select,
   SelectContent,
@@ -20,10 +21,11 @@ import {
   ComboboxSingle,
   type ComboboxOption,
 } from '@/src/components/Ui/combobox';
+import { ClienteModalCadastro } from '@/src/components/Clientes/ClienteModalCadastro';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CriarOrdemFormData } from '@/src/types/ordem';
 import type { Cliente } from '@/src/types/cliente';
-import { AlertTriangle, MapPin, User as UserIcon } from 'lucide-react';
+import { AlertTriangle, MapPin, Plus, User as UserIcon } from 'lucide-react';
 
 interface SecaoClienteEnderecoProps {
   form: UseFormReturn<CriarOrdemFormData>;
@@ -31,6 +33,7 @@ interface SecaoClienteEnderecoProps {
   clienteAtual: Cliente | null;
   loadingClientes: boolean;
   onClienteChange: (clienteId: number) => void;
+  onAdicionarCliente?: (cliente?: Cliente) => void;
 }
 
 export function SecaoClienteEndereco({
@@ -39,7 +42,9 @@ export function SecaoClienteEndereco({
   clienteAtual,
   loadingClientes,
   onClienteChange,
+  onAdicionarCliente,
 }: SecaoClienteEnderecoProps) {
+  const [modalNovoClienteAberto, setModalNovoClienteAberto] = useState(false);
   const {
     watch,
     setValue,
@@ -75,6 +80,20 @@ export function SecaoClienteEndereco({
       resumo={clienteAtual?.nome || 'Selecione cliente e endereço'}
       defaultOpenMobile={true}
       hasError={Boolean(errors.cliente_id || errors.endereco_id)}
+      headerAction={
+        onAdicionarCliente ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setModalNovoClienteAberto(true)}
+            className="h-7 gap-1 border-dashed text-xs"
+          >
+            <Plus className="size-3.5" /> Novo
+            <span className="hidden sm:inline">Cliente</span>
+          </Button>
+        ) : undefined
+      }
       className="bg-card/40 border-border/70"
       contentClassName="flex flex-col gap-4"
     >
@@ -165,6 +184,14 @@ export function SecaoClienteEndereco({
               : ''}
           </span>
         </div>
+      )}
+
+      {onAdicionarCliente && (
+        <ClienteModalCadastro
+          aberto={modalNovoClienteAberto}
+          onOpenChange={setModalNovoClienteAberto}
+          onSucesso={onAdicionarCliente}
+        />
       )}
     </CardColapsavel>
   );
