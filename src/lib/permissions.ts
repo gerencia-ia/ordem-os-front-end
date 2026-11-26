@@ -31,6 +31,7 @@ export const ROTAS_PERMITIDAS: Record<Perfil, string[]> = {
     '/painel',
     '/kanban',
     '/ordens',
+    '/orcamentos',
     '/clientes',
     '/configuracoes',
     '/usuarios',
@@ -43,6 +44,7 @@ export const ROTAS_PERMITIDAS: Record<Perfil, string[]> = {
     '/painel',
     '/kanban',
     '/ordens',
+    '/orcamentos',
     '/clientes',
     '/configuracoes',
     '/usuarios',
@@ -95,6 +97,10 @@ export const CAPACIDADES = {
     p === 'admin' || p === 'secretaria' || p === 'tecnico',
   alterarStatusOperacional: (p: Perfil) =>
     p === 'admin' || p === 'secretaria' || p === 'tecnico',
+
+  // Orçamentos
+  gerenciarOrcamentos: (p: Perfil) => p === 'admin' || p === 'secretaria',
+  converterOrcamentoEmOs: (p: Perfil) => p === 'admin' || p === 'secretaria',
 
   // Financeiro / Métricas
   verMetricasFinanceiras: (p: Perfil) => p === 'admin' || p === 'secretaria',

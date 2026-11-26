@@ -6,6 +6,7 @@ import {
   Home,
   Kanban,
   List,
+  FileText,
   Users,
   Settings,
   X,
@@ -51,6 +52,11 @@ export function BarraLateral({ estaAberta, aoFechar }: BarraLateralProps) {
       href: '/ordens',
       label: 'Ordens de Serviço',
       icon: List,
+    },
+    {
+      href: '/orcamentos',
+      label: 'Orçamentos',
+      icon: FileText,
     },
     {
       href: '/clientes',

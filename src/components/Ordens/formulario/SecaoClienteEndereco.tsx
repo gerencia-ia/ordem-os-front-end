@@ -22,13 +22,20 @@ import {
   type ComboboxOption,
 } from '@/src/components/Ui/combobox';
 import { ClienteModalCadastro } from '@/src/components/Clientes/ClienteModalCadastro';
-import type { UseFormReturn } from 'react-hook-form';
+import type { Path, PathValue, UseFormReturn } from 'react-hook-form';
 import type { CriarOrdemFormData } from '@/src/types/ordem';
 import type { Cliente } from '@/src/types/cliente';
 import { AlertTriangle, MapPin, Plus, User as UserIcon } from 'lucide-react';
 
-interface SecaoClienteEnderecoProps {
-  form: UseFormReturn<CriarOrdemFormData>;
+interface ClienteEnderecoFields {
+  cliente_id: number;
+  endereco_id: number;
+}
+
+interface SecaoClienteEnderecoProps<
+  T extends ClienteEnderecoFields = CriarOrdemFormData,
+> {
+  form: UseFormReturn<T>;
   clientes: Cliente[];
   clienteAtual: Cliente | null;
   loadingClientes: boolean;
@@ -36,14 +43,16 @@ interface SecaoClienteEnderecoProps {
   onAdicionarCliente?: (cliente?: Cliente) => void;
 }
 
-export function SecaoClienteEndereco({
+export function SecaoClienteEndereco<
+  T extends ClienteEnderecoFields = CriarOrdemFormData,
+>({
   form,
   clientes,
   clienteAtual,
   loadingClientes,
   onClienteChange,
   onAdicionarCliente,
-}: SecaoClienteEnderecoProps) {
+}: SecaoClienteEnderecoProps<T>) {
   const [modalNovoClienteAberto, setModalNovoClienteAberto] = useState(false);
   const {
     watch,
@@ -51,8 +60,10 @@ export function SecaoClienteEndereco({
     formState: { errors },
   } = form;
 
-  const clienteId = watch('cliente_id');
-  const enderecoId = watch('endereco_id');
+  const clienteId = Number(watch('cliente_id' as Path<T>)) || 0;
+  const enderecoId = Number(watch('endereco_id' as Path<T>)) || 0;
+  const clienteError = errors.cliente_id as { message?: string } | undefined;
+  const enderecoError = errors.endereco_id as { message?: string } | undefined;
   const enderecos = useMemo(
     () => clienteAtual?.enderecos || [],
     [clienteAtual?.enderecos],
@@ -98,7 +109,7 @@ export function SecaoClienteEndereco({
       contentClassName="flex flex-col gap-4"
     >
       <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Field data-invalid={Boolean(errors.cliente_id)}>
+        <Field data-invalid={Boolean(clienteError)}>
           <FieldLabel htmlFor="os-cliente">
             Cliente <span className="text-destructive">*</span>
           </FieldLabel>
@@ -115,26 +126,30 @@ export function SecaoClienteEndereco({
             searchPlaceholder="Buscar cliente por nome ou e-mail..."
             emptyMessage="Nenhum cliente encontrado."
             disabled={loadingClientes}
-            aria-invalid={Boolean(errors.cliente_id)}
+            aria-invalid={Boolean(clienteError)}
           />
-          <FieldError errors={[errors.cliente_id]} />
+          <FieldError errors={[clienteError]} />
         </Field>
 
-        <Field data-invalid={Boolean(errors.endereco_id)}>
+        <Field data-invalid={Boolean(enderecoError)}>
           <FieldLabel htmlFor="os-endereco">
             Endereço de Atendimento <span className="text-destructive">*</span>
           </FieldLabel>
           <Select
             value={enderecoId ? String(enderecoId) : ''}
             onValueChange={(val) => {
-              setValue('endereco_id', Number(val), { shouldValidate: true });
+              setValue(
+                'endereco_id' as Path<T>,
+                Number(val) as PathValue<T, Path<T>>,
+                { shouldValidate: true },
+              );
             }}
             disabled={!clienteId || enderecos.length === 0}
           >
             <SelectTrigger
               id="os-endereco"
               className="w-full"
-              aria-invalid={Boolean(errors.endereco_id)}
+              aria-invalid={Boolean(enderecoError)}
             >
               <SelectValue
                 placeholder={
@@ -156,7 +171,7 @@ export function SecaoClienteEndereco({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <FieldError errors={[errors.endereco_id]} />
+          <FieldError errors={[enderecoError]} />
           {clienteId > 0 && enderecos.length === 0 && (
             <p className="text-warning flex items-center gap-1.5 text-xs">
               <AlertTriangle className="size-3.5 shrink-0" />
